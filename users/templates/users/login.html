@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Đăng nhập - GlucoPredict AI</title>
+{% endblock %}
+
+{% block content %}
+    <body class="bg-surface-container-lowest min-h-screen flex items-center justify-center p-container-padding antialiased text-on-surface">
+        <!-- Login Card Container -->
+        <!-- Level 1 Elevation: White bg, subtle 1px border, soft ambient shadow -->
+        <div class="w-full max-w-[420px] bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-lg shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+            <!-- Header Section -->
+            <div class="flex flex-col items-center text-center mb-stack-lg">
+                <!-- Brand Logo Icon -->
+                <div class="w-12 h-12 bg-primary-container rounded-lg flex items-center justify-center mb-stack-md">
+                    <span class="material-symbols-outlined text-on-primary text-display-lg fill">vital_signs</span>
+                </div>
+                <!-- Welcome Title -->
+                <h1 class="font-headline-md text-headline-md text-primary mb-stack-sm">
+                    GlucoPredict AI
+                </h1>
+                <!-- Subtext -->
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Hệ thống dự đoán rủi ro y khoa độ chính xác cao. <br/> Vui lòng đăng nhập để tiếp tục.
+                </p>
+            </div>
+            <!-- Sample Error Message Block -->
+            <!-- Style matches Risk Chips logic (Status Indicators) applied to a block -->
+            <div class="bg-error-container/20 border border-error-container rounded-lg p-stack-sm flex items-start gap-stack-sm mb-stack-lg">
+                <span class="material-symbols-outlined text-error text-title-lg fill">error</span>
+                <div class="flex-1">
+                    <p class="font-label-sm text-label-sm text-on-error-container uppercase mb-unit">Lỗi xác thực</p>
+                    <p class="font-body-sm text-body-sm text-error">Tên đăng nhập hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại.</p>
+                </div>
+            </div>
+            <!-- Login Form -->
+            <form action="#" class="flex flex-col gap-stack-md" method="POST">
+                <!-- Email / Username Input Group -->
+                <div class="flex flex-col gap-unit">
+                    <label class="font-label-md text-label-md text-on-surface" for="username">
+                        Tên đăng nhập / Email
+                    </label>
+                    <!-- Minimalist input: 1px border, 4px radius, primary focus ring -->
+                    <div class="relative flex items-center">
+                        <span class="material-symbols-outlined absolute left-stack-sm text-on-surface-variant">person</span>
+                        <input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg pl-10 pr-stack-sm py-[10px] font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors" id="username" name="username" placeholder="nguyen.van.a@hospital.vn" required="" type="text"/>
+                    </div>
+                </div>
+                <!-- Password Input Group -->
+                <div class="flex flex-col gap-unit">
+                    <div class="flex items-center justify-between">
+                        <label class="font-label-md text-label-md text-on-surface" for="password">
+                            Mật khẩu
+                        </label>
+                        <a class="font-label-sm text-label-sm text-primary-container hover:text-primary transition-colors" href="{% url 'forgot_password' %}">Quên mật khẩu?</a>
+                    </div>
+                    <div class="relative flex items-center">
+                        <span class="material-symbols-outlined absolute left-stack-sm text-on-surface-variant">lock</span>
+                        <input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg pl-10 pr-10 py-[10px] font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+                        <button class="absolute right-stack-sm text-on-surface-variant hover:text-on-surface flex items-center justify-center" type="button">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Role Selection Dropdown -->
+                <div class="flex flex-col gap-unit">
+                    <label class="font-label-md text-label-md text-on-surface" for="role">
+                        Phân quyền truy cập
+                    </label>
+                    <div class="relative">
+                        <select class="w-full appearance-none bg-surface-container-lowest border border-outline-variant rounded-lg px-stack-sm py-[10px] font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors" id="role" name="role">
+                            <option value="doctor">Bác sĩ (Chẩn đoán &amp; Hồ sơ)</option>
+                            <option value="admin">Quản trị viên hệ thống</option>
+                            <option value="researcher">Nghiên cứu viên</option>
+                        </select>
+                        <span class="material-symbols-outlined absolute right-stack-sm top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+                    </div>
+                </div>
+                <!-- Action Button -->
+                <!-- Primary button using primary-container (#2563EB) -->
+                <button class="w-full mt-stack-sm bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md py-3 px-gutter rounded-lg transition-colors flex items-center justify-center gap-stack-sm shadow-sm" type="submit">
+                    <span>Đăng nhập</span>
+                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </button>
+            </form>
+            <!-- Footer Info -->
+            <div class="mt-stack-lg pt-stack-md border-t border-outline-variant text-center">
+                <p class="font-body-sm text-body-sm text-on-surface-variant text-[12px] mb-stack-sm">
+                    Kết nối mã hóa E2E. Chỉ nhân sự y tế được cấp phép mới có thể truy cập.
+                </p>
+                <p class="font-body-sm text-body-sm text-on-surface-variant text-[12px]">
+                    Chưa có tài khoản?
+                    <a class="font-label-sm text-label-sm text-primary-container hover:text-primary transition-colors" href="{% url 'register' %}">Đăng ký</a>
+                </p>
+            </div>
+        </div>
+    </body>
+{% endblock %}
