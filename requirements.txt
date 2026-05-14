@@ -7,3 +7,5 @@ joblib
 requests
 xgboost
 mlflow
+fastapi
+uvicorn
