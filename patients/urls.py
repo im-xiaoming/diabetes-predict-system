@@ -3,5 +3,6 @@ from .import views
 
 urlpatterns = [
     path('patients/', views.patients_view, name='patients'),
-    path("patient_detail/", views.patient_detail_view, name='patient-detail')
+    path("patient_detail/", views.patient_detail_view, name='patient-detail'),
+    path('patients/upload/', views.upload_patients_csv_view, name='patient-upload'),
 ]

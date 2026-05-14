@@ -33,10 +33,50 @@
                 </div>
             </div>
             <!-- CTA -->
-            <button class="bg-primary-container text-on-primary-container text-label-md font-label-md py-2 px-4 rounded-lg flex items-center justify-center gap-2 mb-stack-md hover:opacity-90 transition-opacity">
-                <span class="material-symbols-outlined">add</span>
-                New Patient Scan
-            </button>
+            <form id="upload-csv-form" method="POST" enctype="multipart/form-data" action="{% url 'patient-upload' %}" class="mb-stack-md">
+                {% csrf_token %}
+                <input type="file" id="csv-file-input" name="csv_file" accept=".csv" class="hidden" />
+                <button type="button" id="upload-csv-btn" class="w-full bg-primary-container text-on-primary-container text-label-md font-label-md py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50">
+                    <span class="material-symbols-outlined">upload_file</span>
+                    <span id="upload-csv-label">New Patient</span>
+                </button>
+                <p id="upload-csv-status" class="mt-2 text-label-sm font-label-sm text-secondary hidden"></p>
+            </form>
+            <script>
+                (function () {
+                    const form = document.getElementById('upload-csv-form');
+                    const input = document.getElementById('csv-file-input');
+                    const btn = document.getElementById('upload-csv-btn');
+                    const label = document.getElementById('upload-csv-label');
+                    const status = document.getElementById('upload-csv-status');
+
+                    btn.addEventListener('click', () => input.click());
+
+                    input.addEventListener('change', async () => {
+                        if (!input.files || input.files.length === 0) return;
+                        const data = new FormData(form);
+                        btn.disabled = true;
+                        label.textContent = 'Đang tải lên...';
+                        status.classList.remove('hidden');
+                        status.textContent = 'Đang gửi file...';
+                        try {
+                            const res = await fetch(form.action, { method: 'POST', body: data });
+                            const json = await res.json().catch(() => ({}));
+                            if (res.ok) {
+                                status.textContent = json.message || 'Đã nhận file, đang xử lý trong nền.';
+                            } else {
+                                status.textContent = json.error || 'Tải lên thất bại.';
+                            }
+                        } catch (e) {
+                            status.textContent = 'Lỗi kết nối: ' + e.message;
+                        } finally {
+                            input.value = '';
+                            label.textContent = 'New Patient';
+                            btn.disabled = false;
+                        }
+                    });
+                })();
+            </script>
             <!-- Navigation Links -->
             <div class="flex-1 flex flex-col gap-1 overflow-y-auto">
                 <a class="flex items-center gap-3 px-3 py-2 bg-secondary-container text-on-secondary-container rounded-lg text-label-md font-label-md transition-all scale-[0.98]" href="{% url 'dashboard' %}">
