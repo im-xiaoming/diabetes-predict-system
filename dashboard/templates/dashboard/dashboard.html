@@ -59,7 +59,7 @@
                             <span class="text-label-md font-label-md text-secondary uppercase tracking-wider">Tổng bệnh nhân</span>
                             <span class="material-symbols-outlined text-primary">group</span>
                         </div>
-                        <div class="text-display-lg font-display-lg text-on-surface">1,248</div>
+                        <div class="text-display-lg font-display-lg text-on-surface">{{ result.total_patient }}</div>
                         <div class="mt-2 text-label-sm font-label-sm text-[#10B981] flex items-center gap-1">
                             <span class="material-symbols-outlined text-[14px]">trending_up</span>
                             +12% (30 ngày)
@@ -83,7 +83,7 @@
                             <span class="text-label-md font-label-md text-on-error-container font-semibold uppercase tracking-wider">Cảnh báo rủi ro cao</span>
                             <span class="material-symbols-outlined text-error fill">warning</span>
                         </div>
-                        <div class="text-display-lg font-display-lg text-error">84</div>
+                        <div class="text-display-lg font-display-lg text-error">{{ result.total_war }}</div>
                         <div class="mt-2 text-label-sm font-label-sm text-error flex items-center gap-1">
                             Cần can thiệp ngay
                         </div>
