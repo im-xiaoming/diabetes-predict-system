@@ -11,7 +11,7 @@ def login_view(request):
 
     if request.method == "POST" and form.is_valid():
         auth_login(request, form.get_user())
-        return redirect(request.GET.get("next") or "login")
+        return redirect('dashboard')
 
     return render(request, "accounts/login.html", {"form": form})
 
