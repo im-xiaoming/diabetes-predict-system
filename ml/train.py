@@ -20,10 +20,13 @@ except ImportError:
     XGBClassifier = None
 
 from ml.preprocessing import build_preprocessor, clean_data, load_data, split_xy
+from ml.tracking import log_metrics, log_model, log_params, log_report, start_run
 
 
 DATA_PATH = ROOT_DIR / "data" / "data.csv"
 MODEL_PATH = ROOT_DIR / "ml" / "artifacts" / "model.pkl"
+TEST_SIZE = 0.2
+RANDOM_STATE = 42
 
 
 def make_models():
@@ -86,6 +89,8 @@ def label_acc(y_true, y_pred):
 def score_model(name, mdl, x_train, x_test, y_train, y_test, tg):
     mdl.fit(x_train, y_train)
     pred = mdl.predict(x_test)
+    rep_txt = classification_report(y_test, pred, target_names=tg, zero_division=0)
+    rep_js = classification_report(y_test, pred, target_names=tg, zero_division=0, output_dict=True)
     res = {
         "model": name,
         "exact_acc": accuracy_score(y_test, pred),
@@ -99,12 +104,12 @@ def score_model(name, mdl, x_train, x_test, y_train, y_test, tg):
     print(f"\n{name}")
     print(pd.Series(met).round(4).to_string())
     print("\nclassification_report")
-    print(classification_report(y_test, pred, target_names=tg, zero_division=0))
+    print(rep_txt)
     for t in tg:
         support = int(y_test[t].sum())
         if support < 10:
             print(f"{t}: positive support thap ({support}), can doc metric can than")
-    return res
+    return res, rep_txt, rep_js
 
 
 def main():
@@ -118,16 +123,33 @@ def main():
     x_train, x_test, y_train, y_test = train_test_split(
         x,
         y,
-        test_size=0.2,
-        random_state=42,
+        test_size=TEST_SIZE,
+        random_state=RANDOM_STATE,
     )
+    base = {
+        "targets": tg,
+        "features": ft,
+        "rows_raw": raw_n,
+        "rows_clean": len(df),
+        "duplicates_dropped": raw_n - len(df),
+        "test_size": TEST_SIZE,
+        "random_state": RANDOM_STATE,
+    }
     rows = []
     best_name = None
     best_mdl = None
     best_f1 = -1
     for name, mdl in make_models().items():
         try:
-            res = score_model(name, mdl, x_train, x_test, y_train, y_test, tg)
+            with start_run(name):
+                res, rep_txt, rep_js = score_model(name, mdl, x_train, x_test, y_train, y_test, tg)
+                met = {k: v for k, v in res.items() if k != "model"}
+                params = dict(base)
+                params["model_name"] = name
+                log_params(params)
+                log_metrics(met)
+                log_report(rep_txt, rep_js)
+                log_model(mdl)
             rows.append(res)
             if res["f1_macro"] > best_f1:
                 best_f1 = res["f1_macro"]

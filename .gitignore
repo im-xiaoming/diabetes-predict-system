@@ -43,6 +43,7 @@ htmlcov/
 .pytest_cache/
 .tox/
 .cache/
+mlruns/
 
 # Jupyter Notebook
 .ipynb_checkpoints/
@@ -51,3 +52,4 @@ htmlcov/
 build/
 dist/
 *.egg-info/
+.gitnexus
