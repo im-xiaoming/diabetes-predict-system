@@ -100,26 +100,28 @@
                         </thead>
                         <tbody class="divide-y divide-outline-variant">
                             <!-- Row 1: High Risk -->
-                            <tr class="hover:bg-surface-container-low transition-colors relative">
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">BN-2023-0891</td>
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface font-medium">Nguyễn Văn An</td>
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">62 / Nam</td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm bg-error/10 text-error">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-error mr-1.5"></span>
-                                        Cao
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-error-container text-on-error-container text-label-sm font-label-sm">3</span>
-                                </td>
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">10:30, 24/10/2023</td>
-                                <td class="py-3 px-4 text-right">
-                                    <a href="{% url 'patient-detail' %}" class="text-primary hover:text-on-primary-fixed-variant text-label-md font-label-md font-medium">Xem chi tiết</a>
-                                </td>
-                                <!-- Highlight for high risk -->
-                                <td class="absolute left-0 top-0 bottom-0 w-1 bg-error"></td>
-                            </tr>
+                            {% for patient in patients %}
+                                <tr class="hover:bg-surface-container-low transition-colors relative">
+                                    <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">{{ patient.SL_NO }}</td>
+                                    <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface font-medium">{{ patient.NAME }}</td>
+                                    <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">{{ patient.AGE }} / {{ patient.SEX }}</td>
+                                    <td class="py-3 px-4">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm bg-error/10 text-error">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-error mr-1.5"></span>
+                                            {{ patient.LV }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-error-container text-on-error-container text-label-sm font-label-sm">{{ patient.WAR }}</span>
+                                    </td>
+                                    <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">10:30, 24/10/2023</td>
+                                    <td class="py-3 px-4 text-right">
+                                        <a href="{% url 'patient-detail' %}" class="text-primary hover:text-on-primary-fixed-variant text-label-md font-label-md font-medium">Xem chi tiết</a>
+                                    </td>
+                                    <!-- Highlight for high risk -->
+                                    <td class="absolute left-0 top-0 bottom-0 w-1 bg-error"></td>
+                                </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
