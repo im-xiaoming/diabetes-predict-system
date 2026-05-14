@@ -1,0 +1,293 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Chi tiết Bệnh nhân - GlucoPredict AI</title>
+{% endblock %}
+
+{% block page_content %}
+    <div class="flex bg-background min-h-screen font-body-md text-on-surface">
+        <!-- Main Content Canvas -->
+        <main class="flex-1 md:ml-[420px] flex flex-col min-h-screen">
+            <!-- TopNavBar (Mobile only for this structure, or top app bar content) -->
+            <header class="sticky top-0 z-50 flex justify-between items-center w-full px-container-padding h-16 bg-surface border-b border-outline-variant md:hidden">
+                <div class="flex items-center gap-2">
+                    <span class="text-title-lg font-title-lg font-bold text-primary">GlucoPredict AI</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="text-secondary hover:bg-surface-container-low p-2 rounded-full transition-colors">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <button class="text-secondary hover:bg-surface-container-low p-2 rounded-full transition-colors">
+                        <span class="material-symbols-outlined">settings</span>
+                    </button>
+                </div>
+            </header>
+            <div class="p-container-padding flex-1 max-w-7xl mx-auto w-full flex flex-col gap-stack-lg">
+                <!-- Header Actions -->
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <button class="text-secondary hover:bg-surface-container-high p-2 rounded-full transition-colors">
+                            <span class="material-symbols-outlined">arrow_back</span>
+                        </button>
+                        <div>
+                            <h2 class="text-headline-md font-headline-md text-on-surface">Chi tiết Bệnh nhân</h2>
+                            <p class="text-body-sm font-body-sm text-secondary">Mã BA: BN-2023-8472</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button class="px-4 py-2 border border-outline-variant text-secondary rounded-lg text-label-md font-label-md hover:bg-surface-container-low transition-colors">
+                            Chỉnh sửa
+                        </button>
+                        <button class="px-4 py-2 bg-primary-container text-on-primary rounded-lg text-label-md font-label-md hover:opacity-90 transition-opacity">
+                            Chạy Dự đoán Mới
+                        </button>
+                    </div>
+                </div>
+                <!-- Bento Grid Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-stack-lg">
+                    <!-- Left Column: Patient Info & Clinical Profile (Col span 4) -->
+                    <div class="lg:col-span-4 flex flex-col gap-stack-lg">
+                        <!-- Basic Info Card -->
+                        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-sm">
+                            <div class="flex items-center gap-4 mb-stack-md">
+                                <div class="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container text-headline-sm font-headline-sm">
+                                    NV
+                                </div>
+                                <div>
+                                    <h3 class="text-title-lg font-title-lg text-on-surface">Nguyễn Văn A</h3>
+                                    <p class="text-body-sm font-body-sm text-secondary">Nam • 62 tuổi</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-stack-sm text-body-sm font-body-sm">
+                                <div class="flex flex-col">
+                                    <span class="text-label-sm font-label-sm text-secondary uppercase">Ngày sinh</span>
+                                    <span>12/05/1961</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-label-sm font-label-sm text-secondary uppercase">Dân tộc</span>
+                                    <span>Kinh</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-label-sm font-label-sm text-secondary uppercase">SĐT</span>
+                                    <span>0901234567</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-label-sm font-label-sm text-secondary uppercase">Ngày nhập viện</span>
+                                    <span>24/10/2023</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Clinical Profile Grid -->
+                        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-sm flex-1">
+                            <h3 class="text-title-lg font-title-lg text-on-surface mb-stack-md flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">medical_information</span>
+                                Hồ sơ Lâm sàng
+                            </h3>
+                            <div class="grid grid-cols-2 gap-x-gutter gap-y-stack-md">
+                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant">
+                                    <span class="text-label-sm font-label-sm text-secondary block mb-1">Tuổi (AGE)</span>
+                                    <span class="text-title-lg font-title-lg text-on-surface">62</span>
+                                </div>
+                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant">
+                                    <span class="text-label-sm font-label-sm text-secondary block mb-1">BMI</span>
+                                    <span class="text-title-lg font-title-lg text-on-surface">28.4 <span class="text-label-sm text-error ml-1">↑</span></span>
+                                </div>
+                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant">
+                                    <span class="text-label-sm font-label-sm text-secondary block mb-1">HbA1c (%)</span>
+                                    <span class="text-title-lg font-title-lg text-error">8.2</span>
+                                </div>
+                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant">
+                                    <span class="text-label-sm font-label-sm text-secondary block mb-1">ĐD lúc đói (FPS)</span>
+                                    <span class="text-title-lg font-title-lg text-error">145 <span class="text-body-sm text-secondary">mg/dL</span></span>
+                                </div>
+                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant">
+                                    <span class="text-label-sm font-label-sm text-secondary block mb-1">Hút thuốc</span>
+                                    <span class="text-title-lg font-title-lg text-on-surface">Có (20 năm)</span>
+                                </div>
+                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant">
+                                    <span class="text-label-sm font-label-sm text-secondary block mb-1">Huyết áp</span>
+                                    <span class="text-title-lg font-title-lg text-on-surface">140/90</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Right Column: Predictions & History (Col span 8) -->
+                    <div class="lg:col-span-8 flex flex-col gap-stack-lg">
+                        <!-- Prediction Results Cards -->
+                        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-sm">
+                            <div class="flex justify-between items-center mb-stack-md">
+                                <h3 class="text-title-lg font-title-lg text-on-surface flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">online_prediction</span>
+                                    Dự đoán Biến chứng (Mới nhất)
+                                </h3>
+                                <span class="text-label-sm font-label-sm text-secondary">Cập nhật: Hôm nay, 08:30</span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-stack-sm">
+                                <!-- NEP Card (High Risk) -->
+                                <div class="border border-error/30 bg-error-container/20 rounded-lg p-stack-sm relative overflow-hidden">
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
+                                    <div class="pl-2">
+                                        <span class="text-label-sm font-label-sm text-secondary block">Thận (NEP)</span>
+                                        <div class="flex items-end gap-2 mt-1">
+                                            <span class="text-headline-md font-headline-md text-error">85%</span>
+                                            <span class="bg-error/10 text-error px-2 py-0.5 rounded text-label-sm font-label-sm mb-1">Cao</span>
+                                        </div>
+                                        <span class="text-label-sm font-label-sm text-on-surface-variant block mt-2">Dương tính (1)</span>
+                                    </div>
+                                </div>
+                                <!-- NEU Card (Medium Risk) -->
+                                <div class="border border-[#F59E0B]/30 bg-[#FEF3C7]/50 rounded-lg p-stack-sm relative overflow-hidden">
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#F59E0B]"></div>
+                                    <div class="pl-2">
+                                        <span class="text-label-sm font-label-sm text-secondary block">Thần kinh (NEU)</span>
+                                        <div class="flex items-end gap-2 mt-1">
+                                            <span class="text-headline-md font-headline-md text-[#D97706]">62%</span>
+                                            <span class="bg-[#F59E0B]/10 text-[#D97706] px-2 py-0.5 rounded text-label-sm font-label-sm mb-1">TB</span>
+                                        </div>
+                                        <span class="text-label-sm font-label-sm text-on-surface-variant block mt-2">Dương tính (1)</span>
+                                    </div>
+                                </div>
+                                <!-- RET Card (Low Risk) -->
+                                <div class="border border-[#10B981]/30 bg-[#D1FAE5]/50 rounded-lg p-stack-sm relative overflow-hidden">
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#10B981]"></div>
+                                    <div class="pl-2">
+                                        <span class="text-label-sm font-label-sm text-secondary block">Võng mạc (RET)</span>
+                                        <div class="flex items-end gap-2 mt-1">
+                                            <span class="text-headline-md font-headline-md text-[#059669]">24%</span>
+                                            <span class="bg-[#10B981]/10 text-[#059669] px-2 py-0.5 rounded text-label-sm font-label-sm mb-1">Thấp</span>
+                                        </div>
+                                        <span class="text-label-sm font-label-sm text-on-surface-variant block mt-2">Âm tính (0)</span>
+                                    </div>
+                                </div>
+                                <!-- CV Card (Medium Risk) -->
+                                <div class="border border-[#F59E0B]/30 bg-[#FEF3C7]/50 rounded-lg p-stack-sm relative overflow-hidden">
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#F59E0B]"></div>
+                                    <div class="pl-2">
+                                        <span class="text-label-sm font-label-sm text-secondary block">Tim mạch (CV)</span>
+                                        <div class="flex items-end gap-2 mt-1">
+                                            <span class="text-headline-md font-headline-md text-[#D97706]">58%</span>
+                                            <span class="bg-[#F59E0B]/10 text-[#D97706] px-2 py-0.5 rounded text-label-sm font-label-sm mb-1">TB</span>
+                                        </div>
+                                        <span class="text-label-sm font-label-sm text-on-surface-variant block mt-2">Dương tính (1)</span>
+                                    </div>
+                                </div>
+                                <!-- PER VAS Card (Low Risk) -->
+                                <div class="border border-[#10B981]/30 bg-[#D1FAE5]/50 rounded-lg p-stack-sm relative overflow-hidden">
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#10B981]"></div>
+                                    <div class="pl-2">
+                                        <span class="text-label-sm font-label-sm text-secondary block">Mạch ngoại biên (PER)</span>
+                                        <div class="flex items-end gap-2 mt-1">
+                                            <span class="text-headline-md font-headline-md text-[#059669]">18%</span>
+                                            <span class="bg-[#10B981]/10 text-[#059669] px-2 py-0.5 rounded text-label-sm font-label-sm mb-1">Thấp</span>
+                                        </div>
+                                        <span class="text-label-sm font-label-sm text-on-surface-variant block mt-2">Âm tính (0)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Alerts & History Container (Split 1/3 and 2/3) -->
+                        <div class="grid grid-cols-1 xl:grid-cols-3 gap-stack-lg flex-1">
+                            <!-- Alerts List -->
+                            <div class="xl:col-span-1 bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-sm">
+                                <h3 class="text-title-lg font-title-lg text-on-surface mb-stack-md flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-error">warning</span>
+                                    Cảnh báo (2)
+                                </h3>
+                                <div class="flex flex-col gap-stack-sm">
+                                    <div class="bg-error-container/30 border border-error/20 p-3 rounded-lg">
+                                        <div class="flex items-start gap-2">
+                                            <span class="material-symbols-outlined text-error text-[18px] mt-0.5">error</span>
+                                            <div>
+                                                <span class="text-label-md font-label-md text-error block mb-1">Nguy cơ Suy thận cao</span>
+                                                <p class="text-body-sm font-body-sm text-on-surface-variant">Chỉ số eGFR có xu hướng giảm nhanh. Khuyến nghị kiểm tra Microalbumin niệu.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-[#FEF3C7]/50 border border-[#F59E0B]/20 p-3 rounded-lg">
+                                        <div class="flex items-start gap-2">
+                                            <span class="material-symbols-outlined text-[#D97706] text-[18px] mt-0.5">info</span>
+                                            <div>
+                                                <span class="text-label-md font-label-md text-[#D97706] block mb-1">HbA1c Vượt ngưỡng</span>
+                                                <p class="text-body-sm font-body-sm text-on-surface-variant">Cần đánh giá lại phác đồ điều trị đường huyết hiện tại.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Prediction History Table -->
+                            <div class="xl:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-sm overflow-hidden flex flex-col">
+                                <div class="flex justify-between items-center mb-stack-md">
+                                    <h3 class="text-title-lg font-title-lg text-on-surface flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-primary">history</span>
+                                        Lịch sử Dự đoán
+                                    </h3>
+                                    <button class="text-label-md font-label-md text-primary hover:underline">Xem tất cả</button>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="border-b border-outline-variant text-label-sm font-label-sm text-secondary uppercase">
+                                                <th class="py-2 px-3 font-medium">Ngày</th>
+                                                <th class="py-2 px-3 font-medium">HbA1c</th>
+                                                <th class="py-2 px-3 font-medium">BMI</th>
+                                                <th class="py-2 px-3 font-medium text-center">Nguy cơ Cao nhất</th>
+                                                <th class="py-2 px-3 font-medium text-right">Mô hình</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="text-body-sm font-body-sm">
+                                            <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+                                                <td class="py-3 px-3 text-on-surface">24/10/2023</td>
+                                                <td class="py-3 px-3 text-error">8.2%</td>
+                                                <td class="py-3 px-3">28.4</td>
+                                                <td class="py-3 px-3 text-center">
+                                                    <span class="inline-flex items-center gap-1 bg-error/10 text-error px-2 py-1 rounded text-label-sm">
+                                                        NEP (85%)
+                                                    </span>
+                                                </td>
+                                                <td class="py-3 px-3 text-right text-secondary">XGBoost v2.1</td>
+                                            </tr>
+                                            <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+                                                <td class="py-3 px-3 text-on-surface">15/07/2023</td>
+                                                <td class="py-3 px-3 text-error">7.8%</td>
+                                                <td class="py-3 px-3">28.1</td>
+                                                <td class="py-3 px-3 text-center">
+                                                    <span class="inline-flex items-center gap-1 bg-error/10 text-error px-2 py-1 rounded text-label-sm">
+                                                        NEP (78%)
+                                                    </span>
+                                                </td>
+                                                <td class="py-3 px-3 text-right text-secondary">XGBoost v2.0</td>
+                                            </tr>
+                                            <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+                                                <td class="py-3 px-3 text-on-surface">10/02/2023</td>
+                                                <td class="py-3 px-3 text-[#D97706]">7.4%</td>
+                                                <td class="py-3 px-3">27.8</td>
+                                                <td class="py-3 px-3 text-center">
+                                                    <span class="inline-flex items-center gap-1 bg-[#F59E0B]/10 text-[#D97706] px-2 py-1 rounded text-label-sm">
+                                                        NEU (65%)
+                                                    </span>
+                                                </td>
+                                                <td class="py-3 px-3 text-right text-secondary">XGBoost v1.5</td>
+                                            </tr>
+                                            <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+                                                <td class="py-3 px-3 text-on-surface">05/09/2022</td>
+                                                <td class="py-3 px-3 text-[#D97706]">7.1%</td>
+                                                <td class="py-3 px-3">27.5</td>
+                                                <td class="py-3 px-3 text-center">
+                                                    <span class="inline-flex items-center gap-1 bg-[#F59E0B]/10 text-[#D97706] px-2 py-1 rounded text-label-sm">
+                                                        CV (55%)
+                                                    </span>
+                                                </td>
+                                                <td class="py-3 px-3 text-right text-secondary">RF v1.2</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+{% endblock %}

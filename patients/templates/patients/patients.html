@@ -115,87 +115,10 @@
                                 </td>
                                 <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">10:30, 24/10/2023</td>
                                 <td class="py-3 px-4 text-right">
-                                    <button class="text-primary hover:text-on-primary-fixed-variant text-label-md font-label-md font-medium">Xem chi tiết</button>
+                                    <a href="{% url 'patient-detail' %}" class="text-primary hover:text-on-primary-fixed-variant text-label-md font-label-md font-medium">Xem chi tiết</a>
                                 </td>
                                 <!-- Highlight for high risk -->
                                 <td class="absolute left-0 top-0 bottom-0 w-1 bg-error"></td>
-                            </tr>
-                            <!-- Row 2: Medium Risk -->
-                            <tr class="hover:bg-surface-container-low transition-colors">
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">BN-2023-1042</td>
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface font-medium">Trần Thị Bích</td>
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">55 / Nữ</td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm bg-tertiary-container/10 text-tertiary">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-tertiary mr-1.5"></span>
-                                        Trung bình
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-surface-variant text-on-surface-variant text-label-sm font-label-sm">1</span>
-                                </td>
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">08:15, 23/10/2023</td>
-                                <td class="py-3 px-4 text-right">
-                                    <button class="text-primary hover:text-on-primary-fixed-variant text-label-md font-label-md font-medium">Xem chi tiết</button>
-                                </td>
-                            </tr>
-                            <!-- Row 3: Low Risk -->
-                            <tr class="hover:bg-surface-container-low transition-colors">
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">BN-2023-1105</td>
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface font-medium">Lê Hoàng Nam</td>
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">48 / Nam</td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm bg-[#10B981]/10 text-[#059669]">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#10B981] mr-1.5"></span>
-                                        Thấp
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center text-secondary text-body-sm font-body-sm">-</span>
-                                </td>
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">14:20, 22/10/2023</td>
-                                <td class="py-3 px-4 text-right">
-                                    <button class="text-primary hover:text-on-primary-fixed-variant text-label-md font-label-md font-medium">Xem chi tiết</button>
-                                </td>
-                            </tr>
-                            <!-- Row 4: High Risk -->
-                            <tr class="hover:bg-surface-container-low transition-colors relative">
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">BN-2023-0755</td>
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface font-medium">Phạm Văn Đồng</td>
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">68 / Nam</td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm bg-error/10 text-error">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-error mr-1.5"></span>
-                                        Cao
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-error-container text-on-error-container text-label-sm font-label-sm">2</span>
-                                </td>
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">09:00, 24/10/2023</td>
-                                <td class="py-3 px-4 text-right">
-                                    <button class="text-primary hover:text-on-primary-fixed-variant text-label-md font-label-md font-medium">Xem chi tiết</button>
-                                </td>
-                                <td class="absolute left-0 top-0 bottom-0 w-1 bg-error"></td>
-                            </tr>
-                            <!-- Row 5: Medium Risk -->
-                            <tr class="hover:bg-surface-container-low transition-colors">
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">BN-2023-1201</td>
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface font-medium">Hoàng Thị Mai</td>
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">52 / Nữ</td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm bg-tertiary-container/10 text-tertiary">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-tertiary mr-1.5"></span>
-                                        Trung bình
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center text-secondary text-body-sm font-body-sm">-</span>
-                                </td>
-                                <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">16:45, 21/10/2023</td>
-                                <td class="py-3 px-4 text-right">
-                                    <button class="text-primary hover:text-on-primary-fixed-variant text-label-md font-label-md font-medium">Xem chi tiết</button>
-                                </td>
                             </tr>
                         </tbody>
                     </table>
