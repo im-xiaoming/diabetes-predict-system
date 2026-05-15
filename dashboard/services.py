@@ -53,6 +53,7 @@ def process_csv_to_database(csv_path):
         data = pd.read_csv(csv_path)
         data.rename({'SL.NO': 'SL_NO'}, axis=1, inplace=True)
         data = data.dropna(axis=0)
+        data = data.drop_duplicates()
         data = calculate_diabetes_risks(data)
 
         patients = [
