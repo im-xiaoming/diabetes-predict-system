@@ -59,7 +59,7 @@
                             <span class="text-label-md font-label-md text-secondary uppercase tracking-wider">Tổng bệnh nhân</span>
                             <span class="material-symbols-outlined text-primary">group</span>
                         </div>
-                        <div class="text-display-lg font-display-lg text-on-surface">1,248</div>
+                        <div class="text-display-lg font-display-lg text-on-surface">{{ result.total_patient }}</div>
                         <div class="mt-2 text-label-sm font-label-sm text-[#10B981] flex items-center gap-1">
                             <span class="material-symbols-outlined text-[14px]">trending_up</span>
                             +12% (30 ngày)
@@ -71,7 +71,7 @@
                             <span class="text-label-md font-label-md text-secondary uppercase tracking-wider">Số hồ sơ xử lý</span>
                             <span class="material-symbols-outlined text-primary">description</span>
                         </div>
-                        <div class="text-display-lg font-display-lg text-on-surface">3,592</div>
+                        <div class="text-display-lg font-display-lg text-on-surface">{{ result.processed_profile }}</div>
                         <div class="mt-2 text-label-sm font-label-sm text-secondary flex items-center gap-1">
                             Hôm nay: 45 hồ sơ
                         </div>
@@ -83,7 +83,7 @@
                             <span class="text-label-md font-label-md text-on-error-container font-semibold uppercase tracking-wider">Cảnh báo rủi ro cao</span>
                             <span class="material-symbols-outlined text-error fill">warning</span>
                         </div>
-                        <div class="text-display-lg font-display-lg text-error">84</div>
+                        <div class="text-display-lg font-display-lg text-error">{{ result.total_war }}</div>
                         <div class="mt-2 text-label-sm font-label-sm text-error flex items-center gap-1">
                             Cần can thiệp ngay
                         </div>
@@ -94,7 +94,7 @@
                             <span class="text-label-md font-label-md text-secondary uppercase tracking-wider">Số dự đoán tạo ra</span>
                             <span class="material-symbols-outlined text-primary">psychology</span>
                         </div>
-                        <div class="text-display-lg font-display-lg text-on-surface">15.2k</div>
+                        <div class="text-display-lg font-display-lg text-on-surface">{{ result.total_prediction }}</div>
                         <div class="mt-2 text-label-sm font-label-sm text-secondary flex items-center gap-1">
                             Độ chính xác Model: 94.2%
                         </div>
@@ -108,7 +108,7 @@
                         <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-error flex flex-col justify-between">
                             <div>
                                 <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Thận (NEP)</div>
-                                <div class="text-headline-sm font-headline-sm text-on-surface">124 <span class="text-label-sm text-secondary font-normal">ca</span></div>
+                                <div class="text-headline-sm font-headline-sm text-on-surface">{{ result.nep }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
                             </div>
                             <div class="mt-3 space-y-1">
                                 <div class="w-full bg-surface-variant rounded-full h-1.5">
@@ -123,7 +123,7 @@
                         <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-[#F59E0B] flex flex-col justify-between">
                             <div>
                                 <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Thần kinh (NEU)</div>
-                                <div class="text-headline-sm font-headline-sm text-on-surface">89 <span class="text-label-sm text-secondary font-normal">ca</span></div>
+                                <div class="text-headline-sm font-headline-sm text-on-surface">{{ result.neu }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
                             </div>
                             <div class="mt-3 space-y-1">
                                 <div class="w-full bg-surface-variant rounded-full h-1.5">
@@ -138,7 +138,7 @@
                         <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-[#F59E0B] flex flex-col justify-between">
                             <div>
                                 <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Võng mạc (RET)</div>
-                                <div class="text-headline-sm font-headline-sm text-on-surface">105 <span class="text-label-sm text-secondary font-normal">ca</span></div>
+                                <div class="text-headline-sm font-headline-sm text-on-surface">{{ result.ret }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
                             </div>
                             <div class="mt-3 space-y-1">
                                 <div class="w-full bg-surface-variant rounded-full h-1.5">
@@ -153,7 +153,7 @@
                         <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-error flex flex-col justify-between">
                             <div>
                                 <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Tim mạch (CV)</div>
-                                <div class="text-headline-sm font-headline-sm text-on-surface">156 <span class="text-label-sm text-secondary font-normal">ca</span></div>
+                                <div class="text-headline-sm font-headline-sm text-on-surface">{{ result.cv }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
                             </div>
                             <div class="mt-3 space-y-1">
                                 <div class="w-full bg-surface-variant rounded-full h-1.5">
@@ -168,7 +168,7 @@
                         <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-[#10B981] flex flex-col justify-between">
                             <div>
                                 <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Mạch ngoại biên</div>
-                                <div class="text-headline-sm font-headline-sm text-on-surface">42 <span class="text-label-sm text-secondary font-normal">ca</span></div>
+                                <div class="text-headline-sm font-headline-sm text-on-surface">{{ result.per_vas }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
                             </div>
                             <div class="mt-3 space-y-1">
                                 <div class="w-full bg-surface-variant rounded-full h-1.5">

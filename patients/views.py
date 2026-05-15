@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
 from patients.models import Patient
@@ -6,8 +7,19 @@ from patients.models import Patient
 
 @login_required(login_url="login")
 def patients_view(request):
-    patients = Patient.objects.all().order_by("-updated_at")
-    return render(request, "patients/patients.html", {"patients": patients})
+    patient_list = Patient.objects.all().order_by("-updated_at")
+    paginator = Paginator(patient_list, 10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(
+        request,
+        "patients/patients.html",
+        {
+            "patients": page_obj.object_list,
+            "page_obj": page_obj,
+            "paginator": paginator,
+        },
+    )
 
 
 @login_required(login_url="login")

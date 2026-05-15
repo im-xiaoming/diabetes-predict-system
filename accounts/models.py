@@ -6,7 +6,6 @@ class Profile(models.Model):
     class Role(models.TextChoices):
         DOCTOR = "doctor", "Bác sĩ"
         ADMIN = "admin", "Quản trị viên"
-        PATIENT = "patient", "Bệnh nhân"
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,

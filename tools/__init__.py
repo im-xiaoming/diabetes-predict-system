@@ -1,1 +1,1 @@
-from .load_csv import load_csv
+from .utils import AttrDict
