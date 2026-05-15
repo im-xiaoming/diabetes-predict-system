@@ -1,6 +1,5 @@
 import json
 
-import requests
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
@@ -11,7 +10,7 @@ from django.views.decorators.http import require_GET, require_POST
 from patients.models import ClinicalRecord, Patient, PatientTargetFeatures
 from predictions.models import PredictionResult, RiskScoreDetail
 from .sample_loader import load_record, load_records, total_records
-
+import requests
 
 TARGETS = [
     ("NEP", "nep"),
