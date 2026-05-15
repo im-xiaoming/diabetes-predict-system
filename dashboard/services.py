@@ -19,15 +19,15 @@ SEX_MAP = {0: 'female', 1: 'male'}
 def calculate_diabetes_risk(row):
     with open(Path(settings.BASE_DIR) / 'configs' / 'weights.yaml', 'r', encoding='utf-8') as file:
         weights = yaml.safe_load(file)
-        
+
     weights = AttrDict(weights)
-    
-    score = (row['CV'] * weights.CV + 
-             row['PER VAS'] * weights.PER_VAS + 
-             row['NEP'] * weights.NEP + 
-             row['NEU'] * weights.NEU + 
+
+    score = (row['CV'] * weights.CV +
+             row['PER VAS'] * weights.PER_VAS +
+             row['NEP'] * weights.NEP +
+             row['NEU'] * weights.NEU +
              row['RET'] * weights.RET)
-    
+
     if score == 0:
         return 'Thấp', 0
     elif 1 <= score <= 2:
@@ -36,8 +36,8 @@ def calculate_diabetes_risk(row):
         return 'Cao', 2
     else:
         return 'Rất cao', 3
-    
-    
+
+
 def calculate_diabetes_risks(data):
     results = data[TARGET].apply(calculate_diabetes_risk, axis=1, result_type='expand')
     results.columns = ['LV', 'WAR']
@@ -46,12 +46,8 @@ def calculate_diabetes_risks(data):
 
 
 def process_csv_to_database(csv_path):
-    """Đọc CSV, tính toán mức nguy cơ, và lưu danh sách Patient vào DB.
-
-    Hàm này được thiết kế để chạy trong background thread — bulk_create
-    với ignore_conflicts giúp idempotent khi tải lại cùng SL.NO.
-    """
-    from .models import Patient, PatientTargetFeatures
+    """Đọc CSV, tính toán mức nguy cơ, và lưu danh sách Patient vào DB."""
+    from patients.models import Patient, PatientTargetFeatures
 
     try:
         data = pd.read_csv(csv_path)
