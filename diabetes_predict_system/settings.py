@@ -18,6 +18,8 @@ INSTALLED_APPS = [
     "accounts",
     "dashboard",
     "patients",
+    "predictions",
+    "mock_his",
 ]
 
 MIDDLEWARE = [
@@ -81,10 +83,9 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [
-    BASE_DIR / 'static'
+    BASE_DIR / "static",
 ]
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+FASTAPI_BASE_URL = "http://127.0.0.1:8001"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

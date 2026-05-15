@@ -5,5 +5,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("accounts.urls")),
     path("", include("dashboard.urls")),
-    path("", include("patients.urls"))
+    path("", include("patients.urls")),
+    path("", include("mock_his.urls")),
 ]

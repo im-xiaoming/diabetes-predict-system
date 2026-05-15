@@ -1,3 +1,4 @@
+import traceback
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -14,8 +15,8 @@ app = FastAPI(title="Diabetes Complication Prediction API")
 
 def to_dict(req):
     if hasattr(req, "model_dump"):
-        return req.model_dump()
-    return req.dict()
+        return req.model_dump(by_alias=True)
+    return req.dict(by_alias=True)
 
 
 @app.get("/api/health/")
@@ -37,4 +38,5 @@ def predict(req: PredictRequest):
     except FileNotFoundError as exc:
         raise HTTPException(status_code=503, detail="Model file not found. Run python ml/train.py first.") from exc
     except Exception as exc:
+        traceback.print_exc()
         raise HTTPException(status_code=503, detail=f"Prediction service unavailable: {exc}") from exc

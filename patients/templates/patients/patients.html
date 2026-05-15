@@ -2,134 +2,108 @@
 {% load static %}
 
 {% block title %}
-    <title>GlucoPredict AI - Danh sách Bệnh nhân</title>
+    <title>GlucoPredict AI - Danh sach benh nhan</title>
 {% endblock %}
 
 {% block page_content %}
-    <!-- Main Content Area -->
     <div class="flex-1 flex flex-col min-w-0 md:ml-[240px] overflow-hidden">
-        <!-- TopNavBar -->
-        <header class="sticky top-0 z-50 flex justify-between items-center w-full px-container-padding h-16 bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline">
-            <div class="flex items-center md:hidden">
-                <h2 class="text-title-lg font-title-lg font-bold text-primary dark:text-inverse-primary">GlucoPredict AI</h2>
-            </div>
+        <header class="sticky top-0 z-50 flex justify-between items-center w-full px-container-padding h-16 bg-surface border-b border-outline-variant">
             <div class="hidden md:flex flex-1 max-w-md">
                 <div class="relative w-full">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-outline">search</span>
-                    <input class="w-full bg-surface-container-low border border-outline-variant rounded-lg pl-10 pr-4 py-2 text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-outline text-on-surface" placeholder="Tìm kiếm nhanh..." type="text" />
+                    <input id="patient-search" class="w-full bg-surface-container-low border border-outline-variant rounded-lg pl-10 pr-4 py-2 text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-outline text-on-surface" placeholder="Tim kiem nhanh..." type="text" />
                 </div>
             </div>
             <div class="flex items-center gap-stack-sm ml-auto">
-                <button class="w-10 h-10 rounded-full flex items-center justify-center text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors">
+                <button class="w-10 h-10 rounded-full flex items-center justify-center text-secondary hover:bg-surface-container-low transition-colors">
                     <span class="material-symbols-outlined">notifications</span>
                 </button>
-                <button class="w-10 h-10 rounded-full flex items-center justify-center text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors">
+                <button class="w-10 h-10 rounded-full flex items-center justify-center text-secondary hover:bg-surface-container-low transition-colors">
                     <span class="material-symbols-outlined">settings</span>
                 </button>
-                <div class="ml-stack-sm">
-                    <img alt="Dr. Nguyen's Profile" class="w-8 h-8 rounded-full border border-outline-variant" data-alt="A professional headshot of a male doctor in his 40s wearing a white lab coat over a blue button-down shirt. The lighting is soft and even, suggesting a bright clinical environment. The background is a plain light gray. He has a warm, confident expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeHWcIwO93swL5GPwb-f3QhJOOIFTOOOtWsMl2Yt5PGYhyCLj6i5btUYyy1zW2S5iSQOIMz9EPWHWPoUR7k9wW9XpvXSGGkVwSbLNQpj4vxFVXyo7NJI2YtmwzsS3DMzXIzq1fADGNuI4l9p88R_AOhAaWBNdEBGYNTjQuiwtiIazX11AsT3yiq1K_FwClcM9BcY-U3IhU5pwx4E2jgAaArJNuzXvdGRYyeH_0dYI3XJOcDCi301P2zkeDIBMjmQWWlVVsjGqG5BIl" />
-                </div>
             </div>
         </header>
-        <!-- Main Canvas -->
         <main class="flex-1 overflow-y-auto bg-background p-container-padding">
-            <!-- Header Section -->
             <div class="mb-stack-lg">
-                <h2 class="text-headline-md font-headline-md text-on-surface mb-1">Danh sách Bệnh nhân</h2>
-                <p class="text-body-sm font-body-sm text-secondary">Quản lý và theo dõi nguy cơ biến chứng đái tháo đường của tất cả bệnh nhân.</p>
+                <h2 class="text-headline-md font-headline-md text-on-surface mb-1">Danh sach benh nhan</h2>
+                <p class="text-body-sm font-body-sm text-secondary">Theo doi nguy co bien chung tieu duong cua benh nhan.</p>
             </div>
-            <!-- Filters & Controls Card -->
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md mb-stack-lg shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md mb-stack-lg shadow-soft">
                 <div class="flex flex-col md:flex-row gap-stack-md items-end">
-                    <!-- Search -->
                     <div class="w-full md:w-1/3">
-                        <label class="block text-label-md font-label-md text-on-surface mb-unit">Tìm kiếm Bệnh nhân</label>
+                        <label class="block text-label-md font-label-md text-on-surface mb-unit">Tim kiem benh nhan</label>
                         <div class="relative">
                             <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-outline">search</span>
-                            <input class="w-full bg-surface border border-outline-variant rounded p-2 pl-10 text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Tên hoặc Mã BN..." type="text" />
+                            <input id="patient-filter" class="w-full bg-surface border border-outline-variant rounded p-2 pl-10 text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Ten hoac ma BN..." type="text" />
                         </div>
                     </div>
-                    <!-- Risk Filter -->
                     <div class="w-full md:w-1/4">
-                        <label class="block text-label-md font-label-md text-on-surface mb-unit">Mức nguy cơ</label>
-                        <select class="w-full bg-surface border border-outline-variant rounded p-2 text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none">
-                            <option value="">Tất cả mức độ</option>
-                            <option value="high">Cao</option>
-                            <option value="medium">Trung bình</option>
-                            <option value="low">Thấp</option>
+                        <label class="block text-label-md font-label-md text-on-surface mb-unit">Muc nguy co</label>
+                        <select id="level-filter" class="w-full bg-surface border border-outline-variant rounded p-2 text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                            <option value="">Tat ca muc do</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="very_high">Very high</option>
                         </select>
                     </div>
-                    <!-- Complication Filter -->
-                    <div class="w-full md:w-1/4">
-                        <label class="block text-label-md font-label-md text-on-surface mb-unit">Loại biến chứng</label>
-                        <select class="w-full bg-surface border border-outline-variant rounded p-2 text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none">
-                            <option value="">Tất cả loại</option>
-                            <option value="kidney">Thận</option>
-                            <option value="eye">Võng mạc</option>
-                            <option value="nerve">Thần kinh</option>
-                            <option value="foot">Bàn chân</option>
-                        </select>
-                    </div>
-                    <!-- Actions -->
-                    <div class="w-full md:w-auto flex gap-stack-sm ml-auto">
-                        <button class="px-4 py-2 bg-surface border border-outline-variant text-on-surface rounded text-label-md font-label-md hover:bg-surface-container-low transition-colors flex items-center gap-2">
-                            <span class="material-symbols-outlined text-[18px]">filter_list_off</span>
-                            Xóa bộ lọc
-                        </button>
-                        <button class="px-4 py-2 bg-primary-container text-on-primary rounded text-label-md font-label-md hover:bg-primary transition-colors flex items-center gap-2">
-                            <span class="material-symbols-outlined text-[18px]">download</span>
-                            Xuất dữ liệu
-                        </button>
-                    </div>
+                    <button id="clear-filter" class="px-4 py-2 bg-surface border border-outline-variant text-on-surface rounded text-label-md font-label-md hover:bg-surface-container-low transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">filter_list_off</span>
+                        Xoa bo loc
+                    </button>
                 </div>
             </div>
-            <!-- Data Table Card -->
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-soft overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-surface-container-low border-b border-outline-variant">
-                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Mã BN</th>
-                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Tên Bệnh Nhân</th>
-                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Tuổi/GT</th>
-                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Mức nguy cơ tổng</th>
-                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Cảnh báo</th>
-                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Lần dự đoán cuối</th>
-                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-right">Thao tác</th>
+                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Ma BN</th>
+                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Ten benh nhan</th>
+                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Tuoi/GT</th>
+                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Muc nguy co</th>
+                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Canh bao</th>
+                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Cap nhat</th>
+                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-right">Thao tac</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-outline-variant">
-                            <!-- Row 1: High Risk -->
                             {% for patient in patients %}
-                                <tr class="hover:bg-surface-container-low transition-colors relative">
+                                <tr class="patient-row hover:bg-surface-container-low transition-colors relative" data-text="{{ patient.id }} {{ patient.name|lower }}" data-level="{{ patient.level }}">
                                     <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">{{ patient.id }}</td>
                                     <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface font-medium">{{ patient.name }}</td>
-                                    <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">{{ patient.age }} / {{ patient.sex|title }}</td>
+                                    <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">{{ patient.age }} / {{ patient.get_sex_display }}</td>
                                     <td class="py-3 px-4">
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm bg-error/10 text-error">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-error mr-1.5"></span>
-                                            {{ patient.level }}
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm {% if patient.level == 'high' or patient.level == 'very_high' %}bg-error/10 text-error{% elif patient.level == 'medium' %}bg-[#F59E0B]/10 text-[#D97706]{% else %}bg-[#10B981]/10 text-[#059669]{% endif %}">
+                                            <span class="w-1.5 h-1.5 rounded-full mr-1.5 {% if patient.level == 'high' or patient.level == 'very_high' %}bg-error{% elif patient.level == 'medium' %}bg-[#D97706]{% else %}bg-[#059669]{% endif %}"></span>
+                                            {{ patient.get_level_display }}
                                         </span>
                                     </td>
                                     <td class="py-3 px-4">
                                         <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-error-container text-on-error-container text-label-sm font-label-sm">{{ patient.war }}</span>
                                     </td>
-                                    <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">{{ patient.updated_at }}</td>
+                                    <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">{{ patient.updated_at|date:"H:i, d/m/Y" }}</td>
                                     <td class="py-3 px-4 text-right">
-                                        <a href="{% url 'patient-detail' %}" class="text-primary hover:text-on-primary-fixed-variant text-label-md font-label-md font-medium">Xem chi tiết</a>
+                                        <a href="{% url 'patient-detail' patient.id %}" class="text-primary hover:text-on-primary-fixed-variant text-label-md font-label-md font-medium">Xem chi tiet</a>
                                     </td>
-                                    <!-- Highlight for high risk -->
-                                    <td class="absolute left-0 top-0 bottom-0 w-1 bg-error"></td>
+                                    {% if patient.level == "high" or patient.level == "very_high" %}
+                                        <td class="absolute left-0 top-0 bottom-0 w-1 bg-error"></td>
+                                    {% endif %}
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="py-8 px-4 text-center text-secondary">Chua co benh nhan nao. Hay mo Mock HIS de gui ho so.</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-                <!-- Pagination -->
                 <div class="px-4 py-3 border-t border-outline-variant bg-surface-container-lowest flex items-center justify-between">
-                    <span class="text-label-sm font-label-sm text-secondary">
-                        Hiển thị {{ page_obj.start_index }}-{{ page_obj.end_index }} của {{ paginator.count }} bệnh nhân
-                    </span>
+                    {% if paginator.count %}
+                        <span class="text-label-sm font-label-sm text-secondary">Hien thi {{ page_obj.start_index }}-{{ page_obj.end_index }} cua {{ paginator.count }} benh nhan</span>
+                    {% else %}
+                        <span class="text-label-sm font-label-sm text-secondary">Tong: 0 benh nhan</span>
+                    {% endif %}
                     <div class="flex gap-1">
                         {% if page_obj.has_previous %}
                             <a href="?page={{ page_obj.previous_page_number }}" class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary hover:bg-surface-container-low">
@@ -144,11 +118,11 @@
                         {% for num in paginator.page_range %}
                             {% if num == page_obj.number %}
                                 <button class="w-8 h-8 flex items-center justify-center rounded bg-primary-container text-on-primary text-label-md font-label-md">{{ num }}</button>
-                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
                                 <a href="?page={{ num }}" class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-on-surface hover:bg-surface-container-low text-label-md font-label-md">{{ num }}</a>
                             {% elif num == 1 or num == paginator.num_pages %}
                                 <a href="?page={{ num }}" class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-on-surface hover:bg-surface-container-low text-label-md font-label-md">{{ num }}</a>
-                            {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                            {% elif num == page_obj.number|add:"-3" or num == page_obj.number|add:"3" %}
                                 <span class="w-8 h-8 flex items-center justify-center text-secondary text-label-md font-label-md">...</span>
                             {% endif %}
                         {% endfor %}
@@ -167,4 +141,33 @@
             </div>
         </main>
     </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        const textFilter = document.getElementById("patient-filter");
+        const topSearch = document.getElementById("patient-search");
+        const levelFilter = document.getElementById("level-filter");
+        const clearBtn = document.getElementById("clear-filter");
+        const rows = Array.from(document.querySelectorAll(".patient-row"));
+
+        function applyFilter() {
+            const text = (textFilter.value || topSearch.value || "").toLowerCase();
+            const level = levelFilter.value;
+            rows.forEach((row) => {
+                const okText = !text || row.dataset.text.includes(text);
+                const okLevel = !level || row.dataset.level === level;
+                row.classList.toggle("hidden", !(okText && okLevel));
+            });
+        }
+
+        [textFilter, topSearch, levelFilter].forEach((el) => el && el.addEventListener("input", applyFilter));
+        levelFilter.addEventListener("change", applyFilter);
+        clearBtn.addEventListener("click", () => {
+            textFilter.value = "";
+            topSearch.value = "";
+            levelFilter.value = "";
+            applyFilter();
+        });
+    </script>
 {% endblock %}

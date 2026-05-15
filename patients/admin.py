@@ -1,7 +1,18 @@
 from django.contrib import admin
-from .models import Patient
 
-# Register your models here.
+from .models import ClinicalRecord, Patient, PatientTargetFeatures
+
+
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'age', 'sex', 'level', 'war', 'updated_at']
+    list_display = ["id", "name", "age", "sex", "level", "war", "updated_at"]
+
+
+@admin.register(ClinicalRecord)
+class ClinicalRecordAdmin(admin.ModelAdmin):
+    list_display = ["id", "patient", "hba1c", "bmi", "source", "created_at"]
+
+
+@admin.register(PatientTargetFeatures)
+class PatientTargetFeaturesAdmin(admin.ModelAdmin):
+    list_display = ["id", "patient", "nep", "neu", "ret", "cv", "per_vas"]
