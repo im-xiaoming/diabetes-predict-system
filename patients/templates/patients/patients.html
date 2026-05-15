@@ -102,19 +102,19 @@
                             <!-- Row 1: High Risk -->
                             {% for patient in patients %}
                                 <tr class="hover:bg-surface-container-low transition-colors relative">
-                                    <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">{{ patient.SL_NO }}</td>
-                                    <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface font-medium">{{ patient.NAME }}</td>
-                                    <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">{{ patient.AGE }} / {{ patient.SEX }}</td>
+                                    <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">{{ patient.id }}</td>
+                                    <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface font-medium">{{ patient.name }}</td>
+                                    <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">{{ patient.age }} / {{ patient.sex|title }}</td>
                                     <td class="py-3 px-4">
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm bg-error/10 text-error">
                                             <span class="w-1.5 h-1.5 rounded-full bg-error mr-1.5"></span>
-                                            {{ patient.LV }}
+                                            {{ patient.level }}
                                         </span>
                                     </td>
                                     <td class="py-3 px-4">
-                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-error-container text-on-error-container text-label-sm font-label-sm">{{ patient.WAR }}</span>
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-error-container text-on-error-container text-label-sm font-label-sm">{{ patient.war }}</span>
                                     </td>
-                                    <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">10:30, 24/10/2023</td>
+                                    <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">{{ patient.updated_at }}</td>
                                     <td class="py-3 px-4 text-right">
                                         <a href="{% url 'patient-detail' %}" class="text-primary hover:text-on-primary-fixed-variant text-label-md font-label-md font-medium">Xem chi tiết</a>
                                     </td>
@@ -127,18 +127,41 @@
                 </div>
                 <!-- Pagination -->
                 <div class="px-4 py-3 border-t border-outline-variant bg-surface-container-lowest flex items-center justify-between">
-                    <span class="text-label-sm font-label-sm text-secondary">Hiển thị 1-5 của {{ patients|length }} bệnh nhân</span>
+                    <span class="text-label-sm font-label-sm text-secondary">
+                        Hiển thị {{ page_obj.start_index }}-{{ page_obj.end_index }} của {{ paginator.count }} bệnh nhân
+                    </span>
                     <div class="flex gap-1">
-                        <button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary hover:bg-surface-container-low disabled:opacity-50" disabled="">
-                            <span class="material-symbols-outlined text-[18px]">chevron_left</span>
-                        </button>
-                        <button class="w-8 h-8 flex items-center justify-center rounded bg-primary-container text-on-primary text-label-md font-label-md">1</button>
-                        <button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-on-surface hover:bg-surface-container-low text-label-md font-label-md">2</button>
-                        <button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-on-surface hover:bg-surface-container-low text-label-md font-label-md">3</button>
-                        <span class="w-8 h-8 flex items-center justify-center text-secondary text-label-md font-label-md">...</span>
-                        <button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary hover:bg-surface-container-low">
-                            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                        </button>
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}" class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary hover:bg-surface-container-low">
+                                <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                            </a>
+                        {% else %}
+                            <button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary opacity-50 cursor-not-allowed" disabled>
+                                <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                            </button>
+                        {% endif %}
+
+                        {% for num in paginator.page_range %}
+                            {% if num == page_obj.number %}
+                                <button class="w-8 h-8 flex items-center justify-center rounded bg-primary-container text-on-primary text-label-md font-label-md">{{ num }}</button>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <a href="?page={{ num }}" class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-on-surface hover:bg-surface-container-low text-label-md font-label-md">{{ num }}</a>
+                            {% elif num == 1 or num == paginator.num_pages %}
+                                <a href="?page={{ num }}" class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-on-surface hover:bg-surface-container-low text-label-md font-label-md">{{ num }}</a>
+                            {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                                <span class="w-8 h-8 flex items-center justify-center text-secondary text-label-md font-label-md">...</span>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}" class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary hover:bg-surface-container-low">
+                                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                            </a>
+                        {% else %}
+                            <button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary opacity-50 cursor-not-allowed" disabled>
+                                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                            </button>
+                        {% endif %}
                     </div>
                 </div>
             </div>

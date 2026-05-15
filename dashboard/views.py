@@ -21,7 +21,9 @@ def dashboard(request):
     ret = PatientTargetFeatures.objects.filter(ret=1).count()
     cv = PatientTargetFeatures.objects.filter(cv=1).count()
     per_vas = PatientTargetFeatures.objects.filter(per_vas=1).count()
-
+    patient_counts = Patient.objects.count()
+    patient_target_counts = PatientTargetFeatures.objects.count()
+    
     result = {
         'total_patient': total_patient,
         'total_war': total_war, # medium,
@@ -29,7 +31,9 @@ def dashboard(request):
         'neu': neu,
         'ret': ret,
         'cv': cv,
-        'per_vas': per_vas
+        'per_vas': per_vas,
+        'processed_profile': patient_counts - patient_target_counts,
+        'total_prediction': patient_target_counts
     }
     return render(request, "dashboard/dashboard.html", {
         'result': result

@@ -23,7 +23,7 @@
         <!-- SideNavBar -->
         <nav class="bg-surface-container-low border-r border-outline-variant docked fixed left-0 top-0 h-screen w-[240px] hidden md:flex flex-col py-stack-lg px-stack-md gap-stack-md z-40">
             <!-- Header -->
-            <div class="flex items-center gap-3 mb-stack-md px-2">
+            <a href='{% url 'dashboard' %}' class="flex items-center gap-3 mb-stack-md px-2">
                 <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary">
                     <span class="material-symbols-outlined fill">medical_services</span>
                 </div>
@@ -31,7 +31,7 @@
                     <h1 class="text-headline-sm font-headline-sm font-extrabold text-primary">Clinical Precision</h1>
                     <p class="text-label-sm font-label-sm text-secondary">Diabetes Risk System</p>
                 </div>
-            </div>
+            </a>
             <!-- CTA -->
             <form id="upload-csv-form" method="POST" enctype="multipart/form-data" action="{% url 'patient-upload' %}" class="mb-stack-md">
                 {% csrf_token %}
@@ -78,36 +78,38 @@
                 })();
             </script>
             <!-- Navigation Links -->
+            {% with url_name=request.resolver_match.url_name %}
             <div class="flex-1 flex flex-col gap-1 overflow-y-auto">
-                <a class="flex items-center gap-3 px-3 py-2 bg-secondary-container text-on-secondary-container rounded-lg text-label-md font-label-md transition-all scale-[0.98]" href="{% url 'dashboard' %}">
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'dashboard' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'dashboard' %}">
                     <span class="material-symbols-outlined">dashboard</span>
                     Dashboard
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg text-label-md font-label-md" href="{% url 'patients' %}">
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'patients' or url_name == 'patient-detail' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'patients' %}">
                     <span class="material-symbols-outlined">group</span>
                     Patients
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg text-label-md font-label-md" href="alerts.html">
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'alerts' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="alerts.html">
                     <span class="material-symbols-outlined">warning</span>
                     Alerts
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg text-label-md font-label-md" href="prediction_history.html">
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'prediction_history' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="prediction_history.html">
                     <span class="material-symbols-outlined">history</span>
                     History
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg text-label-md font-label-md" href="mock_his.html">
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'mock_his' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="mock_his.html">
                     <span class="material-symbols-outlined">database</span>
                     Mock HIS
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg text-label-md font-label-md" href="monitoring.html">
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'monitoring' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="monitoring.html">
                     <span class="material-symbols-outlined">analytics</span>
                     System Monitoring
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg text-label-md font-label-md" href="logs.html">
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'logs' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="logs.html">
                     <span class="material-symbols-outlined">receipt_long</span>
                     Logs
                 </a>
             </div>
+            {% endwith %}
             <!-- Footer Links -->
             <div class="mt-auto pt-stack-md border-t border-outline-variant flex flex-col gap-1">
                 <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg text-label-md font-label-md" href="#">
