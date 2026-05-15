@@ -8,34 +8,57 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 
+COLS = {
+    "sl_no": "SL.NO",
+    "name": "NAME",
+    "age": "AGE",
+    "sex": "SEX",
+    "bmi": "BMI",
+    "sp": "SP",
+    "bp": "BP",
+    "hba1c": "HbA1c",
+    "fps": "FPS",
+    "pps": "PPS",
+    "fam_ho": "FAMILY H/O",
+    "on_age": "ONSET AGE",
+    "dia_life": "DIA LIFE",
+    "smk": "SMOKING",
+    "phy_act": "PHY ACT",
+    "med_use": "MED USE",
+    "med_adh": "MED ADH",
+    "nep": "NEP",
+    "neu": "NEU",
+    "ret": "RET",
+    "cv": "CV",
+    "per_vas": "PER VAS",
+}
+
+FT = [
+    "AGE",
+    "SEX",
+    "BMI",
+    "SP",
+    "BP",
+    "HbA1c",
+    "FPS",
+    "PPS",
+    "FAMILY H/O",
+    "ONSET AGE",
+    "DIA LIFE",
+    "SMOKING",
+    "PHY ACT",
+    "MED USE",
+    "MED ADH",
+]
+TG = ["NEP", "NEU", "RET", "CV", "PER VAS"]
+NUM = ["AGE", "BMI", "SP", "BP", "HbA1c", "FPS", "PPS", "ONSET AGE", "DIA LIFE"]
+CAT = ["SEX", "FAMILY H/O", "SMOKING", "PHY ACT", "MED USE", "MED ADH"]
+
+
 def rename_cols(df):
-    cols = {
-        "SL.NO": "sl_no",
-        "NAME": "name",
-        "AGE": "age",
-        "SEX": "sex",
-        "BMI": "bmi",
-        "SP": "sp",
-        "BP": "bp",
-        "HbA1c": "hba1c",
-        "FPS": "fps",
-        "PPS": "pps",
-        "FAMILY H/O": "fam_ho",
-        "ONSET AGE": "on_age",
-        "DIA LIFE": "dia_life",
-        "SMOKING": "smk",
-        "PHY ACT": "phy_act",
-        "MED USE": "med_use",
-        "MED ADH": "med_adh",
-        "NEP": "nep",
-        "NEU": "neu",
-        "RET": "ret",
-        "CV": "cv",
-        "PER VAS": "per_vas",
-    }
     df = df.copy()
     df.columns = [str(c).strip() for c in df.columns]
-    return df.rename(columns=cols)
+    return df.rename(columns=COLS)
 
 
 def parse_dia_life(v):
@@ -58,64 +81,24 @@ def load_data(path):
 
 def clean_data(df):
     df = rename_cols(df)
-    ft = [
-        "age",
-        "sex",
-        "bmi",
-        "sp",
-        "bp",
-        "hba1c",
-        "fps",
-        "pps",
-        "fam_ho",
-        "on_age",
-        "dia_life",
-        "smk",
-        "phy_act",
-        "med_use",
-        "med_adh",
-    ]
-    tg = ["nep", "neu", "ret", "cv", "per_vas"]
-    num = ["age", "bmi", "sp", "bp", "hba1c", "fps", "pps", "on_age", "dia_life"]
-    cat = ["sex", "fam_ho", "smk", "phy_act", "med_use", "med_adh"]
     df = df.copy()
-    df["dia_life"] = df["dia_life"].apply(parse_dia_life)
-    for c in num:
+    df["DIA LIFE"] = df["DIA LIFE"].apply(parse_dia_life)
+    for c in NUM:
         df[c] = pd.to_numeric(df[c], errors="coerce")
-    for c in cat:
+    for c in CAT:
         df[c] = df[c].astype("string").str.strip()
-    for c in tg:
+    for c in TG:
         df[c] = pd.to_numeric(df[c], errors="coerce")
-    df = df.dropna(subset=tg)
-    df[tg] = df[tg].astype(int)
-    df = df.drop_duplicates(subset=ft + tg).reset_index(drop=True)
+    df = df.dropna(subset=TG)
+    df[TG] = df[TG].astype(int)
+    df = df.drop_duplicates(subset=FT + TG).reset_index(drop=True)
     return df
 
 
 def split_xy(df):
-    ft = [
-        "age",
-        "sex",
-        "bmi",
-        "sp",
-        "bp",
-        "hba1c",
-        "fps",
-        "pps",
-        "fam_ho",
-        "on_age",
-        "dia_life",
-        "smk",
-        "phy_act",
-        "med_use",
-        "med_adh",
-    ]
-    tg = ["nep", "neu", "ret", "cv", "per_vas"]
-    num = ["age", "bmi", "sp", "bp", "hba1c", "fps", "pps", "on_age", "dia_life"]
-    cat = ["sex", "fam_ho", "smk", "phy_act", "med_use", "med_adh"]
-    x = df[ft].copy()
-    y = df[tg].copy()
-    return x, y, ft, tg, num, cat
+    x = df[FT].copy()
+    y = df[TG].copy()
+    return x, y, FT, TG, NUM, CAT
 
 
 def build_preprocessor():
@@ -137,7 +120,7 @@ def build_preprocessor():
     )
     return ColumnTransformer(
         [
-            ("num", num_pipe, ["age", "bmi", "sp", "bp", "hba1c", "fps", "pps", "on_age", "dia_life"]),
-            ("cat", cat_pipe, ["sex", "fam_ho", "smk", "phy_act", "med_use", "med_adh"]),
+            ("num", num_pipe, NUM),
+            ("cat", cat_pipe, CAT),
         ]
     )

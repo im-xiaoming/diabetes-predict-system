@@ -1,0 +1,472 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Mock HIS - GlucoPredict AI</title>
+{% endblock %}
+
+{% block page_content %}
+    <main class="flex-1 md:ml-[240px] min-h-screen bg-background overflow-y-auto">
+        <div class="p-container-padding max-w-7xl mx-auto w-full flex flex-col gap-stack-lg">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-stack-md">
+                <div>
+                    <h2 class="text-display-lg font-display-lg text-on-surface">Mock HIS Simulation</h2>
+                    <p class="text-body-md font-body-md text-secondary mt-unit">Auto fake real-time feed: Mock HIS starts sending patient records to FastAPI when this page opens.</p>
+                </div>
+                <div class="flex gap-stack-sm">
+                    <button id="reset-btn" class="bg-surface-container-lowest border border-outline-variant text-on-surface-variant rounded-lg py-2 px-4 text-label-md font-label-md flex items-center gap-2 hover:bg-surface-container-low transition-colors shadow-soft">
+                        <span class="material-symbols-outlined text-[18px]">refresh</span>
+                        Reset Data
+                    </button>
+                    <button id="bulk-top-btn" class="bg-primary-container text-on-primary rounded-lg py-2 px-4 text-label-md font-label-md flex items-center gap-2 hover:bg-primary transition-colors shadow-soft">
+                        <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                        Run Bulk Test
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-stack-lg">
+                <div class="lg:col-span-7 flex flex-col gap-stack-md">
+                    <div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-soft overflow-hidden flex flex-col h-[620px]">
+                        <div class="p-stack-md border-b border-outline-variant flex justify-between items-center bg-surface-bright">
+                            <h3 class="text-title-lg font-title-lg text-on-surface flex items-center gap-2">
+                                <span class="material-symbols-outlined text-secondary text-[20px]">folder_shared</span>
+                                Patient Records Ready for Transmission
+                            </h3>
+                            <span class="bg-secondary-container text-on-secondary-container px-2 py-1 rounded text-label-sm font-label-sm">{{ total }} Records</span>
+                        </div>
+                        <div class="overflow-y-auto flex-1 p-stack-sm bg-surface">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="sticky top-0 bg-surface z-10 shadow-soft">
+                                    <tr>
+                                        <th class="p-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider border-b border-outline-variant">PID</th>
+                                        <th class="p-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider border-b border-outline-variant">Patient Name</th>
+                                        <th class="p-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider border-b border-outline-variant">Data</th>
+                                        <th class="p-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider border-b border-outline-variant">Status</th>
+                                        <th class="p-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider border-b border-outline-variant text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="records-body">
+                                    {% for rec in records %}
+                                        <tr id="row-{{ rec.idx }}" class="hover:bg-surface-container-low transition-colors group {% if not rec.ready %}border-l-4 border-error{% endif %}">
+                                            <td class="p-3 border-b border-outline-variant text-body-sm font-body-sm text-on-surface">{{ rec.pid }}</td>
+                                            <td class="p-3 border-b border-outline-variant text-body-sm font-body-sm text-on-surface font-medium">{{ rec.name }}</td>
+                                            <td class="p-3 border-b border-outline-variant">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-16 h-1.5 bg-surface-variant rounded-full overflow-hidden">
+                                                        <div class="{% if rec.complete == 100 %}bg-[#10b981]{% elif rec.complete >= 80 %}bg-[#f59e0b]{% else %}bg-error{% endif %} h-full" style="width: {{ rec.complete }}%"></div>
+                                                    </div>
+                                                    <span class="text-label-sm font-label-sm text-secondary">{{ rec.complete }}%</span>
+                                                </div>
+                                            </td>
+                                            <td class="p-3 border-b border-outline-variant">
+                                                <span id="status-{{ rec.idx }}" class="inline-flex px-2 py-1 rounded bg-surface-container-low text-secondary text-label-sm font-label-sm">Chua gui</span>
+                                            </td>
+                                            <td class="p-3 border-b border-outline-variant text-right">
+                                                {% if rec.ready %}
+                                                    <button data-idx="{{ rec.idx }}" class="send-btn text-primary hover:text-primary-container text-label-md font-label-md px-3 py-1 border border-primary rounded hover:bg-primary-fixed transition-colors">Gui ho so</button>
+                                                {% else %}
+                                                    <button class="text-secondary text-label-md font-label-md px-3 py-1 border border-outline-variant rounded opacity-50 cursor-not-allowed" disabled>Missing Data</button>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 flex flex-col gap-stack-md">
+                    <div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-soft p-stack-md">
+                        <h3 class="text-title-lg font-title-lg text-on-surface mb-stack-sm flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary text-[20px]">settings_ethernet</span>
+                            Transmission Controls
+                        </h3>
+                        <div class="flex flex-col gap-stack-sm">
+                            <label class="text-label-md font-label-md text-on-surface">Endpoint Config</label>
+                            <select id="endpoint-select" class="flex-1 bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                                <option>Localhost FastAPI</option>
+                                <option disabled>Staging Environment</option>
+                                <option disabled>Production Read-Only</option>
+                            </select>
+                            <div class="grid grid-cols-3 gap-stack-sm mt-unit">
+                                <button id="health-btn" class="bg-surface border border-outline-variant text-on-surface rounded-lg py-2 px-4 text-label-md font-label-md hover:bg-surface-container-low transition-colors flex justify-center items-center gap-2">
+                                    <span class="material-symbols-outlined text-[18px]">monitor_heart</span>
+                                    Health
+                                </button>
+                                <button id="random-btn" class="bg-surface border border-primary text-primary rounded-lg py-2 px-4 text-label-md font-label-md hover:bg-primary-fixed transition-colors flex justify-center items-center gap-2">
+                                    <span class="material-symbols-outlined text-[18px]">send</span>
+                                    Random
+                                </button>
+                                <button id="bulk-btn" class="bg-primary-container text-on-primary rounded-lg py-2 px-4 text-label-md font-label-md hover:bg-primary transition-colors flex justify-center items-center gap-2 shadow-soft">
+                                    <span class="material-symbols-outlined text-[18px]">send_time_extension</span>
+                                    All
+                                </button>
+                            </div>
+                            <div class="border-t border-outline-variant mt-stack-sm pt-stack-sm flex flex-col gap-stack-sm">
+                                <div class="grid grid-cols-2 gap-stack-sm">
+                                    <button id="start-feed-btn" class="bg-primary text-on-primary rounded-lg py-2 px-4 text-label-md font-label-md hover:opacity-90 transition-colors flex justify-center items-center gap-2">
+                                        <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                        Restart Feed
+                                    </button>
+                                    <button id="pause-feed-btn" class="bg-surface border border-outline-variant text-on-surface rounded-lg py-2 px-4 text-label-md font-label-md hover:bg-surface-container-low transition-colors flex justify-center items-center gap-2" disabled>
+                                        <span class="material-symbols-outlined text-[18px]">pause</span>
+                                        Pause
+                                    </button>
+                                    <button id="resume-feed-btn" class="bg-surface border border-outline-variant text-on-surface rounded-lg py-2 px-4 text-label-md font-label-md hover:bg-surface-container-low transition-colors flex justify-center items-center gap-2" disabled>
+                                        <span class="material-symbols-outlined text-[18px]">resume</span>
+                                        Resume
+                                    </button>
+                                    <button id="stop-feed-btn" class="bg-surface border border-error text-error rounded-lg py-2 px-4 text-label-md font-label-md hover:bg-error/10 transition-colors flex justify-center items-center gap-2" disabled>
+                                        <span class="material-symbols-outlined text-[18px]">stop</span>
+                                        Stop
+                                    </button>
+                                </div>
+                                <label class="text-label-md font-label-md text-on-surface">Interval</label>
+                                <select id="interval-select" class="bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                                    <option value="3">3 seconds / record</option>
+                                    <option value="5" selected>5 seconds / record</option>
+                                    <option value="10">10 seconds / record</option>
+                                </select>
+                                <div class="grid grid-cols-5 gap-2 text-center">
+                                    <div class="bg-surface-container-low rounded-lg p-2">
+                                        <div id="stat-total" class="text-title-md font-title-md text-on-surface">{{ total }}</div>
+                                        <div class="text-label-sm font-label-sm text-secondary">Total</div>
+                                    </div>
+                                    <div class="bg-surface-container-low rounded-lg p-2">
+                                        <div id="stat-current" class="text-title-md font-title-md text-on-surface">0</div>
+                                        <div class="text-label-sm font-label-sm text-secondary">Next</div>
+                                    </div>
+                                    <div class="bg-surface-container-low rounded-lg p-2">
+                                        <div id="stat-sent" class="text-title-md font-title-md text-on-surface">0</div>
+                                        <div class="text-label-sm font-label-sm text-secondary">Sent</div>
+                                    </div>
+                                    <div class="bg-surface-container-low rounded-lg p-2">
+                                        <div id="stat-ok" class="text-title-md font-title-md text-[#059669]">0</div>
+                                        <div class="text-label-sm font-label-sm text-secondary">OK</div>
+                                    </div>
+                                    <div class="bg-surface-container-low rounded-lg p-2">
+                                        <div id="stat-fail" class="text-title-md font-title-md text-error">0</div>
+                                        <div class="text-label-sm font-label-sm text-secondary">Fail</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-[#1e1e1e] rounded-xl border border-[#333] shadow-soft overflow-hidden flex flex-col flex-1 min-h-[360px]">
+                        <div class="p-stack-sm border-b border-[#333] flex justify-between items-center bg-[#252526]">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[#858585] text-[18px]">terminal</span>
+                                <h3 class="text-label-md font-label-md text-[#d4d4d4]">API Console Output</h3>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="console-dot" class="relative inline-flex rounded-full h-2 w-2 bg-[#858585]"></span>
+                                <span id="console-status" class="text-label-sm font-label-sm text-[#858585] uppercase tracking-wider">Idle</span>
+                            </div>
+                        </div>
+                        <div class="p-stack-md overflow-y-auto json-viewer text-[#d4d4d4] flex-1">
+                            <pre><code id="console-json">{
+  "status": "ready",
+  "message": "Auto feed will start when FastAPI is online"
+}</code></pre>
+                        </div>
+                        <div class="p-2 border-t border-[#333] bg-[#252526] flex justify-end">
+                            <button id="copy-btn" class="text-[#858585] hover:text-[#d4d4d4] text-label-sm font-label-sm flex items-center gap-1 transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                                Copy JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}
+
+{% block js %}
+    {{ records|json_script:"mock-records" }}
+    <script>
+        let records = JSON.parse(document.getElementById("mock-records").textContent);
+        const totalRecords = Number("{{ total }}");
+        const batchSize = 20;
+        const recordMap = new Map(records.map((rec) => [rec.idx, rec]));
+        const sentSet = new Set();
+        const sendUrl = "{% url 'mock-his-send' %}";
+        const bulkUrl = "{% url 'mock-his-send-bulk' %}";
+        const healthUrl = "{% url 'mock-his-health' %}";
+        const recordsUrl = "{% url 'mock-his-records' %}";
+        const token = "{{ csrf_token }}";
+        const consoleJson = document.getElementById("console-json");
+        const consoleStatus = document.getElementById("console-status");
+        const consoleDot = document.getElementById("console-dot");
+        const bodyEl = document.getElementById("records-body");
+        const startBtn = document.getElementById("start-feed-btn");
+        const pauseBtn = document.getElementById("pause-feed-btn");
+        const resumeBtn = document.getElementById("resume-feed-btn");
+        const stopBtn = document.getElementById("stop-feed-btn");
+        const intervalSelect = document.getElementById("interval-select");
+        const statTotal = document.getElementById("stat-total");
+        const statCurrent = document.getElementById("stat-current");
+        const statSent = document.getElementById("stat-sent");
+        const statOk = document.getElementById("stat-ok");
+        const statFail = document.getElementById("stat-fail");
+        let timer = null;
+        let busy = false;
+        let nextIdx = 0;
+        let running = false;
+        let paused = false;
+        let stat = { sent: 0, ok: 0, fail: 0 };
+
+        function show(obj, ok = true) {
+            consoleJson.textContent = JSON.stringify(obj, null, 2);
+            consoleStatus.textContent = ok ? "Thanh cong" : "That bai";
+            consoleStatus.className = ok ? "text-label-sm font-label-sm text-[#10b981] uppercase tracking-wider" : "text-label-sm font-label-sm text-error uppercase tracking-wider";
+            consoleDot.className = ok ? "relative inline-flex rounded-full h-2 w-2 bg-[#10b981]" : "relative inline-flex rounded-full h-2 w-2 bg-error";
+        }
+
+        function esc(v) {
+            return String(v ?? "").replace(/[&<>"']/g, (m) => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                "\"": "&quot;",
+                "'": "&#039;"
+            }[m]));
+        }
+
+        function updateStats() {
+            statTotal.textContent = totalRecords;
+            statCurrent.textContent = Math.min(nextIdx + 1, totalRecords);
+            statSent.textContent = stat.sent;
+            statOk.textContent = stat.ok;
+            statFail.textContent = stat.fail;
+        }
+
+        function setStatus(idx, text, cls) {
+            const el = document.getElementById(`status-${idx}`);
+            if (!el) return;
+            el.textContent = text;
+            el.className = `inline-flex px-2 py-1 rounded text-label-sm font-label-sm ${cls}`;
+        }
+
+        function rowHtml(rec) {
+            const bar = rec.complete === 100 ? "bg-[#10b981]" : rec.complete >= 80 ? "bg-[#f59e0b]" : "bg-error";
+            const action = rec.ready
+                ? `<button data-idx="${rec.idx}" class="send-btn text-primary hover:text-primary-container text-label-md font-label-md px-3 py-1 border border-primary rounded hover:bg-primary-fixed transition-colors">Gui ho so</button>`
+                : `<button class="text-secondary text-label-md font-label-md px-3 py-1 border border-outline-variant rounded opacity-50 cursor-not-allowed" disabled>Missing Data</button>`;
+            return `
+                <tr id="row-${rec.idx}" class="hover:bg-surface-container-low transition-colors group ${rec.ready ? "" : "border-l-4 border-error"}">
+                    <td class="p-3 border-b border-outline-variant text-body-sm font-body-sm text-on-surface">${esc(rec.pid)}</td>
+                    <td class="p-3 border-b border-outline-variant text-body-sm font-body-sm text-on-surface font-medium">${esc(rec.name)}</td>
+                    <td class="p-3 border-b border-outline-variant">
+                        <div class="flex items-center gap-2">
+                            <div class="w-16 h-1.5 bg-surface-variant rounded-full overflow-hidden">
+                                <div class="${bar} h-full" style="width: ${rec.complete}%"></div>
+                            </div>
+                            <span class="text-label-sm font-label-sm text-secondary">${rec.complete}%</span>
+                        </div>
+                    </td>
+                    <td class="p-3 border-b border-outline-variant">
+                        <span id="status-${rec.idx}" class="inline-flex px-2 py-1 rounded bg-surface-container-low text-secondary text-label-sm font-label-sm">Chua gui</span>
+                    </td>
+                    <td class="p-3 border-b border-outline-variant text-right">${action}</td>
+                </tr>`;
+        }
+
+        function addRecords(items) {
+            items.forEach((rec) => {
+                if (recordMap.has(rec.idx)) return;
+                recordMap.set(rec.idx, rec);
+                records.push(rec);
+                bodyEl.insertAdjacentHTML("beforeend", rowHtml(rec));
+            });
+        }
+
+        async function ensureRecord(idx) {
+            if (recordMap.has(idx)) return recordMap.get(idx);
+            const offset = Math.floor(idx / batchSize) * batchSize;
+            const res = await fetch(`${recordsUrl}?offset=${offset}&limit=${batchSize}`);
+            const body = await res.json().catch(() => ({ error: "Invalid JSON response" }));
+            if (!res.ok || !body.ok) throw new Error(body.error || "Cannot load records");
+            addRecords(body.records || []);
+            return recordMap.get(idx);
+        }
+
+        async function post(url, data) {
+            const res = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": token
+                },
+                body: JSON.stringify(data)
+            });
+            const body = await res.json().catch(() => ({ error: "Invalid JSON response" }));
+            return { ok: res.ok, body };
+        }
+
+        async function sendOne(idx, countStats = false) {
+            const rec = await ensureRecord(idx);
+            if (!rec) {
+                const body = { ok: false, idx, error: "Record not found" };
+                show(body, false);
+                return { ok: false, body };
+            }
+            if (!rec.ready) {
+                setStatus(idx, "Bo qua", "bg-surface-container-low text-secondary");
+                const body = { ok: false, idx, skipped: true, error: "Record has missing values" };
+                if (countStats) {
+                    stat.sent += 1;
+                    stat.fail += 1;
+                    sentSet.add(idx);
+                    updateStats();
+                }
+                show(body, false);
+                return { ok: false, body };
+            }
+            setStatus(idx, "Dang gui", "bg-[#F59E0B]/10 text-[#D97706]");
+            const out = await post(sendUrl, { idx });
+            setStatus(idx, out.ok ? "Thanh cong" : "That bai", out.ok ? "bg-[#10b981]/10 text-[#059669]" : "bg-error/10 text-error");
+            if (countStats) {
+                stat.sent += 1;
+                stat.ok += out.ok ? 1 : 0;
+                stat.fail += out.ok ? 0 : 1;
+                sentSet.add(idx);
+                updateStats();
+            }
+            show(out.body, out.ok);
+            return out;
+        }
+
+        bodyEl.addEventListener("click", (e) => {
+            const btn = e.target.closest(".send-btn");
+            if (!btn) return;
+            sendOne(Number(btn.dataset.idx));
+        });
+
+        document.getElementById("random-btn").addEventListener("click", () => {
+            const ready = records.filter((rec) => rec.ready);
+            if (!ready.length) {
+                show({ ok: false, error: "No valid records" }, false);
+                return;
+            }
+            const rec = ready[Math.floor(Math.random() * ready.length)];
+            sendOne(rec.idx);
+        });
+
+        async function sendBulk() {
+            records.filter((rec) => rec.ready).forEach((rec) => setStatus(rec.idx, "Dang gui", "bg-[#F59E0B]/10 text-[#D97706]"));
+            const out = await post(bulkUrl, { offset: 0, count: records.length });
+            if (out.body.results) {
+                out.body.results.forEach((row) => {
+                    setStatus(row.idx, row.ok ? "Thanh cong" : "That bai", row.ok ? "bg-[#10b981]/10 text-[#059669]" : "bg-error/10 text-error");
+                });
+            }
+            show(out.body, out.ok);
+        }
+
+        document.getElementById("bulk-btn").addEventListener("click", sendBulk);
+        document.getElementById("bulk-top-btn").addEventListener("click", sendBulk);
+
+        async function health() {
+            const res = await fetch(healthUrl);
+            const body = await res.json().catch(() => ({ error: "Invalid JSON response" }));
+            show(body, res.ok && body.ok);
+            return res.ok && body.ok;
+        }
+
+        document.getElementById("health-btn").addEventListener("click", async () => {
+            await health();
+        });
+
+        function setFeedButtons() {
+            startBtn.disabled = running;
+            pauseBtn.disabled = !running || paused;
+            resumeBtn.disabled = !running || !paused;
+            stopBtn.disabled = !running;
+        }
+
+        function stopFeed(done = false) {
+            if (timer) clearInterval(timer);
+            timer = null;
+            running = false;
+            paused = false;
+            busy = false;
+            setFeedButtons();
+            if (done) show({ ok: true, message: "Auto feed completed", sent: stat.sent, success: stat.ok, failed: stat.fail }, true);
+        }
+
+        function pauseFeed() {
+            if (timer) clearInterval(timer);
+            timer = null;
+            paused = true;
+            setFeedButtons();
+        }
+
+        async function tickFeed() {
+            if (busy || !running || paused) return;
+            busy = true;
+            try {
+                while (nextIdx < totalRecords && sentSet.has(nextIdx)) {
+                    nextIdx += 1;
+                }
+                if (nextIdx >= totalRecords) {
+                    stopFeed(true);
+                    return;
+                }
+                const idx = nextIdx;
+                nextIdx += 1;
+                updateStats();
+                const out = await sendOne(idx, true);
+                if (!out.ok && !out.body.skipped) {
+                    pauseFeed();
+                    show({ ok: false, message: "Auto feed paused because FastAPI returned an error", detail: out.body }, false);
+                }
+            } catch (err) {
+                pauseFeed();
+                show({ ok: false, message: "Auto feed paused", error: err.message }, false);
+            } finally {
+                busy = false;
+            }
+        }
+
+        async function startFeed(reset = false) {
+            const ok = await health();
+            if (!ok) return;
+            if (reset && nextIdx >= totalRecords) nextIdx = 0;
+            running = true;
+            paused = false;
+            setFeedButtons();
+            updateStats();
+            await tickFeed();
+            timer = setInterval(tickFeed, Number(intervalSelect.value) * 1000);
+        }
+
+        startBtn.addEventListener("click", () => startFeed(true));
+        pauseBtn.addEventListener("click", pauseFeed);
+        resumeBtn.addEventListener("click", () => startFeed(false));
+        stopBtn.addEventListener("click", () => stopFeed(false));
+
+        document.getElementById("reset-btn").addEventListener("click", () => {
+            stopFeed(false);
+            nextIdx = 0;
+            stat = { sent: 0, ok: 0, fail: 0 };
+            sentSet.clear();
+            records.forEach((rec) => setStatus(rec.idx, "Chua gui", "bg-surface-container-low text-secondary"));
+            show({ status: "ready", message: "Auto feed will start when FastAPI is online" }, true);
+            consoleStatus.textContent = "Idle";
+            consoleStatus.className = "text-label-sm font-label-sm text-[#858585] uppercase tracking-wider";
+            consoleDot.className = "relative inline-flex rounded-full h-2 w-2 bg-[#858585]";
+            updateStats();
+        });
+
+        document.getElementById("copy-btn").addEventListener("click", async () => {
+            await navigator.clipboard.writeText(consoleJson.textContent);
+        });
+
+        updateStats();
+        setFeedButtons();
+        window.addEventListener("load", () => {
+            setTimeout(() => startFeed(true), 800);
+        });
+    </script>
+{% endblock %}

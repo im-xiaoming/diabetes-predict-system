@@ -14,8 +14,8 @@ app = FastAPI(title="Diabetes Complication Prediction API")
 
 def to_dict(req):
     if hasattr(req, "model_dump"):
-        return req.model_dump()
-    return req.dict()
+        return req.model_dump(by_alias=True)
+    return req.dict(by_alias=True)
 
 
 @app.get("/api/health/")

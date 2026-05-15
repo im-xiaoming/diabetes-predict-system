@@ -8,7 +8,7 @@ if str(ROOT_DIR) not in sys.path:
 import joblib
 import pandas as pd
 
-from ml.preprocessing import parse_dia_life
+from ml.preprocessing import COLS, parse_dia_life
 
 
 MODEL_PATH = ROOT_DIR / "ml" / "artifacts" / "model.pkl"
@@ -50,13 +50,31 @@ def get_scores(mdl, x, tg):
     return out
 
 
+def build_row(data, ft):
+    data = dict(data)
+    rev = {v: k for k, v in COLS.items()}
+    row = {}
+    for c in ft:
+        if c in data:
+            row[c] = data[c]
+        elif c in COLS and COLS[c] in data:
+            row[c] = data[COLS[c]]
+        elif c in rev and rev[c] in data:
+            row[c] = data[rev[c]]
+        else:
+            row[c] = None
+    dia = "DIA LIFE" if "DIA LIFE" in row else "dia_life"
+    if dia in row:
+        row[dia] = parse_dia_life(row.get(dia))
+    return row
+
+
 def predict_one(data):
     bundle = load_model()
     ft = bundle["features"]
     tg = bundle["targets"]
     mdl = bundle["model"]
-    row = dict(data)
-    row["dia_life"] = parse_dia_life(row.get("dia_life"))
+    row = build_row(data, ft)
     x = pd.DataFrame([row], columns=ft)
     pred = mdl.predict(x)[0]
     labels = {t: int(v) for t, v in zip(tg, pred)}
