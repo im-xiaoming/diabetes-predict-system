@@ -71,7 +71,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = "vi"
+LANGUAGE_CODE = "en"
 
 TIME_ZONE = "Asia/Bangkok"
 
