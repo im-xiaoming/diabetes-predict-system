@@ -6,55 +6,6 @@
 {% endblock %}
 
 {% block page_content %}
-    <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col md:ml-[240px] h-screen overflow-hidden">
-      <!-- TopNavBar -->
-      <header class="sticky top-0 z-50 flex justify-between items-center w-full px-container-padding h-16 bg-surface border-b border-outline-variant docked full-width top-0">
-        <!-- Mobile Menu Button (Hidden on Desktop) -->
-        <button class="md:hidden p-2 -ml-2 text-on-surface-variant">
-          <span class="material-symbols-outlined">menu</span>
-        </button>
-
-        <!-- Search Bar -->
-        <div class="flex-1 max-w-md hidden md:flex">
-          <div class="relative w-full">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span class="material-symbols-outlined text-outline">search</span>
-            </div>
-            <input
-              class="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded-lg leading-5 bg-surface-container-lowest placeholder-outline focus:outline-none focus:bg-surface-container-lowest focus:border-primary-container focus:ring-1 focus:ring-primary-container sm:text-sm transition-colors text-body-sm font-body-sm"
-              placeholder="Tìm kiếm bệnh nhân hoặc mã cảnh báo..."
-              type="text"
-            />
-          </div>
-        </div>
-
-        <div class="md:hidden flex-1 flex justify-center">
-          <span class="text-title-lg font-title-lg font-bold text-primary">GlucoPredict AI</span>
-        </div>
-
-        <!-- Actions -->
-        <div class="flex items-center gap-stack-sm ml-auto">
-          <button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors relative">
-            <span class="material-symbols-outlined">notifications</span>
-            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span>
-          </button>
-          <button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors hidden md:block">
-            <span class="material-symbols-outlined">settings</span>
-          </button>
-          <div class="ml-2 pl-2 border-l border-outline-variant">
-            <img
-              alt="Dr. Nguyen's Profile"
-              class="w-8 h-8 rounded-full border border-outline-variant"
-              data-alt="A professional headshot of a doctor used as a profile picture in a medical application. The lighting is clean and bright, set against a neutral gray background. The style is modern corporate minimalist, conveying trust and authority."
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDo8yBVuQw7ApXJdSGpes6b5L7A1uGzPuir7tplLQpZRJmfOVX4sJ0ismchhKsoGTCmeVjqugGu-Y0tYJ6bULLAL_ux8DMmKaOfsBPQAgi7dbX4U-Lwaz8xoWIkHsA-Hf2siypcG97SyvKmQb9aci21IceFuTENm4T_XAwoDJ3XmWFavrzodYKa4zVcnVnNWINY7uEoE5lbWaUVxLrccQFE-XClvbamnfH4u9NEP5uDsBeE4XzpDP9D85xiokzIMigDqIBANyGIxwp6"
-            />
-          </div>
-        </div>
-      </header>
-
-      <!-- Canvas -->
-      <main class="flex-1 overflow-y-auto p-container-padding bg-background">
         <div class="max-w-[1400px] mx-auto">
           <!-- Page Header & Filters -->
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-stack-lg gap-stack-md">
@@ -336,6 +287,4 @@
             </div>
           </div>
         </div>
-      </main>
-    </div>
 {% endblock %}
