@@ -8,7 +8,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from ml.preprocessing import FT, rename_cols
+from ml.preprocessing import FT, TG, rename_cols
 
 
 DATA_PATH = ROOT_DIR / "data" / "data.csv"
@@ -31,6 +31,7 @@ def complete(row):
 
 def make_record(row, idx):
     payload = {k: native(row.get(k)) for k in FT}
+    truth = {k: native(row.get(k)) for k in TG}
     pid = native(row.get("SL.NO")) or idx + 1
     name = native(row.get("NAME")) or f"Patient {pid}"
     pct = complete(row)
@@ -41,6 +42,7 @@ def make_record(row, idx):
         "complete": pct,
         "ready": pct == 100,
         "payload": payload,
+        "truth": truth,
     }
 
 
@@ -60,7 +62,7 @@ def load_records(path=DATA_PATH, count=20, offset=0, limit=None):
         limit = count
     df = pd.read_csv(path)
     df = rename_cols(df)
-    cols = [c for c in META + FT if c in df.columns]
+    cols = [c for c in META + FT + TG if c in df.columns]
     rows = df[cols].iloc[offset:offset + limit].to_dict(orient="records")
     out = []
     for idx, row in enumerate(rows):

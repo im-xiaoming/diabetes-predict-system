@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import ClinicalRecord, Patient, PatientRiskStatus
+from .models import ClinicalRecord, ClinicalRecordLabel, Patient, PatientRiskStatus
 
 
 @admin.register(Patient)
@@ -11,6 +11,11 @@ class PatientAdmin(admin.ModelAdmin):
 @admin.register(ClinicalRecord)
 class ClinicalRecordAdmin(admin.ModelAdmin):
     list_display = ["id", "patient", "hba1c", "bmi", "source", "created_at"]
+
+
+@admin.register(ClinicalRecordLabel)
+class ClinicalRecordLabelAdmin(admin.ModelAdmin):
+    list_display = ["id", "clinical_record", "nep", "neu", "ret", "cv", "per_vas", "source", "created_at"]
 
 
 @admin.register(PatientRiskStatus)
