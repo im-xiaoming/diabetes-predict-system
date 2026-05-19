@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Model Management - GlucoPredict AI</title>
+{% endblock %}
+
+{% block page_content %}
+  <!-- Page Content -->
+  <main class="flex-1 overflow-y-auto p-container-padding">
+    <div class="max-w-[1200px] mx-auto space-y-stack-lg">
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-stack-md">
+        <div>
+          <h2 class="text-headline-md font-headline-md text-on-surface">Quản lý Model MLOps</h2>
+          <p class="text-body-sm font-body-sm text-on-surface-variant mt-1">
+            Giám sát và triển khai các mô hình dự đoán rủi ro tiểu đường.
+          </p>
+        </div>
+        <div class="flex gap-stack-sm">
+          <a
+            class="inline-flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-lg text-label-md font-label-md text-on-surface hover:bg-surface-container-low transition-colors bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.05)]"
+            href="#"
+          >
+            <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+            Mở MLflow UI
+          </a>
+          <button
+            class="inline-flex items-center gap-2 px-4 py-2 bg-primary-container text-on-primary rounded-lg text-label-md font-label-md hover:bg-surface-tint transition-colors"
+          >
+            <span class="material-symbols-outlined text-[18px]">cloud_upload</span>
+            Deploy Model Mới
+          </button>
+        </div>
+      </div>
+
+      <!-- Production Model Card -->
+      <section>
+        <h3 class="text-title-lg font-title-lg text-on-surface mb-stack-md">Mô hình Production Hiện Tại</h3>
+        <div class="bg-surface border border-outline-variant rounded-xl p-stack-lg shadow-[0_1px_3px_rgba(0,0,0,0.05)] relative overflow-hidden">
+          <div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+          <div class="flex flex-col lg:flex-row justify-between gap-stack-lg">
+            <div class="flex-1">
+              <div class="flex items-center gap-stack-sm mb-stack-sm">
+                <h4 class="text-headline-sm font-headline-sm text-on-surface">XGBoost_Diabetes_Risk</h4>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-primary/10 text-primary">v2.4.1</span>
+              </div>
+              <p class="text-body-sm font-body-sm text-on-surface-variant mb-stack-md">
+                Mô hình ensemble cây quyết định tối ưu hóa cho dữ liệu HIS Việt Nam. Đang phục vụ 100% traffic.
+              </p>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-stack-md">
+                <div>
+                  <p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Ngày Deploy</p>
+                  <p class="text-body-md font-body-md text-on-surface font-medium">15/10/2023</p>
+                </div>
+                <div>
+                  <p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Độ trễ trung bình</p>
+                  <p class="text-body-md font-body-md text-on-surface font-medium">42ms</p>
+                </div>
+                <div>
+                  <p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Yêu cầu/phút</p>
+                  <p class="text-body-md font-body-md text-on-surface font-medium">1,250</p>
+                </div>
+                <div>
+                  <p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Trạng thái API</p>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+                    <span class="text-body-md font-body-md text-on-surface font-medium">Khỏe mạnh</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="w-full lg:w-[300px] bg-surface-container-low rounded-lg p-stack-md border border-outline-variant flex flex-col justify-center">
+              <p class="text-label-md font-label-md text-on-surface-variant mb-stack-sm text-center">F1-Score (Micro)</p>
+              <div class="flex items-end justify-center gap-2 mb-stack-sm">
+                <span class="text-display-lg font-display-lg text-primary">0.942</span>
+                <span class="text-label-sm font-label-sm text-[#10b981] flex items-center pb-2">
+                  <span class="material-symbols-outlined text-[16px]">arrow_upward</span>
+                  0.012
+                </span>
+              </div>
+              <p class="text-label-sm font-label-sm text-on-surface-variant text-center">So với phiên bản trước (v2.3.0)</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Model Registry Table -->
+      <section>
+        <div class="flex items-center justify-between mb-stack-md">
+          <h3 class="text-title-lg font-title-lg text-on-surface">Lịch sử Phiên bản</h3>
+          <div class="flex items-center gap-stack-sm">
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+              <input
+                class="pl-10 pr-4 py-2 border border-outline-variant rounded-lg text-body-sm font-body-sm bg-surface focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary w-64"
+                placeholder="Tìm kiếm phiên bản..."
+                type="text"
+              />
+            </div>
+            <button class="p-2 border border-outline-variant rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors bg-surface">
+              <span class="material-symbols-outlined">filter_list</span>
+            </button>
+          </div>
+        </div>
+        <div class="bg-surface border border-outline-variant rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-x-auto">
+          <table class="w-full text-left border-collapse min-w-[800px]">
+            <thead>
+              <tr class="border-b border-outline-variant bg-surface-container-low">
+                <th class="py-3 px-4 text-label-sm font-label-sm text-on-surface-variant uppercase font-semibold">Phiên bản</th>
+                <th class="py-3 px-4 text-label-sm font-label-sm text-on-surface-variant uppercase font-semibold">Tên Model</th>
+                <th class="py-3 px-4 text-label-sm font-label-sm text-on-surface-variant uppercase font-semibold">Stage</th>
+                <th class="py-3 px-4 text-label-sm font-label-sm text-on-surface-variant uppercase font-semibold">F1-Micro</th>
+                <th class="py-3 px-4 text-label-sm font-label-sm text-on-surface-variant uppercase font-semibold">Recall</th>
+                <th class="py-3 px-4 text-label-sm font-label-sm text-on-surface-variant uppercase font-semibold">Precision</th>
+                <th class="py-3 px-4 text-label-sm font-label-sm text-on-surface-variant uppercase font-semibold">Hành động</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant">
+              <!-- Row 1 -->
+              <tr class="hover:bg-surface-container-lowest transition-colors group">
+                <td class="py-3 px-4">
+                  <span class="text-body-sm font-body-sm font-medium text-on-surface">v2.4.1</span>
+                  <p class="text-label-sm font-label-sm text-on-surface-variant mt-0.5">15/10/2023</p>
+                </td>
+                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">XGBoost_Diabetes_Risk</td>
+                <td class="py-3 px-4">
+                  <span class="inline-flex items-center px-2 py-1 rounded bg-[#10b981]/10 text-[#10b981] text-label-sm font-label-sm font-medium">Production</span>
+                </td>
+                <td class="py-3 px-4 text-body-sm font-body-sm font-medium text-on-surface">0.942</td>
+                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">0.951</td>
+                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">0.935</td>
+                <td class="py-3 px-4">
+                  <button class="text-primary hover:text-primary-container p-1 rounded transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
+                    <span class="material-symbols-outlined text-[20px]">more_vert</span>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 2 -->
+              <tr class="hover:bg-surface-container-lowest transition-colors group">
+                <td class="py-3 px-4">
+                  <span class="text-body-sm font-body-sm font-medium text-on-surface">v2.5.0-rc1</span>
+                  <p class="text-label-sm font-label-sm text-on-surface-variant mt-0.5">28/10/2023</p>
+                </td>
+                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">LightGBM_Diabetes_Risk</td>
+                <td class="py-3 px-4">
+                  <span class="inline-flex items-center px-2 py-1 rounded bg-[#f59e0b]/10 text-[#f59e0b] text-label-sm font-label-sm font-medium">Staging</span>
+                </td>
+                <td class="py-3 px-4 text-body-sm font-body-sm font-medium text-on-surface">0.948</td>
+                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">0.955</td>
+                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">0.940</td>
+                <td class="py-3 px-4">
+                  <button class="text-primary hover:text-primary-container p-1 rounded transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
+                    <span class="material-symbols-outlined text-[20px]">more_vert</span>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 3 -->
+              <tr class="hover:bg-surface-container-lowest transition-colors group">
+                <td class="py-3 px-4">
+                  <span class="text-body-sm font-body-sm font-medium text-on-surface">v2.3.0</span>
+                  <p class="text-label-sm font-label-sm text-on-surface-variant mt-0.5">02/08/2023</p>
+                </td>
+                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">XGBoost_Diabetes_Risk</td>
+                <td class="py-3 px-4">
+                  <span class="inline-flex items-center px-2 py-1 rounded bg-secondary/10 text-secondary text-label-sm font-label-sm font-medium">Archived</span>
+                </td>
+                <td class="py-3 px-4 text-body-sm font-body-sm font-medium text-on-surface">0.930</td>
+                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">0.942</td>
+                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">0.921</td>
+                <td class="py-3 px-4">
+                  <button class="text-primary hover:text-primary-container p-1 rounded transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
+                    <span class="material-symbols-outlined text-[20px]">more_vert</span>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 4 -->
+              <tr class="hover:bg-surface-container-lowest transition-colors group">
+                <td class="py-3 px-4">
+                  <span class="text-body-sm font-body-sm font-medium text-on-surface">v2.2.5</span>
+                  <p class="text-label-sm font-label-sm text-on-surface-variant mt-0.5">15/05/2023</p>
+                </td>
+                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">RandomForest_Baseline</td>
+                <td class="py-3 px-4">
+                  <span class="inline-flex items-center px-2 py-1 rounded bg-secondary/10 text-secondary text-label-sm font-label-sm font-medium">Archived</span>
+                </td>
+                <td class="py-3 px-4 text-body-sm font-body-sm font-medium text-on-surface">0.895</td>
+                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">0.910</td>
+                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">0.882</td>
+                <td class="py-3 px-4">
+                  <button class="text-primary hover:text-primary-container p-1 rounded transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
+                    <span class="material-symbols-outlined text-[20px]">more_vert</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+{% endblock %}

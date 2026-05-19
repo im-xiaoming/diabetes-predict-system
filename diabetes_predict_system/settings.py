@@ -20,6 +20,9 @@ INSTALLED_APPS = [
     "patients",
     "predictions",
     "mock_his",
+    "monitor",
+    "alerts",
+    "history"
 ]
 
 MIDDLEWARE = [

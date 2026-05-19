@@ -88,11 +88,11 @@
                     <span class="material-symbols-outlined">group</span>
                     Patients
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'alerts' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="alerts.html">
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'alerts' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'alerts' %}">
                     <span class="material-symbols-outlined">warning</span>
                     Alerts
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'prediction_history' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="prediction_history.html">
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'history' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'history' %}">
                     <span class="material-symbols-outlined">history</span>
                     History
                 </a>
@@ -100,7 +100,7 @@
                     <span class="material-symbols-outlined">database</span>
                     Mock HIS
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'monitoring' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="monitoring.html">
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'monitor' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'monitor' %}">
                     <span class="material-symbols-outlined">analytics</span>
                     System Monitoring
                 </a>
@@ -122,6 +122,10 @@
                 </a>
             </div>
         </nav>
+
+        
+        
+        {% block navbar %}{% endblock %}
 
         {% block page_content %}{% endblock %}
     </body>

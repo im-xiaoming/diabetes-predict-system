@@ -14,6 +14,12 @@ class Level(models.TextChoices):
 
 
 class Patient(models.Model):
+    """Master patient profile.
+
+    Clinical measurements and model outputs are stored in separate tables so a
+    patient can have many incoming HIS records and prediction results.
+    """
+
     id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=50)
     age = models.PositiveIntegerField()
@@ -37,6 +43,8 @@ class Patient(models.Model):
 
 
 class ClinicalRecord(models.Model):
+    """One clinical payload received from HIS/mock HIS before prediction."""
+
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="clinical_records")
     age = models.PositiveIntegerField()
     sex = models.TextField()
@@ -60,13 +68,21 @@ class ClinicalRecord(models.Model):
         return f"{self.patient.id} - {self.created_at}"
 
 
-class PatientTargetFeatures(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="patient_features")
+class PatientRiskStatus(models.Model):
+    """Latest known complication risk status for a patient.
+
+    This is a cache for dashboards/lists. Historical prediction details live in
+    predictions.RiskScoreDetail.
+    """
+
+    patient = models.OneToOneField(Patient, on_delete=models.CASCADE, related_name="risk_status")
     nep = models.BooleanField(default=False, verbose_name="Nephropathy")
     neu = models.BooleanField(default=False, verbose_name="Neuropathy")
     ret = models.BooleanField(default=False, verbose_name="Retinopathy")
     cv = models.BooleanField(default=False, verbose_name="Cardiovascular complication")
     per_vas = models.BooleanField(default=False, verbose_name="Peripheral Vascular complication")
+    source = models.CharField(max_length=50, default="prediction")
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.patient.id} - {self.patient.name} - {self.pk}"
