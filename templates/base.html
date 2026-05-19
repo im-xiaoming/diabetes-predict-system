@@ -19,7 +19,7 @@
 </head>
 
 {% block content %}
-    <body class="bg-surface text-on-surface font-body-md antialiased h-screen flex overflow-hidden">
+    <body class="bg-surface text-on-surface font-body-md antialiased h-screen overflow-hidden">
         <!-- SideNavBar -->
         <nav class="bg-surface-container-low border-r border-outline-variant docked fixed left-0 top-0 h-screen w-[240px] hidden md:flex flex-col py-stack-lg px-stack-md gap-stack-md z-40">
             <!-- Header -->
@@ -123,11 +123,39 @@
             </div>
         </nav>
 
-        
-        
-        {% block navbar %}{% endblock %}
+        <div class="flex min-w-0 flex-1 flex-col h-screen md:ml-[240px] overflow-hidden">
+            {% block topbar %}
+                <header class="sticky top-0 z-50 flex justify-between items-center w-full px-container-padding h-16 bg-surface border-b border-outline-variant shrink-0">
+                    <div class="flex items-center gap-4 min-w-0 flex-1">
+                        <button class="md:hidden text-on-surface-variant p-2 -ml-2 rounded-full hover:bg-surface-container-low" type="button">
+                            <span class="material-symbols-outlined">menu</span>
+                        </button>
+                        <div class="text-title-lg font-title-lg font-bold text-primary hidden md:block">GlucoPredict AI</div>
+                        {% block topbar_search %}
+                            <div class="relative w-full max-w-md hidden sm:block">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+                                <input id="patient-search" class="w-full bg-surface-container-low border border-outline-variant rounded-lg pl-10 pr-4 py-2 text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-outline text-on-surface" placeholder="Tìm kiếm nhanh..." type="text" />
+                            </div>
+                        {% endblock %}
+                    </div>
+                    {% block topbar_actions %}
+                        <div class="flex items-center gap-stack-sm ml-auto">
+                            <button class="w-10 h-10 rounded-full flex items-center justify-center text-secondary hover:bg-surface-container-low transition-colors relative" type="button">
+                                <span class="material-symbols-outlined">notifications</span>
+                                <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+                            </button>
+                            <button class="w-10 h-10 rounded-full flex items-center justify-center text-secondary hover:bg-surface-container-low transition-colors" type="button">
+                                <span class="material-symbols-outlined">settings</span>
+                            </button>
+                        </div>
+                    {% endblock %}
+                </header>
+            {% endblock %}
 
-        {% block page_content %}{% endblock %}
+            <main class="{% block main_class %}flex-1 overflow-y-auto bg-background p-container-padding{% endblock %}">
+                {% block page_content %}{% endblock %}
+            </main>
+        </div>
     </body>
 {% endblock %}
 

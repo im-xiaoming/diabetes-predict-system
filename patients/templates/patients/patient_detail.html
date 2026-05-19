@@ -6,8 +6,7 @@
 {% endblock %}
 
 {% block page_content %}
-    <main class="flex-1 md:ml-[240px] min-h-screen bg-background overflow-y-auto">
-        <div class="p-container-padding max-w-7xl mx-auto w-full flex flex-col gap-stack-lg">
+        <div class="max-w-7xl mx-auto w-full flex flex-col gap-stack-lg">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <a href="{% url 'patients' %}" class="text-secondary hover:bg-surface-container-high p-2 rounded-full transition-colors">
@@ -159,5 +158,4 @@
                 </div>
             </div>
         </div>
-    </main>
 {% endblock %}
