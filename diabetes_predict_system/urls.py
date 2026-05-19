@@ -7,4 +7,7 @@ urlpatterns = [
     path("", include("dashboard.urls")),
     path("", include("patients.urls")),
     path("", include("mock_his.urls")),
+    path("", include("monitor.urls")),
+    path("", include("alerts.urls")),
+    path("", include("history.urls"))
 ]

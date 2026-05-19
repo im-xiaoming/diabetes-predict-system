@@ -47,7 +47,7 @@ def calculate_diabetes_risks(data):
 
 def process_csv_to_database(csv_path):
     """Đọc CSV, tính toán mức nguy cơ, và lưu danh sách Patient vào DB."""
-    from patients.models import Patient, PatientTargetFeatures
+    from patients.models import Patient, PatientRiskStatus
 
     try:
         data = pd.read_csv(csv_path)
@@ -67,27 +67,20 @@ def process_csv_to_database(csv_path):
             for _, row in data.iterrows()
         ]
 
-        features = [
-            PatientTargetFeatures(
-                patient_id=int(row['SL_NO']),
-                nep=bool(int(row['NEP'])),
-                neu=bool(int(row['NEU'])),
-                ret=bool(int(row['RET'])),
-                cv=bool(int(row['CV'])),
-                per_vas=bool(int(row['PER VAS'])),
-            )
-            for _, row in data.iterrows()
-        ]
-
         with transaction.atomic():
             Patient.objects.bulk_create(patients, ignore_conflicts=True)
-            existing = set(
-                PatientTargetFeatures.objects
-                    .filter(patient_id__in=[f.patient_id for f in features])
-                    .values_list('patient_id', flat=True)
-            )
-            new_features = [f for f in features if f.patient_id not in existing]
-            PatientTargetFeatures.objects.bulk_create(new_features)
+            for _, row in data.iterrows():
+                PatientRiskStatus.objects.update_or_create(
+                    patient_id=int(row['SL_NO']),
+                    defaults={
+                        'nep': bool(int(row['NEP'])),
+                        'neu': bool(int(row['NEU'])),
+                        'ret': bool(int(row['RET'])),
+                        'cv': bool(int(row['CV'])),
+                        'per_vas': bool(int(row['PER VAS'])),
+                        'source': 'uploaded_label',
+                    },
+                )
 
         return len(patients)
     finally:

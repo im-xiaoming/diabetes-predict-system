@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_GET, require_POST
 
-from patients.models import ClinicalRecord, Patient, PatientTargetFeatures
+from patients.models import ClinicalRecord, Patient, PatientRiskStatus
 from predictions.models import PredictionResult, RiskScoreDetail
 from .sample_loader import load_record, load_records, total_records
 import requests
@@ -122,15 +122,10 @@ def save_result(rec, res):
                 )
             )
         RiskScoreDetail.objects.bulk_create(rows)
-        qs = PatientTargetFeatures.objects.filter(patient=patient).order_by("id")
-        pt = qs.first()
-        if pt:
-            for key, val in latest.items():
-                setattr(pt, key, val)
-            pt.save(update_fields=list(latest.keys()))
-            qs.exclude(pk=pt.pk).delete()
-        else:
-            PatientTargetFeatures.objects.create(patient=patient, **latest)
+        PatientRiskStatus.objects.update_or_create(
+            patient=patient,
+            defaults={**latest, "source": "prediction"},
+        )
     return pr.id
 
 
