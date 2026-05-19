@@ -9,5 +9,7 @@ urlpatterns = [
     path("", include("mock_his.urls")),
     path("", include("monitor.urls")),
     path("", include("alerts.urls")),
-    path("", include("history.urls"))
+    path("", include("history.urls")),
+    path("", include("modeling.urls")),
+    path("", include("logs.urls"))
 ]

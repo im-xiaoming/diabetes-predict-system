@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    <title>System Monitoring - GlucoPredict AI</title>
+{% endblock %}
+
+
+{% block page_content %}
+    <!-- Canvas -->
+    <main class="flex-1 overflow-y-auto p-container-padding">
+        <div class="max-w-7xl mx-auto flex flex-col gap-stack-lg">
+            <!-- Page Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-stack-sm">
+                <div>
+                    <h2 class="text-headline-md font-headline-md text-on-surface">System Monitoring</h2>
+                    <p class="text-body-sm font-body-sm text-secondary mt-1">Real-time infrastructure and model health</p>
+                </div>
+
+                <div class="flex gap-stack-sm">
+                    <button class="px-4 py-2 border border-outline-variant bg-surface text-on-surface text-label-md font-label-md rounded flex items-center gap-2 hover:bg-surface-container-low transition-colors shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+                        <span class="material-symbols-outlined text-[18px]">monitoring</span>
+                        Grafana
+                    </button>
+
+                    <button class="px-4 py-2 border border-outline-variant bg-surface text-on-surface text-label-md font-label-md rounded flex items-center gap-2 hover:bg-surface-container-low transition-colors shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+                        <span class="material-symbols-outlined text-[18px]">query_stats</span>
+                        Prometheus
+                    </button>
+                </div>
+            </div>
+
+            <!-- Health Metrics Bento Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-stack-md">
+                <!-- API Status -->
+                <div class="bg-surface border border-outline-variant rounded-lg p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_6px_rgba(0,0,0,0.08)] transition-shadow">
+                    <div class="flex justify-between items-start mb-stack-sm">
+                        <span class="text-label-md font-label-md text-secondary">API Status</span>
+                        <span class="material-symbols-outlined text-primary text-[20px]">api</span>
+                    </div>
+
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-display-lg font-display-lg text-[#16a34a]">Healthy</span>
+                    </div>
+
+                    <div class="mt-stack-sm flex items-center gap-1 text-label-sm font-label-sm text-secondary">
+                        <span class="w-2 h-2 rounded-full bg-[#16a34a] opacity-80"></span>
+                        All nodes operational
+                    </div>
+                </div>
+
+                <!-- Request Rate -->
+                <div class="bg-surface border border-outline-variant rounded-lg p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_6px_rgba(0,0,0,0.08)] transition-shadow">
+                    <div class="flex justify-between items-start mb-stack-sm">
+                        <span class="text-label-md font-label-md text-secondary">Request Rate</span>
+                        <span class="material-symbols-outlined text-primary text-[20px]">speed</span>
+                    </div>
+
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-display-lg font-display-lg text-on-surface">1,240</span>
+                        <span class="text-label-sm font-label-sm text-secondary">ops/sec</span>
+                    </div>
+
+                    <div class="mt-stack-sm h-6 bg-surface-container-low rounded flex items-end overflow-hidden">
+                        <!-- Fake Sparkline -->
+                        <div class="w-1/6 h-[30%] bg-outline-variant"></div>
+                        <div class="w-1/6 h-[50%] bg-outline-variant"></div>
+                        <div class="w-1/6 h-[40%] bg-outline-variant"></div>
+                        <div class="w-1/6 h-[70%] bg-outline-variant"></div>
+                        <div class="w-1/6 h-[60%] bg-outline-variant"></div>
+                        <div class="w-1/6 h-[90%] bg-primary"></div>
+                    </div>
+                </div>
+
+                <!-- Error Rate -->
+                <div class="bg-surface border border-outline-variant rounded-lg p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_6px_rgba(0,0,0,0.08)] transition-shadow">
+                    <div class="flex justify-between items-start mb-stack-sm">
+                        <span class="text-label-md font-label-md text-secondary">Error Rate</span>
+                        <span class="material-symbols-outlined text-error text-[20px]">error</span>
+                    </div>
+
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-display-lg font-display-lg text-on-surface">0.12</span>
+                        <span class="text-label-sm font-label-sm text-secondary">%</span>
+                    </div>
+
+                    <div class="mt-stack-sm flex items-center gap-1 text-label-sm font-label-sm text-[#16a34a]">
+                        <span class="material-symbols-outlined text-[14px]">arrow_downward</span>
+                        0.02% from last hour
+                    </div>
+                </div>
+
+                <!-- Latency -->
+                <div class="bg-surface border border-outline-variant rounded-lg p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_6px_rgba(0,0,0,0.08)] transition-shadow">
+                    <div class="flex justify-between items-start mb-stack-sm">
+                        <span class="text-label-md font-label-md text-secondary">p99 Latency</span>
+                        <span class="material-symbols-outlined text-primary text-[20px]">timer</span>
+                    </div>
+
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-display-lg font-display-lg text-on-surface">45</span>
+                        <span class="text-label-sm font-label-sm text-secondary">ms</span>
+                    </div>
+
+                    <div class="mt-stack-sm h-6 flex items-center gap-1">
+                        <div class="flex-1 h-1 bg-surface-container-high rounded overflow-hidden">
+                            <div class="h-full w-[45%] bg-primary"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Drift & Performance Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-stack-md">
+                <!-- Latency Trend Graph (Span 2) -->
+                <div class="lg:col-span-2 bg-surface border border-outline-variant rounded-lg p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex flex-col">
+                    <div class="flex justify-between items-center mb-stack-md">
+                        <h3 class="text-title-lg font-title-lg text-on-surface">Latency Trend (24h)</h3>
+                        <span class="px-2 py-1 bg-surface-container-low text-secondary text-label-sm font-label-sm rounded border border-outline-variant">Global region</span>
+                    </div>
+
+                    <div class="flex-1 min-h-[200px] border-b border-l border-outline-variant relative mt-stack-sm mx-4 mb-6">
+                        <!-- Y-axis labels -->
+                        <div class="absolute -left-8 top-0 text-label-sm font-label-sm text-secondary">100ms</div>
+                        <div class="absolute -left-8 top-1/2 -translate-y-1/2 text-label-sm font-label-sm text-secondary">50ms</div>
+                        <div class="absolute -left-6 bottom-0 text-label-sm font-label-sm text-secondary">0</div>
+
+                        <!-- X-axis labels -->
+                        <div class="absolute left-0 -bottom-6 text-label-sm font-label-sm text-secondary">00:00</div>
+                        <div class="absolute left-1/2 -translate-x-1/2 -bottom-6 text-label-sm font-label-sm text-secondary">12:00</div>
+                        <div class="absolute right-0 -bottom-6 text-label-sm font-label-sm text-secondary">Now</div>
+
+                        <!-- SVG Graph line -->
+                        <svg class="absolute inset-0 w-full h-full" preserveaspectratio="none" viewbox="0 0 100 100">
+                            <path d="M0,80 L10,75 L20,78 L30,50 L40,60 L50,45 L60,55 L70,30 L80,40 L90,20 L100,25" fill="none" stroke="#004ac6" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+                            <path d="M0,100 L0,80 L10,75 L20,78 L30,50 L40,60 L50,45 L60,55 L70,30 L80,40 L90,20 L100,25 L100,100 Z" fill="#dbe1ff" opacity="0.3"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Model Drift Tracking -->
+                <div class="bg-surface border border-outline-variant rounded-lg p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+                    <div class="flex justify-between items-center mb-stack-md border-b border-outline-variant pb-stack-sm">
+                        <h3 class="text-title-lg font-title-lg text-on-surface">Model Health</h3>
+                        <span class="px-2 py-0.5 bg-[#16a34a]/10 text-[#16a34a] text-label-sm font-label-sm rounded-full border border-[#16a34a]/20">Stable</span>
+                    </div>
+
+                    <div class="flex flex-col gap-stack-md">
+                        <div>
+                            <div class="flex justify-between text-label-md font-label-md mb-1">
+                                <span class="text-secondary">Drift Score (KL Divergence)</span>
+                                <span class="text-on-surface font-semibold">0.04</span>
+                            </div>
+
+                            <div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+                                <div class="bg-[#16a34a] h-full w-[15%]"></div>
+                            </div>
+
+                            <p class="text-label-sm font-label-sm text-secondary mt-1 text-right">Threshold: &gt; 0.15</p>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-label-md font-label-md mb-1">
+                                <span class="text-secondary">Recent F1 Score</span>
+                                <span class="text-on-surface font-semibold">0.92</span>
+                            </div>
+
+                            <div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+                                <div class="bg-primary h-full w-[92%]"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-label-md font-label-md mb-1">
+                                <span class="text-secondary">Recent Recall</span>
+                                <span class="text-on-surface font-semibold">0.89</span>
+                            </div>
+
+                            <div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+                                <div class="bg-primary h-full w-[89%]"></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-stack-sm pt-stack-sm border-t border-outline-variant">
+                            <p class="text-body-sm font-body-sm text-secondary flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">info</span>
+                                Model retrained 4 days ago.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}
