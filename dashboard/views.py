@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 
-from patients.models import Patient, PatientRiskStatus
+from patients.models import Patient, ClinicalRecordLabel
 from . import services
 
 
@@ -15,15 +15,15 @@ from . import services
 def dashboard(request):
     total_patient = Patient.objects.count()
     total_war = Patient.objects.filter(level__in=["medium", "high", "very_high"]).count()
-    total_prediction = PatientRiskStatus.objects.count()
+    total_prediction = ClinicalRecordLabel.objects.count()
     result = {
         "total_patient": total_patient,
         "total_war": total_war,
-        "nep": PatientRiskStatus.objects.filter(nep=1).count(),
-        "neu": PatientRiskStatus.objects.filter(neu=1).count(),
-        "ret": PatientRiskStatus.objects.filter(ret=1).count(),
-        "cv": PatientRiskStatus.objects.filter(cv=1).count(),
-        "per_vas": PatientRiskStatus.objects.filter(per_vas=1).count(),
+        "nep": ClinicalRecordLabel.objects.filter(nep=1).count(),
+        "neu": ClinicalRecordLabel.objects.filter(neu=1).count(),
+        "ret": ClinicalRecordLabel.objects.filter(ret=1).count(),
+        "cv": ClinicalRecordLabel.objects.filter(cv=1).count(),
+        "per_vas": ClinicalRecordLabel.objects.filter(per_vas=1).count(),
         "processed_profile": total_prediction,
         "total_prediction": total_prediction,
     }

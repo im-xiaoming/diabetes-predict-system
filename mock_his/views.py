@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_GET, require_POST
 
-from patients.models import ClinicalRecord, ClinicalRecordLabel, Patient, PatientRiskStatus
+from patients.models import ClinicalRecord, ClinicalRecordLabel, Patient
 from predictions.models import PredictionResult, RequestLog, RiskScoreDetail
 from .sample_loader import load_record, load_records, total_records
 import requests
@@ -96,7 +96,6 @@ def save_result(rec, res):
             id=int(float(rec["pid"])),
             defaults={
                 "name": str(rec["name"]),
-                "age": int(float(data["AGE"])),
                 "sex": sex(data["SEX"]),
                 "level": level,
             },
@@ -104,7 +103,6 @@ def save_result(rec, res):
         cr = ClinicalRecord.objects.create(
             patient=patient,
             age=int(float(data["AGE"])),
-            sex=str(data["SEX"]),
             bmi=to_float(data["BMI"]),
             sp=to_float(data["SP"]),
             bp=to_float(data["BP"]),
@@ -150,10 +148,6 @@ def save_result(rec, res):
                 )
             )
         RiskScoreDetail.objects.bulk_create(rows)
-        PatientRiskStatus.objects.update_or_create(
-            patient=patient,
-            defaults={**latest, "source": "prediction"},
-        )
     return pr, bool(truth)
 
 
