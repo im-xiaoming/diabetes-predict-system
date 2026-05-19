@@ -23,3 +23,14 @@ class RiskScoreDetail(models.Model):
 
     def __str__(self):
         return f"{self.prediction_id} - {self.target}"
+
+
+class RequestLog(models.Model):
+    prediction = models.ForeignKey(PredictionResult, on_delete=models.CASCADE, related_name="request_logs")
+    endpoint = models.CharField(max_length=100)
+    status_code = models.PositiveIntegerField()
+    latency_ms = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.endpoint} - {self.status_code} - {self.created_at}"

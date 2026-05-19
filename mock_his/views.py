@@ -1,4 +1,5 @@
 import json
+from time import perf_counter
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -7,8 +8,8 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_GET, require_POST
 
-from patients.models import ClinicalRecord, Patient, PatientRiskStatus
-from predictions.models import PredictionResult, RiskScoreDetail
+from patients.models import ClinicalRecord, ClinicalRecordLabel, Patient, PatientRiskStatus
+from predictions.models import PredictionResult, RequestLog, RiskScoreDetail
 from .sample_loader import load_record, load_records, total_records
 import requests
 
@@ -61,8 +62,29 @@ def to_float(v):
     return float(v)
 
 
+def to_label(v):
+    if v is None or v == "":
+        return None
+    return bool(int(float(v)))
+
+
+def truth_data(rec):
+    truth = rec.get("truth") or {}
+    vals = {
+        "nep": to_label(get_val(truth, "NEP", "nep")),
+        "neu": to_label(get_val(truth, "NEU", "neu")),
+        "ret": to_label(get_val(truth, "RET", "ret")),
+        "cv": to_label(get_val(truth, "CV", "cv")),
+        "per_vas": to_label(get_val(truth, "PER VAS", "per_vas")),
+    }
+    if any(v is None for v in vals.values()):
+        return None
+    return vals
+
+
 def save_result(rec, res):
     data = rec["payload"]
+    truth = truth_data(rec)
     labels = res.get("risk_labels", {})
     scores = res.get("risk_scores", {})
     level = str(res.get("risk_level") or "low").lower()
@@ -98,6 +120,12 @@ def save_result(rec, res):
             med_adh=str(data["MED ADH"]),
             source="mock_his",
         )
+        if truth:
+            ClinicalRecordLabel.objects.create(
+                clinical_record=cr,
+                **truth,
+                source="mendeley_mock",
+            )
         pr = PredictionResult.objects.create(
             patient=patient,
             clinical_record=cr,
@@ -126,30 +154,41 @@ def save_result(rec, res):
             patient=patient,
             defaults={**latest, "source": "prediction"},
         )
-    return pr.id
+    return pr, bool(truth)
 
 
 def call_predict(rec):
+    endpoint = "/api/predict/"
+    start = perf_counter()
     try:
-        res = requests.post(url("/api/predict/"), json=rec["payload"], timeout=30)
+        res = requests.post(url(endpoint), json=rec["payload"], timeout=30)
+        latency = round((perf_counter() - start) * 1000, 2)
         try:
             data = res.json()
         except ValueError:
             data = {"detail": res.text}
     except requests.RequestException as exc:
+        latency = round((perf_counter() - start) * 1000, 2)
         return {"ok": False, "saved": False, "idx": rec["idx"], "status_code": 503, "error": str(exc)}
 
     if res.status_code != 200:
         return {"ok": False, "saved": False, "idx": rec["idx"], "status_code": res.status_code, "error": data}
 
-    pred_id = save_result(rec, data)
+    pred, truth_saved = save_result(rec, data)
+    RequestLog.objects.create(
+        prediction=pred,
+        endpoint=endpoint,
+        status_code=res.status_code,
+        latency_ms=latency,
+    )
     return {
         "ok": True,
         "saved": True,
+        "truth_saved": truth_saved,
         "idx": rec["idx"],
         "status_code": res.status_code,
         "patient_id": int(float(rec["pid"])),
-        "prediction_id": pred_id,
+        "prediction_id": pred.id,
         "response": data,
     }
 

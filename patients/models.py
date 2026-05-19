@@ -68,6 +68,20 @@ class ClinicalRecord(models.Model):
         return f"{self.patient.id} - {self.created_at}"
 
 
+class ClinicalRecordLabel(models.Model):
+    clinical_record = models.OneToOneField(ClinicalRecord, on_delete=models.CASCADE, related_name="label")
+    nep = models.BooleanField(default=False, verbose_name="Nephropathy")
+    neu = models.BooleanField(default=False, verbose_name="Neuropathy")
+    ret = models.BooleanField(default=False, verbose_name="Retinopathy")
+    cv = models.BooleanField(default=False, verbose_name="Cardiovascular complication")
+    per_vas = models.BooleanField(default=False, verbose_name="Peripheral Vascular complication")
+    source = models.CharField(max_length=50, default="mendeley_mock")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.clinical_record_id} - {self.source}"
+
+
 class PatientRiskStatus(models.Model):
     """Latest known complication risk status for a patient.
 
