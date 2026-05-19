@@ -22,7 +22,6 @@ class Patient(models.Model):
 
     id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=50)
-    age = models.PositiveIntegerField()
     sex = models.TextField(choices=Sex.choices)
     level = models.TextField(choices=Level.choices)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -47,7 +46,6 @@ class ClinicalRecord(models.Model):
 
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="clinical_records")
     age = models.PositiveIntegerField()
-    sex = models.TextField()
     bmi = models.FloatField()
     sp = models.FloatField()
     bp = models.FloatField()
@@ -82,21 +80,21 @@ class ClinicalRecordLabel(models.Model):
         return f"{self.clinical_record_id} - {self.source}"
 
 
-class PatientRiskStatus(models.Model):
-    """Latest known complication risk status for a patient.
+# class PatientRiskStatus(models.Model):
+#     """Latest known complication risk status for a patient.
 
-    This is a cache for dashboards/lists. Historical prediction details live in
-    predictions.RiskScoreDetail.
-    """
+#     This is a cache for dashboards/lists. Historical prediction details live in
+#     predictions.RiskScoreDetail.
+#     """
 
-    patient = models.OneToOneField(Patient, on_delete=models.CASCADE, related_name="risk_status")
-    nep = models.BooleanField(default=False, verbose_name="Nephropathy")
-    neu = models.BooleanField(default=False, verbose_name="Neuropathy")
-    ret = models.BooleanField(default=False, verbose_name="Retinopathy")
-    cv = models.BooleanField(default=False, verbose_name="Cardiovascular complication")
-    per_vas = models.BooleanField(default=False, verbose_name="Peripheral Vascular complication")
-    source = models.CharField(max_length=50, default="prediction")
-    updated_at = models.DateTimeField(auto_now=True)
+#     patient = models.OneToOneField(Patient, on_delete=models.CASCADE, related_name="risk_status")
+#     nep = models.BooleanField(default=False, verbose_name="Nephropathy")
+#     neu = models.BooleanField(default=False, verbose_name="Neuropathy")
+#     ret = models.BooleanField(default=False, verbose_name="Retinopathy")
+#     cv = models.BooleanField(default=False, verbose_name="Cardiovascular complication")
+#     per_vas = models.BooleanField(default=False, verbose_name="Peripheral Vascular complication")
+#     source = models.CharField(max_length=50, default="prediction")
+#     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f"{self.patient.id} - {self.patient.name} - {self.pk}"
+#     def __str__(self):
+#         return f"{self.patient.id} - {self.patient.name} - {self.pk}"
