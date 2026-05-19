@@ -22,7 +22,9 @@ INSTALLED_APPS = [
     "mock_his",
     "monitor",
     "alerts",
-    "history"
+    "history",
+    "modeling",
+    "logs"
 ]
 
 MIDDLEWARE = [

@@ -88,6 +88,10 @@
                     <span class="material-symbols-outlined">group</span>
                     Patients
                 </a>
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'modeling' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'modeling' %}">
+                <span class="material-symbols-outlined">smart_toy</span>
+                    Model
+                </a>
                 <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'alerts' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'alerts' %}">
                     <span class="material-symbols-outlined">warning</span>
                     Alerts
@@ -104,7 +108,7 @@
                     <span class="material-symbols-outlined">analytics</span>
                     System Monitoring
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'logs' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="logs.html">
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'logs' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'logs' %}">
                     <span class="material-symbols-outlined">receipt_long</span>
                     Logs
                 </a>
