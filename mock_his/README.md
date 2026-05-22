@@ -1,31 +1,32 @@
-app `mock_his` dùng để **giả lập HIS** (*Hospital Information System* - hệ thống thông tin bệnh viện).
+`mock_his` giả lập nguồn hồ sơ từ HIS để kiểm tra luồng ingest trước khi tích hợp với hệ thống bệnh viện thật.
 
-Nó không phải app nghiệp vụ chính, mà là app **demo/test luồng dữ liệu bệnh viện gửi hồ sơ bệnh nhân sang hệ thống dự đoán tiểu đường**.
-
-Cụ thể:
-
-- Đọc dữ liệu bệnh nhân mẫu từ `data/data.csv` qua [sample_loader.py](C:/diabetes/diabetes_predict_system/mock_his/sample_loader.py).
-- Hiển thị giao diện mô phỏng tại `/mock-his/` qua [views.py](C:/diabetes/diabetes_predict_system/mock_his/views.py:163).
-- Gửi từng hồ sơ hoặc gửi hàng loạt sang FastAPI endpoint `/api/predict/`.
-- Kiểm tra FastAPI còn sống qua `/api/health/`.
-- Sau khi nhận kết quả dự đoán, lưu vào database Django:
-  - `Patient`
-  - `ClinicalRecord`
-  - `PredictionResult`
-  - `RiskScoreDetail`
-  - `PatientRiskStatus`
-
-Luồng chính là:
+Luồng chính:
 
 ```text
 data.csv
-  -> mock_his
-  -> FastAPI /api/predict/
-  -> kết quả nguy cơ biến chứng
-  -> lưu vào DB Django
-  -> hiển thị ở Patients/Dashboard
+  -> Mock HIS
+  -> FastAPI /api/ingest/
+  -> predict
+  -> Django database
+  -> Alert Engine
+  -> Dashboard / Patients / Alerts
 ```
 
-Trong UI, trang Mock HIS còn có auto-feed: khi mở trang, nó tự gửi dần hồ sơ bệnh nhân sang FastAPI theo interval. Phần này nằm trong template [mock_his.html](C:/diabetes/diabetes_predict_system/mock_his/templates/mock_his/mock_his.html).
+Mock HIS gửi metadata bệnh nhân, 15 feature lâm sàng và nhãn thật chỉ có trong dữ liệu mock để phục vụ retrain sau này. Nhãn thật không tham gia dự đoán và không dùng để tạo alert.
 
-Nói ngắn gọn: `mock_his` được dùng để **giả lập nguồn dữ liệu bệnh viện**, giúp test/demo hệ thống dự đoán mà chưa cần tích hợp với HIS thật.
+Sau mỗi ingest thành công, database lưu:
+
+- `Patient`
+- `ClinicalRecord`
+- `ClinicalRecordLabel` nếu record mock có ground truth
+- `PredictionResult`
+- `RiskScoreDetail`
+- `RequestLog`
+- `Alert` cho biến chứng nguy cơ cao
+- `WatchlistItem` cho biến chứng nguy cơ trung bình
+
+Trang `/mock-his/` dùng để quan sát hồ sơ mẫu và test feed. Feed nền có thể chạy bằng:
+
+```powershell
+python manage.py run_mock_his_feed --interval 5
+```

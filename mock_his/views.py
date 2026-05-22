@@ -1,25 +1,15 @@
 import json
-from time import perf_counter
 
+import requests
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_GET, require_POST
 
-from patients.models import ClinicalRecord, ClinicalRecordLabel, Patient
-from predictions.models import PredictionResult, RequestLog, RiskScoreDetail
-from .sample_loader import load_record, load_records, total_records
-import requests
+from patients.models import ClinicalRecord
 
-TARGETS = [
-    ("NEP", "nep"),
-    ("NEU", "neu"),
-    ("RET", "ret"),
-    ("CV", "cv"),
-    ("PER VAS", "per_vas"),
-]
+from .sample_loader import load_record, load_records, total_records
 
 
 def url(path):
@@ -34,162 +24,103 @@ def body(req):
         return {}
 
 
-def sex(v):
-    s = str(v).strip().lower()
-    if s in ["0", "female", "f", "nu", "nữ"]:
-        return "female"
-    return "male"
-
-
-def score_level(score, label):
-    if int(label) == 0:
-        return "low"
-    if float(score) >= 0.7:
-        return "high"
-    return "medium"
-
-
-def get_val(data, *keys, default=None):
-    for key in keys:
-        if key in data:
-            return data[key]
-    return default
-
-
-def to_float(v):
-    if v is None or v == "":
-        return 0.0
-    return float(v)
-
-
-def to_label(v):
-    if v is None or v == "":
+def saved_result(rec):
+    idx = rec.get("idx")
+    if idx is None:
         return None
-    return bool(int(float(v)))
-
-
-def truth_data(rec):
-    truth = rec.get("truth") or {}
-    vals = {
-        "nep": to_label(get_val(truth, "NEP", "nep")),
-        "neu": to_label(get_val(truth, "NEU", "neu")),
-        "ret": to_label(get_val(truth, "RET", "ret")),
-        "cv": to_label(get_val(truth, "CV", "cv")),
-        "per_vas": to_label(get_val(truth, "PER VAS", "per_vas")),
+    cr = ClinicalRecord.objects.filter(source="mock_his", source_idx=idx).order_by("-created_at").first()
+    if not cr:
+        return None
+    pred = cr.predictions.order_by("-created_at").first()
+    if not pred:
+        return None
+    scores = {row.target: row.risk_score for row in pred.scores.all()}
+    labels = {row.target: row.risk_label for row in pred.scores.all()}
+    return {
+        "ok": True,
+        "saved": True,
+        "already_saved": True,
+        "truth_saved": hasattr(cr, "label"),
+        "idx": idx,
+        "status_code": 200,
+        "patient_id": cr.patient_id,
+        "prediction_id": pred.id,
+        "alert_ids": list(pred.alerts.values_list("id", flat=True)),
+        "watchlist_ids": list(pred.watchlist_items.values_list("id", flat=True)),
+        "response": {
+            "risk_scores": scores,
+            "risk_labels": labels,
+            "risk_level": pred.risk_level,
+            "warning_message": pred.warning_message,
+            "model_name": pred.model_name,
+            "model_version": pred.model_version,
+            "saved": True,
+            "already_saved": True,
+            "patient_id": cr.patient_id,
+            "clinical_record_id": cr.id,
+            "prediction_id": pred.id,
+        },
     }
-    if any(v is None for v in vals.values()):
-        return None
-    return vals
 
 
-def save_result(rec, res):
-    data = rec["payload"]
-    truth = truth_data(rec)
-    labels = res.get("risk_labels", {})
-    scores = res.get("risk_scores", {})
-    level = str(res.get("risk_level") or "low").lower()
-    if level not in ["low", "medium", "high", "very_high"]:
-        level = "low"
-
-    with transaction.atomic():
-        patient, _ = Patient.objects.update_or_create(
-            id=int(float(rec["pid"])),
-            defaults={
-                "name": str(rec["name"]),
-                "sex": sex(data["SEX"]),
-                "level": level,
-            },
-        )
-        cr = ClinicalRecord.objects.create(
-            patient=patient,
-            age=int(float(data["AGE"])),
-            bmi=to_float(data["BMI"]),
-            sp=to_float(data["SP"]),
-            bp=to_float(data["BP"]),
-            hba1c=to_float(data["HbA1c"]),
-            fps=to_float(data["FPS"]),
-            pps=to_float(data["PPS"]),
-            fam_ho=str(data["FAMILY H/O"]),
-            on_age=to_float(data["ONSET AGE"]),
-            dia_life=str(data["DIA LIFE"]),
-            smk=str(data["SMOKING"]),
-            phy_act=str(data["PHY ACT"]),
-            med_use=str(data["MED USE"]),
-            med_adh=str(data["MED ADH"]),
-            source="mock_his",
-        )
-        if truth:
-            ClinicalRecordLabel.objects.create(
-                clinical_record=cr,
-                **truth,
-                source="mendeley_mock",
-            )
-        pr = PredictionResult.objects.create(
-            patient=patient,
-            clinical_record=cr,
-            model_name=str(res.get("model_name") or ""),
-            model_version=str(res.get("model_version") or "v1"),
-            risk_level=level,
-            warning_message=str(res.get("warning_message") or ""),
-        )
-        rows = []
-        latest = {}
-        for target, field in TARGETS:
-            sc = float(get_val(scores, target, field, default=0) or 0)
-            lb = int(get_val(labels, target, field, default=0) or 0)
-            latest[field] = bool(lb)
-            rows.append(
-                RiskScoreDetail(
-                    prediction=pr,
-                    target=target,
-                    risk_score=sc,
-                    risk_label=lb,
-                    risk_level=score_level(sc, lb),
-                )
-            )
-        RiskScoreDetail.objects.bulk_create(rows)
-    return pr, bool(truth)
+def ingest_payload(rec):
+    return {
+        **rec["payload"],
+        "patient_id": int(float(rec["pid"])),
+        "patient_name": str(rec["name"]),
+        "source": "mock_his",
+        "source_idx": int(rec["idx"]),
+        "truth": rec.get("truth") or None,
+    }
 
 
 def call_predict(rec):
-    endpoint = "/api/predict/"
-    start = perf_counter()
+    old = saved_result(rec)
+    if old:
+        return old
+
+    endpoint = "/api/ingest/"
     try:
-        res = requests.post(url(endpoint), json=rec["payload"], timeout=30)
-        latency = round((perf_counter() - start) * 1000, 2)
+        res = requests.post(url(endpoint), json=ingest_payload(rec), timeout=30)
         try:
             data = res.json()
         except ValueError:
             data = {"detail": res.text}
     except requests.RequestException as exc:
-        latency = round((perf_counter() - start) * 1000, 2)
         return {"ok": False, "saved": False, "idx": rec["idx"], "status_code": 503, "error": str(exc)}
 
     if res.status_code != 200:
         return {"ok": False, "saved": False, "idx": rec["idx"], "status_code": res.status_code, "error": data}
 
-    pred, truth_saved = save_result(rec, data)
-    RequestLog.objects.create(
-        prediction=pred,
-        endpoint=endpoint,
-        status_code=res.status_code,
-        latency_ms=latency,
-    )
     return {
         "ok": True,
-        "saved": True,
-        "truth_saved": truth_saved,
+        "saved": data.get("saved", False),
+        "already_saved": data.get("already_saved", False),
+        "truth_saved": data.get("truth_saved", False),
         "idx": rec["idx"],
         "status_code": res.status_code,
-        "patient_id": int(float(rec["pid"])),
-        "prediction_id": pred.id,
+        "patient_id": data.get("patient_id"),
+        "prediction_id": data.get("prediction_id"),
+        "alert_ids": data.get("alert_ids", []),
+        "watchlist_ids": data.get("watchlist_ids", []),
         "response": data,
     }
 
 
+def mark_records(records):
+    idxs = [rec["idx"] for rec in records]
+    done = set(
+        ClinicalRecord.objects.filter(source="mock_his", source_idx__in=idxs)
+        .values_list("source_idx", flat=True)
+    )
+    for rec in records:
+        rec["status"] = "success" if rec["idx"] in done else "pending"
+    return records
+
+
 @login_required(login_url="login")
 def mock_his_view(request):
-    records = load_records(offset=0, limit=20)
+    records = mark_records(load_records(offset=0, limit=20))
     return render(request, "mock_his/mock_his.html", {"records": records, "total": total_records()})
 
 
@@ -234,7 +165,7 @@ def records_view(request):
     offset = int(request.GET.get("offset", 0))
     limit = int(request.GET.get("limit", 20))
     limit = max(1, min(limit, 100))
-    records = load_records(offset=offset, limit=limit)
+    records = mark_records(load_records(offset=offset, limit=limit))
     return JsonResponse(
         {
             "ok": True,

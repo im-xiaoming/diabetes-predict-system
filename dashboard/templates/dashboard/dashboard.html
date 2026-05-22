@@ -1,237 +1,149 @@
 {% extends "base.html" %}
-{% load static %}
 
 {% block title %}
-    <title>GlucoPredict AI - Bảng điều khiển Bác sĩ</title>
+    <title>GlucoPredict AI - Dashboard bác sĩ</title>
 {% endblock %}
 
 {% block page_content %}
-            <div class="max-w-[1200px] mx-auto space-y-stack-lg">
-                <!-- Page Header & Status -->
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-stack-md pb-stack-sm border-b border-outline-variant">
-                    <div>
-                        <h2 class="text-headline-md font-headline-md text-on-surface">Tổng quan hệ thống</h2>
-                        <p class="text-body-sm font-body-sm text-secondary mt-1">Dữ liệu phân tích dự đoán rủi ro biến chứng tiểu đường</p>
-                    </div>
-                    <div class="flex gap-3">
-                        <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-lowest border border-outline-variant rounded-full text-label-sm font-label-sm shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
-                            <span class="w-2 h-2 rounded-full bg-[#10B981]"></span>
-                            Model: Active
-                        </div>
-                        <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-lowest border border-outline-variant rounded-full text-label-sm font-label-sm shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
-                            <span class="w-2 h-2 rounded-full bg-[#10B981]"></span>
-                            API: Online
-                        </div>
-                    </div>
+    <div class="max-w-[1200px] mx-auto space-y-stack-lg">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-stack-md pb-stack-sm border-b border-outline-variant">
+            <div>
+                <h2 class="text-headline-md font-headline-md text-on-surface">Tổng quan hệ thống</h2>
+                <p class="text-body-sm font-body-sm text-secondary mt-1">Dashboard phản ánh hồ sơ đã ingest, prediction đã lưu và alert còn mở.</p>
+            </div>
+            <div class="flex gap-3">
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-lowest border border-outline-variant rounded-full text-label-sm font-label-sm">
+                    <span class="w-2 h-2 rounded-full bg-[#10B981]"></span>
+                    Model: Active
                 </div>
-                <!-- Key Metrics Bento Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
-                    <!-- Stat Card 1 -->
-                    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_6px_rgba(0,0,0,0.08)] transition-shadow">
-                        <div class="flex justify-between items-start mb-stack-sm">
-                            <span class="text-label-md font-label-md text-secondary uppercase tracking-wider">Tổng bệnh nhân</span>
-                            <span class="material-symbols-outlined text-primary">group</span>
-                        </div>
-                        <div class="text-display-lg font-display-lg text-on-surface">{{ result.total_patient }}</div>
-                        <div class="mt-2 text-label-sm font-label-sm text-[#10B981] flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[14px]">trending_up</span>
-                            +12% (30 ngày)
-                        </div>
-                    </div>
-                    <!-- Stat Card 2 -->
-                    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_6px_rgba(0,0,0,0.08)] transition-shadow">
-                        <div class="flex justify-between items-start mb-stack-sm">
-                            <span class="text-label-md font-label-md text-secondary uppercase tracking-wider">Số hồ sơ xử lý</span>
-                            <span class="material-symbols-outlined text-primary">description</span>
-                        </div>
-                        <div class="text-display-lg font-display-lg text-on-surface">{{ result.processed_profile }}</div>
-                        <div class="mt-2 text-label-sm font-label-sm text-secondary flex items-center gap-1">
-                            Hôm nay: 45 hồ sơ
-                        </div>
-                    </div>
-                    <!-- Stat Card 3 -->
-                    <div class="bg-surface-container-lowest border border-error rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_6px_rgba(0,0,0,0.08)] transition-shadow relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-1 h-full bg-error"></div>
-                        <div class="flex justify-between items-start mb-stack-sm">
-                            <span class="text-label-md font-label-md text-on-error-container font-semibold uppercase tracking-wider">Cảnh báo rủi ro cao</span>
-                            <span class="material-symbols-outlined text-error fill">warning</span>
-                        </div>
-                        <div class="text-display-lg font-display-lg text-error">{{ result.total_war }}</div>
-                        <div class="mt-2 text-label-sm font-label-sm text-error flex items-center gap-1">
-                            Cần can thiệp ngay
-                        </div>
-                    </div>
-                    <!-- Stat Card 4 -->
-                    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_6px_rgba(0,0,0,0.08)] transition-shadow">
-                        <div class="flex justify-between items-start mb-stack-sm">
-                            <span class="text-label-md font-label-md text-secondary uppercase tracking-wider">Số dự đoán tạo ra</span>
-                            <span class="material-symbols-outlined text-primary">psychology</span>
-                        </div>
-                        <div class="text-display-lg font-display-lg text-on-surface">{{ result.total_prediction }}</div>
-                        <div class="mt-2 text-label-sm font-label-sm text-secondary flex items-center gap-1">
-                            Độ chính xác Model: 94.2%
-                        </div>
-                    </div>
-                </div>
-                <!-- Complication Risk Matrix (Glassmorphism inspired) -->
-                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
-                    <h3 class="text-title-lg font-title-lg text-on-surface mb-stack-md">Phân bổ rủi ro theo biến chứng (Top 5)</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-stack-sm">
-                        <!-- NEP (Nephropathy) -->
-                        <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-error flex flex-col justify-between">
-                            <div>
-                                <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Thận (NEP)</div>
-                                <div class="text-headline-sm font-headline-sm text-on-surface">{{ result.nep }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
-                            </div>
-                            <div class="mt-3 space-y-1">
-                                <div class="w-full bg-surface-variant rounded-full h-1.5">
-                                    <div class="bg-error h-1.5 rounded-full w-[45%]"></div>
-                                </div>
-                                <div class="flex justify-between text-[10px] text-secondary">
-                                    <span>Rất cao: 45%</span>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- NEU (Neuropathy) -->
-                        <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-[#F59E0B] flex flex-col justify-between">
-                            <div>
-                                <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Thần kinh (NEU)</div>
-                                <div class="text-headline-sm font-headline-sm text-on-surface">{{ result.neu }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
-                            </div>
-                            <div class="mt-3 space-y-1">
-                                <div class="w-full bg-surface-variant rounded-full h-1.5">
-                                    <div class="bg-[#F59E0B] h-1.5 rounded-full w-[32%]"></div>
-                                </div>
-                                <div class="flex justify-between text-[10px] text-secondary">
-                                    <span>Cao: 32%</span>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- RET (Retinopathy) -->
-                        <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-[#F59E0B] flex flex-col justify-between">
-                            <div>
-                                <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Võng mạc (RET)</div>
-                                <div class="text-headline-sm font-headline-sm text-on-surface">{{ result.ret }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
-                            </div>
-                            <div class="mt-3 space-y-1">
-                                <div class="w-full bg-surface-variant rounded-full h-1.5">
-                                    <div class="bg-[#F59E0B] h-1.5 rounded-full w-[38%]"></div>
-                                </div>
-                                <div class="flex justify-between text-[10px] text-secondary">
-                                    <span>Cao: 38%</span>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- CV (Cardiovascular) -->
-                        <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-error flex flex-col justify-between">
-                            <div>
-                                <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Tim mạch (CV)</div>
-                                <div class="text-headline-sm font-headline-sm text-on-surface">{{ result.cv }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
-                            </div>
-                            <div class="mt-3 space-y-1">
-                                <div class="w-full bg-surface-variant rounded-full h-1.5">
-                                    <div class="bg-error h-1.5 rounded-full w-[52%]"></div>
-                                </div>
-                                <div class="flex justify-between text-[10px] text-secondary">
-                                    <span>Rất cao: 52%</span>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- PER VAS (Peripheral Vascular) -->
-                        <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-[#10B981] flex flex-col justify-between">
-                            <div>
-                                <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Mạch ngoại biên</div>
-                                <div class="text-headline-sm font-headline-sm text-on-surface">{{ result.per_vas }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
-                            </div>
-                            <div class="mt-3 space-y-1">
-                                <div class="w-full bg-surface-variant rounded-full h-1.5">
-                                    <div class="bg-[#10B981] h-1.5 rounded-full w-[15%]"></div>
-                                </div>
-                                <div class="flex justify-between text-[10px] text-secondary">
-                                    <span>Trung bình: 15%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Data Table: Bệnh nhân cần chú ý -->
-                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-                    <div class="px-stack-md py-stack-sm border-b border-outline-variant flex justify-between items-center bg-surface-bright">
-                        <h3 class="text-title-lg font-title-lg text-on-surface">Bệnh nhân cần can thiệp (Rủi ro cao)</h3>
-                        <button class="text-primary text-label-sm font-label-sm uppercase tracking-wider hover:underline">Xem tất cả</button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[800px]">
-                            <thead>
-                                <tr class="bg-surface-container-low border-b border-outline-variant">
-                                    <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider w-[120px]">Mã BN</th>
-                                    <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Họ và tên</th>
-                                    <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Tuổi / Giới</th>
-                                    <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Biến chứng dự kiến</th>
-                                    <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-center">Xác suất (%)</th>
-                                    <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-right">Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-body-sm font-body-sm">
-                                <!-- Row 1 - High Risk -->
-                                <tr class="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors relative">
-                                    <td class="py-3 px-4 font-mono text-secondary relative">
-                                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
-                                        BN-10294
-                                    </td>
-                                    <td class="py-3 px-4 text-on-surface font-medium">Nguyễn Văn An</td>
-                                    <td class="py-3 px-4 text-on-surface-variant">65 / Nam</td>
-                                    <td class="py-3 px-4">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-error-container text-on-error-container border border-error/20">
-                                            Tim mạch (CV)
-                                        </span>
-                                    </td>
-                                    <td class="py-3 px-4 text-center font-bold text-error">92%</td>
-                                    <td class="py-3 px-4 text-right">
-                                        <button class="text-primary hover:text-primary-container font-medium text-label-md">Chi tiết</button>
-                                    </td>
-                                </tr>
-                                <!-- Row 2 - High Risk -->
-                                <tr class="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors relative">
-                                    <td class="py-3 px-4 font-mono text-secondary relative">
-                                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
-                                        BN-08432
-                                    </td>
-                                    <td class="py-3 px-4 text-on-surface font-medium">Trần Thị Bình</td>
-                                    <td class="py-3 px-4 text-on-surface-variant">72 / Nữ</td>
-                                    <td class="py-3 px-4">
-                                        <div class="flex gap-1 flex-wrap">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-error-container text-on-error-container border border-error/20">
-                                                Thận (NEP)
-                                            </span>
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#F59E0B]/10 text-[#D97706] border border-[#F59E0B]/20">
-                                                Võng mạc
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3 px-4 text-center font-bold text-error">88%</td>
-                                    <td class="py-3 px-4 text-right">
-                                        <button class="text-primary hover:text-primary-container font-medium text-label-md">Chi tiết</button>
-                                    </td>
-                                </tr>
-                                <!-- Row 3 - Med Risk -->
-                                <tr class="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors">
-                                    <td class="py-3 px-4 font-mono text-secondary">BN-11005</td>
-                                    <td class="py-3 px-4 text-on-surface font-medium">Lê Hoàng Nam</td>
-                                    <td class="py-3 px-4 text-on-surface-variant">58 / Nam</td>
-                                    <td class="py-3 px-4">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#F59E0B]/10 text-[#D97706] border border-[#F59E0B]/20">
-                                            Thần kinh (NEU)
-                                        </span>
-                                    </td>
-                                    <td class="py-3 px-4 text-center font-bold text-[#D97706]">75%</td>
-                                    <td class="py-3 px-4 text-right">
-                                        <button class="text-primary hover:text-primary-container font-medium text-label-md">Chi tiết</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-lowest border border-outline-variant rounded-full text-label-sm font-label-sm">
+                    <span class="w-2 h-2 rounded-full bg-[#10B981]"></span>
+                    API: Online
                 </div>
             </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-sm">
+                <div class="flex justify-between items-start mb-stack-sm">
+                    <span class="text-label-md font-label-md text-secondary uppercase">Tổng bệnh nhân</span>
+                    <span class="material-symbols-outlined text-primary">group</span>
+                </div>
+                <div class="text-display-lg font-display-lg text-on-surface" data-stat="total_patient">{{ result.total_patient }}</div>
+                <div class="mt-2 text-label-sm font-label-sm text-secondary">Bệnh nhân có hồ sơ trong hệ thống</div>
+            </div>
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-sm">
+                <div class="flex justify-between items-start mb-stack-sm">
+                    <span class="text-label-md font-label-md text-secondary uppercase">Số hồ sơ xử lý</span>
+                    <span class="material-symbols-outlined text-primary">description</span>
+                </div>
+                <div class="text-display-lg font-display-lg text-on-surface" data-stat="processed_profile">{{ result.processed_profile }}</div>
+                <div class="mt-2 text-label-sm font-label-sm text-secondary">Clinical record đã lưu</div>
+            </div>
+            <div class="bg-surface-container-lowest border border-error rounded-xl p-stack-md shadow-sm">
+                <div class="flex justify-between items-start mb-stack-sm">
+                    <span class="text-label-md font-label-md text-error uppercase">Cảnh báo cần xử lý</span>
+                    <span class="material-symbols-outlined text-error fill">warning</span>
+                </div>
+                <div class="text-display-lg font-display-lg text-error" data-stat="total_war">{{ result.total_war }}</div>
+                <div class="mt-2 text-label-sm font-label-sm text-secondary">Bệnh nhân nguy cơ tổng cao: <span data-stat="high_patient">{{ result.high_patient }}</span></div>
+            </div>
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-sm">
+                <div class="flex justify-between items-start mb-stack-sm">
+                    <span class="text-label-md font-label-md text-secondary uppercase">Số prediction</span>
+                    <span class="material-symbols-outlined text-primary">psychology</span>
+                </div>
+                <div class="text-display-lg font-display-lg text-on-surface" data-stat="total_prediction">{{ result.total_prediction }}</div>
+                <div class="mt-2 text-label-sm font-label-sm text-secondary">Kết quả model đã lưu</div>
+            </div>
+        </div>
+
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-sm">
+            <h3 class="text-title-lg font-title-lg text-on-surface mb-stack-md">Phân bố nguy cơ theo biến chứng</h3>
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-stack-sm">
+                <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-error">
+                    <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Thận (NEP)</div>
+                    <div class="text-headline-sm font-headline-sm text-on-surface"><span data-stat="nep">{{ result.nep }}</span> <span class="text-label-sm text-secondary">ca</span></div>
+                </div>
+                <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-[#F59E0B]">
+                    <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Thần kinh (NEU)</div>
+                    <div class="text-headline-sm font-headline-sm text-on-surface"><span data-stat="neu">{{ result.neu }}</span> <span class="text-label-sm text-secondary">ca</span></div>
+                </div>
+                <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-[#F59E0B]">
+                    <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Võng mạc (RET)</div>
+                    <div class="text-headline-sm font-headline-sm text-on-surface"><span data-stat="ret">{{ result.ret }}</span> <span class="text-label-sm text-secondary">ca</span></div>
+                </div>
+                <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-error">
+                    <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Tim mạch (CV)</div>
+                    <div class="text-headline-sm font-headline-sm text-on-surface"><span data-stat="cv">{{ result.cv }}</span> <span class="text-label-sm text-secondary">ca</span></div>
+                </div>
+                <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-[#10B981]">
+                    <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Mạch ngoại biên</div>
+                    <div class="text-headline-sm font-headline-sm text-on-surface"><span data-stat="per_vas">{{ result.per_vas }}</span> <span class="text-label-sm text-secondary">ca</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+            <div class="px-stack-md py-stack-sm border-b border-outline-variant flex justify-between items-center">
+                <div>
+                    <h3 class="text-title-lg font-title-lg text-on-surface">Alert đang mở</h3>
+                    <p class="text-body-sm font-body-sm text-secondary">Cảnh báo theo từng biến chứng cần bác sĩ xem hoặc theo dõi.</p>
+                </div>
+                <a href="{% url 'alerts' %}" class="text-primary-container text-label-md font-label-md">Xem tất cả</a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[760px]">
+                    <thead>
+                        <tr class="bg-surface-container-low border-b border-outline-variant text-label-sm font-label-sm text-secondary">
+                            <th class="py-3 px-4">Bệnh nhân</th>
+                            <th class="py-3 px-4">Biến chứng</th>
+                            <th class="py-3 px-4">Risk score</th>
+                            <th class="py-3 px-4">Trạng thái</th>
+                            <th class="py-3 px-4 text-right">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alert in alerts %}
+                            <tr class="border-b border-outline-variant">
+                                <td class="py-3 px-4">
+                                    <div class="font-medium">{{ alert.patient.name }}</div>
+                                    <div class="text-label-sm font-label-sm text-secondary">BN-{{ alert.patient.id }}</div>
+                                </td>
+                                <td class="py-3 px-4">{{ alert.target }}</td>
+                                <td class="py-3 px-4">{{ alert.score.risk_score|floatformat:3 }}</td>
+                                <td class="py-3 px-4">{{ alert.get_status_display }}</td>
+                                <td class="py-3 px-4 text-right">
+                                    <a href="{% url 'patient-detail' alert.patient_id %}" class="text-primary-container text-label-md font-label-md">Xem hồ sơ</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="py-8 px-4 text-center text-secondary">Không có alert đang mở.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        const statsUrl = "{% url 'dashboard-stats' %}";
+
+        async function refreshStats() {
+            const res = await fetch(statsUrl);
+            const data = await res.json().catch(() => null);
+            if (!res.ok || !data || !data.ok) return;
+            Object.entries(data.result).forEach(([key, val]) => {
+                document.querySelectorAll(`[data-stat="${key}"]`).forEach((el) => {
+                    el.textContent = val;
+                });
+            });
+        }
+
+        setInterval(refreshStats, 5000);
+    </script>
 {% endblock %}

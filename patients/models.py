@@ -60,6 +60,7 @@ class ClinicalRecord(models.Model):
     med_use = models.TextField()
     med_adh = models.TextField()
     source = models.CharField(max_length=50, default="mock_his")
+    source_idx = models.PositiveIntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
