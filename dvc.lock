@@ -2,21 +2,22 @@ schema: '2.0'
 stages:
   train_model:
     cmd: python ml/train.py --data data/training.csv --tune --n-trials 5 
-      --timeout 600 --register
+      --timeout 600 --register --promotion-metric f1_macro --promotion-min-delta
+      0.0
     deps:
     - path: data/training.csv
       hash: md5
-      md5: 6ec33d1f0168cc0b7a5bdbf416eace39
-      size: 74103
+      md5: 6cf4cddc285c4187a4be7b7aa2eba8f0
+      size: 74177
     - path: ml/train.py
       hash: md5
-      md5: 93659146a8f9fe603e287c20d4a1ef8a
-      size: 8363
+      md5: 6622d89cfe22e1bc306f1c7bbf773221
+      size: 11503
     outs:
     - path: ml/artifacts/model.pkl
       hash: md5
-      md5: 337fd047e92d8ab9fc658a8fb4011a77
-      size: 2956705
+      md5: 3547f079984cca82a3794e2c8e2feb8e
+      size: 8631
   export_training_data:
     cmd: python ml/export_training_data.py --output data/training.csv --fallback
       data/data.csv
@@ -32,5 +33,5 @@ stages:
     outs:
     - path: data/training.csv
       hash: md5
-      md5: 6ec33d1f0168cc0b7a5bdbf416eace39
-      size: 74103
+      md5: 6cf4cddc285c4187a4be7b7aa2eba8f0
+      size: 74177

@@ -1,5 +1,6 @@
 from pathlib import Path
 import sys
+import shutil
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
@@ -15,6 +16,30 @@ from ml.tracking import setup_tracking
 
 
 REGISTERED_MODEL = "diabetes-complication-best"
+
+
+def get_champion_metrics(alias="champion"):
+    setup_tracking()
+    client = MlflowClient()
+    try:
+        mv = client.get_model_version_by_alias(REGISTERED_MODEL, alias)
+    except Exception:
+        return None
+
+    metrics = {}
+    for key, value in mv.tags.items():
+        if not key.startswith("metric."):
+            continue
+        try:
+            metrics[key.removeprefix("metric.")] = float(value)
+        except (TypeError, ValueError):
+            continue
+    return {
+        "name": REGISTERED_MODEL,
+        "version": mv.version,
+        "run_id": mv.run_id,
+        "metrics": metrics,
+    }
 
 
 def register_best_model(model, model_name, metrics, params, alias="champion"):
@@ -62,3 +87,15 @@ def load_champion():
     local_dir = client.download_artifacts(mv.run_id, "model")
     model_path = Path(local_dir) / "model.pkl"
     return joblib.load(model_path), mv
+
+
+def restore_champion_model(destination):
+    setup_tracking()
+    client = MlflowClient()
+    mv = client.get_model_version_by_alias(REGISTERED_MODEL, "champion")
+    local_dir = client.download_artifacts(mv.run_id, "model")
+    source = Path(local_dir) / "model.pkl"
+    destination = Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, destination)
+    return mv
