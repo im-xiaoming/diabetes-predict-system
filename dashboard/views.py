@@ -133,7 +133,11 @@ def dashboard(request):
     return render(
         request,
         "dashboard/dashboard.html",
-        {"result": result, "alert_patients": alert_patients, "complication_stats": complication_stats},
+        {
+            "result": result,
+            "alert_patients": alert_patients,
+            "complication_stats": complication_stats,
+        },
     )
 
 

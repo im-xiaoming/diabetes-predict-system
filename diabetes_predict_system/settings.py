@@ -19,7 +19,7 @@ INSTALLED_APPS = [
     "dashboard",
     "patients",
     "predictions",
-    "mock_his",
+    "mock_his.apps.MockHisConfig",
     "monitor",
     "alerts",
     "history",
@@ -92,5 +92,10 @@ STATICFILES_DIRS = [
 ]
 
 FASTAPI_BASE_URL = "http://127.0.0.1:8001"
+
+MOCK_HIS_AUTO_START = True
+MOCK_HIS_AUTO_START_INTERVAL = 5
+MOCK_HIS_AUTO_START_DELAY = 3
+MOCK_HIS_AUTO_START_UNLABELED = False
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
