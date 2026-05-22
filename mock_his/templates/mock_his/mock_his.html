@@ -66,11 +66,11 @@
                                                 </div>
                                             </td>
                                             <td class="p-3 border-b border-outline-variant">
-                                                <span id="status-{{ rec.idx }}" class="inline-flex px-2 py-1 rounded bg-surface-container-low text-secondary text-label-sm font-label-sm">Chua gui</span>
+                                                <span id="status-{{ rec.idx }}" class="inline-flex px-2 py-1 rounded bg-surface-container-low text-secondary text-label-sm font-label-sm">Chưa gửi</span>
                                             </td>
                                             <td class="p-3 border-b border-outline-variant text-right">
                                                 {% if rec.ready %}
-                                                    <button data-idx="{{ rec.idx }}" class="send-btn text-primary hover:text-primary-container text-label-md font-label-md px-3 py-1 border border-primary rounded hover:bg-primary-fixed transition-colors">Gui ho so</button>
+                                                    <button data-idx="{{ rec.idx }}" class="send-btn text-primary hover:text-primary-container text-label-md font-label-md px-3 py-1 border border-primary rounded hover:bg-primary-fixed transition-colors">Gửi hồ sơ</button>
                                                 {% else %}
                                                     <button class="text-secondary text-label-md font-label-md px-3 py-1 border border-outline-variant rounded opacity-50 cursor-not-allowed" disabled>Missing Data</button>
                                                 {% endif %}
@@ -257,7 +257,7 @@
         function rowHtml(rec) {
             const bar = rec.complete === 100 ? "bg-[#10b981]" : rec.complete >= 80 ? "bg-[#f59e0b]" : "bg-error";
             const action = rec.ready
-                ? `<button data-idx="${rec.idx}" class="send-btn text-primary hover:text-primary-container text-label-md font-label-md px-3 py-1 border border-primary rounded hover:bg-primary-fixed transition-colors">Gui ho so</button>`
+                ? `<button data-idx="${rec.idx}" class="send-btn text-primary hover:text-primary-container text-label-md font-label-md px-3 py-1 border border-primary rounded hover:bg-primary-fixed transition-colors">Gửi hồ sơ</button>`
                 : `<button class="text-secondary text-label-md font-label-md px-3 py-1 border border-outline-variant rounded opacity-50 cursor-not-allowed" disabled>Missing Data</button>`;
             return `
                 <tr id="row-${rec.idx}" class="hover:bg-surface-container-low transition-colors group ${rec.ready ? "" : "border-l-4 border-error"}">
@@ -272,7 +272,7 @@
                         </div>
                     </td>
                     <td class="p-3 border-b border-outline-variant">
-                        <span id="status-${rec.idx}" class="inline-flex px-2 py-1 rounded bg-surface-container-low text-secondary text-label-sm font-label-sm">Chua gui</span>
+                        <span id="status-${rec.idx}" class="inline-flex px-2 py-1 rounded bg-surface-container-low text-secondary text-label-sm font-label-sm">Chưa gửi</span>
                     </td>
                     <td class="p-3 border-b border-outline-variant text-right">${action}</td>
                 </tr>`;
@@ -457,7 +457,7 @@
             nextIdx = 0;
             stat = { sent: 0, ok: 0, fail: 0 };
             sentSet.clear();
-            records.forEach((rec) => setStatus(rec.idx, "Chua gui", "bg-surface-container-low text-secondary"));
+            records.forEach((rec) => setStatus(rec.idx, "Chưa gửi", "bg-surface-container-low text-secondary"));
             show({ status: "ready", message: "Auto feed will start when FastAPI is online" }, true);
             consoleStatus.textContent = "Idle";
             consoleStatus.className = "text-label-sm font-label-sm text-[#858585] uppercase tracking-wider";

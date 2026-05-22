@@ -2,12 +2,11 @@
 {% load static %}
 
 {% block title %}
-    <title>GlucoPredict AI - Bảng điều khiển Bác sĩ</title>
+    <title>GlucoPredict AI - Dashboard</title>
 {% endblock %}
 
 {% block page_content %}
     <div class="max-w-[1200px] mx-auto space-y-stack-lg">
-        <!-- Page Header & Status -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-stack-md pb-stack-sm border-b border-outline-variant">
             <div>
                 <h2 class="text-headline-md font-headline-md text-on-surface">Tổng quan hệ thống</h2>
@@ -15,150 +14,84 @@
             </div>
             <div class="flex gap-3">
                 <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-lowest border border-outline-variant rounded-full text-label-sm font-label-sm shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
-                    <span class="w-2 h-2 rounded-full bg-[#10B981]"></span>
-                    Model: Active
+                    <span class="w-2 h-2 rounded-full {% if result.model_status == 'Active' %}bg-[#10B981]{% else %}bg-outline{% endif %}"></span>
+                    Model: {{ result.model_status }}
                 </div>
                 <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-lowest border border-outline-variant rounded-full text-label-sm font-label-sm shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
-                    <span class="w-2 h-2 rounded-full bg-[#10B981]"></span>
-                    API: Online
+                    <span class="w-2 h-2 rounded-full {% if result.total_prediction %}bg-[#10B981]{% else %}bg-outline{% endif %}"></span>
+                    Prediction: {{ result.total_prediction }}
                 </div>
             </div>
         </div>
-        <!-- Key Metrics Bento Grid -->
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
-            <!-- Stat Card 1 -->
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_6px_rgba(0,0,0,0.08)] transition-shadow">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
                 <div class="flex justify-between items-start mb-stack-sm">
                     <span class="text-label-md font-label-md text-secondary uppercase tracking-wider">Tổng bệnh nhân</span>
                     <span class="material-symbols-outlined text-primary">group</span>
                 </div>
                 <div class="text-display-lg font-display-lg text-on-surface">{{ result.total_patient }}</div>
-                <div class="mt-2 text-label-sm font-label-sm text-[#10B981] flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[14px]">trending_up</span>
-                    +12% (30 ngày)
+                <div class="mt-2 text-label-sm font-label-sm text-secondary flex items-center gap-1">
+                    {% if result.patient_growth is not None %}{{ result.patient_growth|floatformat:1 }}% trong 30 ngày{% else %}Chưa có dữ liệu kỳ trước{% endif %}
                 </div>
             </div>
-            <!-- Stat Card 2 -->
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_6px_rgba(0,0,0,0.08)] transition-shadow">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
                 <div class="flex justify-between items-start mb-stack-sm">
-                    <span class="text-label-md font-label-md text-secondary uppercase tracking-wider">Số hồ sơ xử lý</span>
+                    <span class="text-label-md font-label-md text-secondary uppercase tracking-wider">Hồ sơ xử lý</span>
                     <span class="material-symbols-outlined text-primary">description</span>
                 </div>
                 <div class="text-display-lg font-display-lg text-on-surface">{{ result.processed_profile }}</div>
-                <div class="mt-2 text-label-sm font-label-sm text-secondary flex items-center gap-1">
-                    Hôm nay: 45 hồ sơ
-                </div>
+                <div class="mt-2 text-label-sm font-label-sm text-secondary flex items-center gap-1">Hôm nay: {{ result.today_profile }} hồ sơ</div>
             </div>
-            <!-- Stat Card 3 -->
-            <div class="bg-surface-container-lowest border border-error rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_6px_rgba(0,0,0,0.08)] transition-shadow relative overflow-hidden">
+            <div class="bg-surface-container-lowest border border-error rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-1 h-full bg-error"></div>
                 <div class="flex justify-between items-start mb-stack-sm">
                     <span class="text-label-md font-label-md text-on-error-container font-semibold uppercase tracking-wider">Cảnh báo rủi ro cao</span>
                     <span class="material-symbols-outlined text-error fill">warning</span>
                 </div>
                 <div class="text-display-lg font-display-lg text-error">{{ result.total_war }}</div>
-                <div class="mt-2 text-label-sm font-label-sm text-error flex items-center gap-1">
-                    Cần can thiệp ngay
-                </div>
+                <div class="mt-2 text-label-sm font-label-sm text-error flex items-center gap-1">Lấy từ PredictionResult</div>
             </div>
-            <!-- Stat Card 4 -->
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_6px_rgba(0,0,0,0.08)] transition-shadow">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
                 <div class="flex justify-between items-start mb-stack-sm">
-                    <span class="text-label-md font-label-md text-secondary uppercase tracking-wider">Số dự đoán tạo ra</span>
+                    <span class="text-label-md font-label-md text-secondary uppercase tracking-wider">Dự đoán đã tạo</span>
                     <span class="material-symbols-outlined text-primary">psychology</span>
                 </div>
                 <div class="text-display-lg font-display-lg text-on-surface">{{ result.total_prediction }}</div>
                 <div class="mt-2 text-label-sm font-label-sm text-secondary flex items-center gap-1">
-                    Độ chính xác Model: 94.2%
+                    F1 DB: {% if result.model_accuracy is not None %}{{ result.model_accuracy|floatformat:3 }}{% else %}chưa có label{% endif %}
                 </div>
             </div>
         </div>
-        <!-- Complication Risk Matrix (Glassmorphism inspired) -->
+
         <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
-            <h3 class="text-title-lg font-title-lg text-on-surface mb-stack-md">Phân bổ rủi ro theo biến chứng (Top 5)</h3>
+            <h3 class="text-title-lg font-title-lg text-on-surface mb-stack-md">Phân bố rủi ro theo biến chứng</h3>
             <div class="grid grid-cols-1 md:grid-cols-5 gap-stack-sm">
-                <!-- NEP (Nephropathy) -->
-                <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-error flex flex-col justify-between">
-                    <div>
-                        <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Thận (NEP)</div>
-                        <div class="text-headline-sm font-headline-sm text-on-surface">{{ result.nep }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
-                    </div>
-                    <div class="mt-3 space-y-1">
-                        <div class="w-full bg-surface-variant rounded-full h-1.5">
-                            <div class="bg-error h-1.5 rounded-full w-[45%]"></div>
+                {% for item in complication_stats %}
+                    <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 {% if item.color == 'error' %}border-error{% elif item.color == 'warning' %}border-[#F59E0B]{% else %}border-[#10B981]{% endif %} flex flex-col justify-between">
+                        <div>
+                            <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">{{ item.name }}</div>
+                            <div class="text-headline-sm font-headline-sm text-on-surface">{{ item.count }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
                         </div>
-                        <div class="flex justify-between text-[10px] text-secondary">
-                            <span>Rất cao: 45%</span>
-                        </div>
-                    </div>
-                </div>
-                <!-- NEU (Neuropathy) -->
-                <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-[#F59E0B] flex flex-col justify-between">
-                    <div>
-                        <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Thần kinh (NEU)</div>
-                        <div class="text-headline-sm font-headline-sm text-on-surface">{{ result.neu }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
-                    </div>
-                    <div class="mt-3 space-y-1">
-                        <div class="w-full bg-surface-variant rounded-full h-1.5">
-                            <div class="bg-[#F59E0B] h-1.5 rounded-full w-[32%]"></div>
-                        </div>
-                        <div class="flex justify-between text-[10px] text-secondary">
-                            <span>Cao: 32%</span>
+                        <div class="mt-3 space-y-1">
+                            <div class="w-full bg-surface-variant rounded-full h-1.5">
+                                <div class="{% if item.color == 'error' %}bg-error{% elif item.color == 'warning' %}bg-[#F59E0B]{% else %}bg-[#10B981]{% endif %} h-1.5 rounded-full" style="width: {{ item.width }}%"></div>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-secondary">
+                                <span>{{ item.label }}: {{ item.percent|floatformat:1 }}%</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <!-- RET (Retinopathy) -->
-                <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-[#F59E0B] flex flex-col justify-between">
-                    <div>
-                        <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Võng mạc (RET)</div>
-                        <div class="text-headline-sm font-headline-sm text-on-surface">{{ result.ret }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
-                    </div>
-                    <div class="mt-3 space-y-1">
-                        <div class="w-full bg-surface-variant rounded-full h-1.5">
-                            <div class="bg-[#F59E0B] h-1.5 rounded-full w-[38%]"></div>
-                        </div>
-                        <div class="flex justify-between text-[10px] text-secondary">
-                            <span>Cao: 38%</span>
-                        </div>
-                    </div>
-                </div>
-                <!-- CV (Cardiovascular) -->
-                <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-error flex flex-col justify-between">
-                    <div>
-                        <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Tim mạch (CV)</div>
-                        <div class="text-headline-sm font-headline-sm text-on-surface">{{ result.cv }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
-                    </div>
-                    <div class="mt-3 space-y-1">
-                        <div class="w-full bg-surface-variant rounded-full h-1.5">
-                            <div class="bg-error h-1.5 rounded-full w-[52%]"></div>
-                        </div>
-                        <div class="flex justify-between text-[10px] text-secondary">
-                            <span>Rất cao: 52%</span>
-                        </div>
-                    </div>
-                </div>
-                <!-- PER VAS (Peripheral Vascular) -->
-                <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 border-[#10B981] flex flex-col justify-between">
-                    <div>
-                        <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">Mạch ngoại biên</div>
-                        <div class="text-headline-sm font-headline-sm text-on-surface">{{ result.per_vas }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
-                    </div>
-                    <div class="mt-3 space-y-1">
-                        <div class="w-full bg-surface-variant rounded-full h-1.5">
-                            <div class="bg-[#10B981] h-1.5 rounded-full w-[15%]"></div>
-                        </div>
-                        <div class="flex justify-between text-[10px] text-secondary">
-                            <span>Trung bình: 15%</span>
-                        </div>
-                    </div>
-                </div>
+                {% empty %}
+                    <div class="md:col-span-5 py-8 text-center text-secondary">Chưa có điểm rủi ro nào trong DB.</div>
+                {% endfor %}
             </div>
         </div>
-        <!-- Data Table: Bệnh nhân cần chú ý -->
+
         <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
             <div class="px-stack-md py-stack-sm border-b border-outline-variant flex justify-between items-center bg-surface-bright">
-                <h3 class="text-title-lg font-title-lg text-on-surface">Bệnh nhân cần can thiệp (Rủi ro cao)</h3>
-                <button class="text-primary text-label-sm font-label-sm uppercase tracking-wider hover:underline">Xem tất cả</button>
+                <h3 class="text-title-lg font-title-lg text-on-surface">Bệnh nhân cần can thiệp</h3>
+                <a href="{% url 'alerts' %}" class="text-primary text-label-sm font-label-sm uppercase tracking-wider hover:underline">Xem tất cả</a>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[800px]">
@@ -168,43 +101,37 @@
                             <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Họ và tên</th>
                             <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Tuổi / Giới</th>
                             <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Biến chứng dự kiến</th>
-                            <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-center">Xác suất (%)</th>
+                            <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-center">Xác suất</th>
                             <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-right">Hành động</th>
                         </tr>
                     </thead>
                     <tbody class="text-body-sm font-body-sm">
-                                {% for row in alert_patients %}
-                                    <tr class="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors relative">
-                                        <td class="py-3 px-4 font-mono text-secondary relative">
-                                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
-                                            {{ row.patient.id }}
-                                        </td>
-                                        <td class="py-3 px-4 text-on-surface font-medium">{{ row.patient.name }}</td>
-                                        <td class="py-3 px-4 text-on-surface-variant">
-                                            {% if row.age %}{{ row.age }}{% else %}N/A{% endif %} / {{ row.sex }}
-                                        </td>
-                                        <td class="py-3 px-4">
-                                            <div class="flex flex-wrap gap-1">
-                                                {% for complication in row.complications %}
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-error-container text-on-error-container border border-error/20">
-                                                        {{ complication }}
-                                                    </span>
-                                                {% endfor %}
-                                            </div>
-                                        </td>
-                                        <td class="py-3 px-4 text-center font-bold text-error">{{ row.risk_percent }}%</td>
-                                        <td class="py-3 px-4 text-right">
-                                            <a href="{% url 'patient-detail' row.patient.id %}" class="text-primary hover:text-primary-container font-medium text-label-md">Chi tiết</a>
-                                        </td>
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="6" class="py-8 px-4 text-center text-secondary">
-                                            Chưa có bệnh nhân cảnh báo. Hãy tải dữ liệu hoặc chạy dự đoán mới.
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
+                        {% for row in alert_patients %}
+                            <tr class="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors relative">
+                                <td class="py-3 px-4 font-mono text-secondary relative">
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
+                                    {{ row.patient.id }}
+                                </td>
+                                <td class="py-3 px-4 text-on-surface font-medium">{{ row.patient.name }}</td>
+                                <td class="py-3 px-4 text-on-surface-variant">{% if row.age %}{{ row.age }}{% else %}N/A{% endif %} / {{ row.sex }}</td>
+                                <td class="py-3 px-4">
+                                    <div class="flex flex-wrap gap-1">
+                                        {% for complication in row.complications %}
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-error-container text-on-error-container border border-error/20">{{ complication }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4 text-center font-bold text-error">{{ row.risk_percent }}%</td>
+                                <td class="py-3 px-4 text-right">
+                                    <a href="{% url 'patient-detail' row.patient.id %}" class="text-primary hover:text-primary-container font-medium text-label-md">Chi tiết</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="py-8 px-4 text-center text-secondary">Chưa có bệnh nhân cảnh báo. Hãy gửi hồ sơ từ HIS Inference.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
             </div>
         </div>

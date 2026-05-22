@@ -6,285 +6,136 @@
 {% endblock %}
 
 {% block page_content %}
-        <div class="max-w-[1400px] mx-auto">
-          <!-- Page Header & Filters -->
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-stack-lg gap-stack-md">
+    <div class="max-w-[1400px] mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-stack-lg gap-stack-md">
             <div>
-              <h2 class="text-headline-md font-headline-md text-on-background">Cảnh báo biến chứng</h2>
-              <p class="text-body-sm font-body-sm text-secondary mt-1">Quản lý và theo dõi các cảnh báo rủi ro biến chứng tiểu đường.</p>
+                <h2 class="text-headline-md font-headline-md text-on-background">Cảnh báo biến chứng</h2>
+                <p class="text-body-sm font-body-sm text-secondary mt-1">Danh sách lấy từ các RiskScoreDetail đang có risk_label = 1.</p>
             </div>
             <div class="flex flex-wrap items-center gap-stack-sm w-full md:w-auto">
-              <!-- Filter: Mức độ -->
-              <div class="relative min-w-[140px]">
-                <select class="appearance-none w-full bg-surface-container-lowest border border-outline-variant text-on-surface py-2 pl-3 pr-8 rounded-lg text-label-md font-label-md focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container">
-                  <option>Tất cả mức độ</option>
-                  <option>Nguy cơ Cao</option>
-                  <option>Nguy cơ Trung bình</option>
-                  <option>Nguy cơ Thấp</option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-on-surface-variant">
-                  <span class="material-symbols-outlined text-[20px]">arrow_drop_down</span>
+                <div class="relative min-w-[140px]">
+                    <select class="appearance-none w-full bg-surface-container-lowest border border-outline-variant text-on-surface py-2 pl-3 pr-8 rounded-lg text-label-md font-label-md focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container">
+                        <option>Tất cả mức độ</option>
+                        <option>High</option>
+                        <option>Medium</option>
+                        <option>Low</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-on-surface-variant">
+                        <span class="material-symbols-outlined text-[20px]">arrow_drop_down</span>
+                    </div>
                 </div>
-              </div>
-
-              <!-- Filter: Loại biến chứng -->
-              <div class="relative min-w-[160px]">
-                <select class="appearance-none w-full bg-surface-container-lowest border border-outline-variant text-on-surface py-2 pl-3 pr-8 rounded-lg text-label-md font-label-md focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container">
-                  <option>Tất cả biến chứng</option>
-                  <option>Võng mạc</option>
-                  <option>Thận</option>
-                  <option>Thần kinh</option>
-                  <option>Tim mạch</option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-on-surface-variant">
-                  <span class="material-symbols-outlined text-[20px]">arrow_drop_down</span>
-                </div>
-              </div>
-
-              <!-- Filter: Trạng thái -->
-              <div class="relative min-w-[140px]">
-                <select class="appearance-none w-full bg-surface-container-lowest border border-outline-variant text-on-surface py-2 pl-3 pr-8 rounded-lg text-label-md font-label-md focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container">
-                  <option>Tất cả trạng thái</option>
-                  <option>Chưa xử lý</option>
-                  <option>Đang theo dõi</option>
-                  <option>Đã xử lý</option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-on-surface-variant">
-                  <span class="material-symbols-outlined text-[20px]">arrow_drop_down</span>
-                </div>
-              </div>
             </div>
-          </div>
-
-          <!-- Active Summary Cards (Bento Style) -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-stack-lg">
-            <!-- High Risk Card -->
-            <div class="bg-surface-container-lowest border border-error-container rounded-xl p-stack-md flex flex-col relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-              <div class="absolute top-0 right-0 w-24 h-24 bg-error opacity-5 rounded-bl-full"></div>
-              <div class="flex items-center gap-2 text-error mb-2">
-                <span class="material-symbols-outlined fill">error</span>
-                <span class="text-label-md font-label-md">Cần xử lý gấp</span>
-              </div>
-              <div class="flex items-end gap-3 mt-auto">
-                <span class="text-display-lg font-display-lg text-on-surface">12</span>
-                <span class="text-body-sm font-body-sm text-secondary mb-1">cảnh báo nguy cơ cao</span>
-              </div>
-            </div>
-
-            <!-- Pending Card -->
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex flex-col relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-              <div class="flex items-center gap-2 text-tertiary-container mb-2">
-                <span class="material-symbols-outlined">pending_actions</span>
-                <span class="text-label-md font-label-md">Chưa xử lý</span>
-              </div>
-              <div class="flex items-end gap-3 mt-auto">
-                <span class="text-display-lg font-display-lg text-on-surface">24</span>
-                <span class="text-body-sm font-body-sm text-secondary mb-1">tổng số cảnh báo mới</span>
-              </div>
-            </div>
-
-            <!-- Monitoring Card -->
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex flex-col relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-              <div class="flex items-center gap-2 text-primary-container mb-2">
-                <span class="material-symbols-outlined">visibility</span>
-                <span class="text-label-md font-label-md">Đang theo dõi</span>
-              </div>
-              <div class="flex items-end gap-3 mt-auto">
-                <span class="text-display-lg font-display-lg text-on-surface">45</span>
-                <span class="text-body-sm font-body-sm text-secondary mb-1">bệnh nhân</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Data Table Container -->
-          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse min-w-[1000px]">
-                <thead>
-                  <tr class="border-b border-outline-variant bg-surface-container-low text-label-sm font-label-sm text-secondary">
-                    <th class="py-3 px-4 font-semibold">Mã CB</th>
-                    <th class="py-3 px-4 font-semibold">Bệnh nhân</th>
-                    <th class="py-3 px-4 font-semibold">Biến chứng</th>
-                    <th class="py-3 px-4 font-semibold">Mức độ</th>
-                    <th class="py-3 px-4 font-semibold w-1/4">Nội dung</th>
-                    <th class="py-3 px-4 font-semibold">Thời gian</th>
-                    <th class="py-3 px-4 font-semibold">Trạng thái</th>
-                    <th class="py-3 px-4 font-semibold text-right">Hành động</th>
-                  </tr>
-                </thead>
-                <tbody class="text-body-sm font-body-sm">
-                  <!-- High Risk Row -->
-                  <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors relative">
-                    <td class="py-3 px-4">
-                      <div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
-                      <span class="font-medium">AL-1042</span>
-                    </td>
-                    <td class="py-3 px-4">
-                      <div class="flex flex-col">
-                        <span class="font-medium text-on-surface">Nguyễn Văn An</span>
-                        <span class="text-label-sm font-label-sm text-secondary">BN-23901</span>
-                      </div>
-                    </td>
-                    <td class="py-3 px-4">Bệnh võng mạc</td>
-                    <td class="py-3 px-4">
-                      <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm bg-error bg-opacity-10 text-error">
-                        Nguy cơ Cao
-                      </span>
-                    </td>
-                    <td class="py-3 px-4 text-on-surface-variant truncate max-w-[250px]" title="Dự đoán xuất huyết võng mạc trong 3 tháng tới. HbA1c tăng đột biến.">
-                      Dự đoán xuất huyết võng mạc trong 3 tháng tới. HbA1c tăng đột biến.
-                    </td>
-                    <td class="py-3 px-4 text-secondary">10 phút trước</td>
-                    <td class="py-3 px-4">
-                      <select class="bg-transparent border border-outline-variant rounded text-label-sm font-label-sm py-1 pl-2 pr-6 focus:border-primary-container focus:ring-1 focus:ring-primary-container">
-                        <option selected="">Chưa xử lý</option>
-                        <option>Đang theo dõi</option>
-                        <option>Đã xử lý</option>
-                      </select>
-                    </td>
-                    <td class="py-3 px-4 text-right">
-                      <button class="text-primary-container hover:text-primary font-medium text-label-md font-label-md inline-flex items-center gap-1">
-                        Xem BN
-                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                      </button>
-                    </td>
-                  </tr>
-
-                  <!-- Medium Risk Row -->
-                  <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
-                    <td class="py-3 px-4 font-medium">AL-1041</td>
-                    <td class="py-3 px-4">
-                      <div class="flex flex-col">
-                        <span class="font-medium text-on-surface">Trần Thị Bích</span>
-                        <span class="text-label-sm font-label-sm text-secondary">BN-23855</span>
-                      </div>
-                    </td>
-                    <td class="py-3 px-4">Biến chứng thận</td>
-                    <td class="py-3 px-4">
-                      <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm bg-tertiary-container bg-opacity-10 text-tertiary-container">
-                        Nguy cơ TB
-                      </span>
-                    </td>
-                    <td class="py-3 px-4 text-on-surface-variant truncate max-w-[250px]" title="Microalbumin niệu có dấu hiệu tăng nhẹ so với kỳ kiểm tra trước.">
-                      Microalbumin niệu có dấu hiệu tăng nhẹ so với kỳ kiểm tra trước.
-                    </td>
-                    <td class="py-3 px-4 text-secondary">2 giờ trước</td>
-                    <td class="py-3 px-4">
-                      <select class="bg-transparent border border-outline-variant rounded text-label-sm font-label-sm py-1 pl-2 pr-6 focus:border-primary-container focus:ring-1 focus:ring-primary-container">
-                        <option>Chưa xử lý</option>
-                        <option selected="">Đang theo dõi</option>
-                        <option>Đã xử lý</option>
-                      </select>
-                    </td>
-                    <td class="py-3 px-4 text-right">
-                      <button class="text-primary-container hover:text-primary font-medium text-label-md font-label-md inline-flex items-center gap-1">
-                        Xem BN
-                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                      </button>
-                    </td>
-                  </tr>
-
-                  <!-- High Risk Row -->
-                  <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors relative">
-                    <td class="py-3 px-4">
-                      <div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
-                      <span class="font-medium">AL-1040</span>
-                    </td>
-                    <td class="py-3 px-4">
-                      <div class="flex flex-col">
-                        <span class="font-medium text-on-surface">Lê Văn Cường</span>
-                        <span class="text-label-sm font-label-sm text-secondary">BN-23712</span>
-                      </div>
-                    </td>
-                    <td class="py-3 px-4">Bệnh lý bàn chân</td>
-                    <td class="py-3 px-4">
-                      <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm bg-error bg-opacity-10 text-error">
-                        Nguy cơ Cao
-                      </span>
-                    </td>
-                    <td class="py-3 px-4 text-on-surface-variant truncate max-w-[250px]" title="Mất cảm giác ngoại biên diện rộng. Nguy cơ loét chân rất cao.">
-                      Mất cảm giác ngoại biên diện rộng. Nguy cơ loét chân rất cao.
-                    </td>
-                    <td class="py-3 px-4 text-secondary">Hôm qua, 14:30</td>
-                    <td class="py-3 px-4">
-                      <select class="bg-transparent border border-outline-variant rounded text-label-sm font-label-sm py-1 pl-2 pr-6 focus:border-primary-container focus:ring-1 focus:ring-primary-container">
-                        <option selected="">Chưa xử lý</option>
-                        <option>Đang theo dõi</option>
-                        <option>Đã xử lý</option>
-                      </select>
-                    </td>
-                    <td class="py-3 px-4 text-right">
-                      <button class="text-primary-container hover:text-primary font-medium text-label-md font-label-md inline-flex items-center gap-1">
-                        Xem BN
-                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                      </button>
-                    </td>
-                  </tr>
-
-                  <!-- Low Risk Row -->
-                  <tr class="hover:bg-surface-container-low transition-colors">
-                    <td class="py-3 px-4 font-medium">AL-1039</td>
-                    <td class="py-3 px-4">
-                      <div class="flex flex-col">
-                        <span class="font-medium text-on-surface">Phạm Thị Dung</span>
-                        <span class="text-label-sm font-label-sm text-secondary">BN-23688</span>
-                      </div>
-                    </td>
-                    <td class="py-3 px-4">Tim mạch</td>
-                    <td class="py-3 px-4">
-                      <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm bg-primary bg-opacity-10 text-primary">
-                        Nguy cơ Thấp
-                      </span>
-                    </td>
-                    <td class="py-3 px-4 text-on-surface-variant truncate max-w-[250px]" title="Chỉ số huyết áp ổn định nhưng mỡ máu có xu hướng nhích nhẹ. Cần điều chỉnh chế độ ăn.">
-                      Chỉ số huyết áp ổn định nhưng mỡ máu có xu hướng nhích...
-                    </td>
-                    <td class="py-3 px-4 text-secondary">Hôm qua, 09:15</td>
-                    <td class="py-3 px-4">
-                      <select class="bg-transparent border border-outline-variant rounded text-label-sm font-label-sm py-1 pl-2 pr-6 focus:border-primary-container focus:ring-1 focus:ring-primary-container" disabled="">
-                        <option>Chưa xử lý</option>
-                        <option>Đang theo dõi</option>
-                        <option selected="">Đã xử lý</option>
-                      </select>
-                    </td>
-                    <td class="py-3 px-4 text-right">
-                      <button class="text-primary-container hover:text-primary font-medium text-label-md font-label-md inline-flex items-center gap-1">
-                        Xem BN
-                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Pagination -->
-            <div class="border-t border-outline-variant bg-surface-container-lowest px-4 py-3 flex items-center justify-between sm:px-6">
-              <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                <div>
-                  <p class="text-body-sm font-body-sm text-on-surface-variant">
-                    Hiển thị <span class="font-medium text-on-surface">1</span> đến <span class="font-medium text-on-surface">10</span> trong <span class="font-medium text-on-surface">97</span> kết quả
-                  </p>
-                </div>
-                <div>
-                  <nav aria-label="Pagination" class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                    <a class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-outline-variant bg-surface-container-lowest text-sm font-medium text-secondary hover:bg-surface-container-low" href="#">
-                      <span class="sr-only">Previous</span>
-                      <span class="material-symbols-outlined text-[20px]">chevron_left</span>
-                    </a>
-                    <a aria-current="page" class="z-10 bg-primary-container bg-opacity-10 border-primary-container text-primary-container relative inline-flex items-center px-4 py-2 border text-sm font-medium" href="#"> 1 </a>
-                    <a class="bg-surface-container-lowest border-outline-variant text-secondary hover:bg-surface-container-low relative inline-flex items-center px-4 py-2 border text-sm font-medium" href="#"> 2 </a>
-                    <a class="bg-surface-container-lowest border-outline-variant text-secondary hover:bg-surface-container-low relative inline-flex items-center px-4 py-2 border text-sm font-medium" href="#"> 3 </a>
-                    <span class="relative inline-flex items-center px-4 py-2 border border-outline-variant bg-surface-container-lowest text-sm font-medium text-secondary"> ... </span>
-                    <a class="bg-surface-container-lowest border-outline-variant text-secondary hover:bg-surface-container-low relative inline-flex items-center px-4 py-2 border text-sm font-medium" href="#"> 10 </a>
-                    <a class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-outline-variant bg-surface-container-lowest text-sm font-medium text-secondary hover:bg-surface-container-low" href="#">
-                      <span class="sr-only">Next</span>
-                      <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-                    </a>
-                  </nav>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-stack-lg">
+            <div class="bg-surface-container-lowest border border-error-container rounded-xl p-stack-md flex flex-col relative overflow-hidden shadow-sm">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-error opacity-5 rounded-bl-full"></div>
+                <div class="flex items-center gap-2 text-error mb-2">
+                    <span class="material-symbols-outlined fill">error</span>
+                    <span class="text-label-md font-label-md">Cần xử lý gấp</span>
+                </div>
+                <div class="flex items-end gap-3 mt-auto">
+                    <span class="text-display-lg font-display-lg text-on-surface">{{ high_count }}</span>
+                    <span class="text-body-sm font-body-sm text-secondary mb-1">cảnh báo high</span>
+                </div>
+            </div>
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex flex-col relative overflow-hidden shadow-sm">
+                <div class="flex items-center gap-2 text-tertiary-container mb-2">
+                    <span class="material-symbols-outlined">pending_actions</span>
+                    <span class="text-label-md font-label-md">Tổng cảnh báo</span>
+                </div>
+                <div class="flex items-end gap-3 mt-auto">
+                    <span class="text-display-lg font-display-lg text-on-surface">{{ pending_count }}</span>
+                    <span class="text-body-sm font-body-sm text-secondary mb-1">kết quả dương tính</span>
+                </div>
+            </div>
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex flex-col relative overflow-hidden shadow-sm">
+                <div class="flex items-center gap-2 text-primary-container mb-2">
+                    <span class="material-symbols-outlined">visibility</span>
+                    <span class="text-label-md font-label-md">Đang theo dõi</span>
+                </div>
+                <div class="flex items-end gap-3 mt-auto">
+                    <span class="text-display-lg font-display-lg text-on-surface">{{ monitoring_count }}</span>
+                    <span class="text-body-sm font-body-sm text-secondary mb-1">medium/low</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[1000px]">
+                    <thead>
+                        <tr class="border-b border-outline-variant bg-surface-container-low text-label-sm font-label-sm text-secondary">
+                            <th class="py-3 px-4 font-semibold">Mã CB</th>
+                            <th class="py-3 px-4 font-semibold">Bệnh nhân</th>
+                            <th class="py-3 px-4 font-semibold">Biến chứng</th>
+                            <th class="py-3 px-4 font-semibold">Mức độ</th>
+                            <th class="py-3 px-4 font-semibold">Điểm</th>
+                            <th class="py-3 px-4 font-semibold w-1/4">Nội dung</th>
+                            <th class="py-3 px-4 font-semibold">Thời gian</th>
+                            <th class="py-3 px-4 font-semibold text-right">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-body-sm font-body-sm">
+                        {% for alert in alerts %}
+                            <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors relative">
+                                <td class="py-3 px-4">
+                                    {% if alert.risk_level == 'high' %}<div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>{% endif %}
+                                    <span class="font-medium">{{ alert.id }}</span>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <div class="flex flex-col">
+                                        <span class="font-medium text-on-surface">{{ alert.patient.name }}</span>
+                                        <span class="text-label-sm font-label-sm text-secondary">BN-{{ alert.patient.id }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4">{{ alert.target }}</td>
+                                <td class="py-3 px-4">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm {% if alert.risk_level == 'high' %}bg-error bg-opacity-10 text-error{% elif alert.risk_level == 'medium' %}bg-tertiary-container bg-opacity-10 text-tertiary-container{% else %}bg-primary bg-opacity-10 text-primary{% endif %}">
+                                        {{ alert.risk_level }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4">{{ alert.risk_percent|floatformat:1 }}%</td>
+                                <td class="py-3 px-4 text-on-surface-variant truncate max-w-[250px]" title="{{ alert.message }}">{{ alert.message|default:"-" }}</td>
+                                <td class="py-3 px-4 text-secondary">{{ alert.created_at|date:"H:i d/m/Y" }}</td>
+                                <td class="py-3 px-4 text-right">
+                                    <a href="{% url 'patient-detail' alert.patient.id %}" class="text-primary-container hover:text-primary font-medium text-label-md font-label-md inline-flex items-center gap-1">
+                                        Xem BN
+                                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8" class="py-8 px-4 text-center text-secondary">Chưa có cảnh báo nào trong DB.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="border-t border-outline-variant bg-surface-container-lowest px-4 py-3 flex items-center justify-between sm:px-6">
+                {% if paginator.count %}
+                    <p class="text-body-sm font-body-sm text-on-surface-variant">Hiển thị <span class="font-medium text-on-surface">{{ page_obj.start_index }}</span> đến <span class="font-medium text-on-surface">{{ page_obj.end_index }}</span> trong <span class="font-medium text-on-surface">{{ paginator.count }}</span> kết quả</p>
+                {% else %}
+                    <p class="text-body-sm font-body-sm text-on-surface-variant">Tổng: 0 kết quả</p>
+                {% endif %}
+                <div class="flex gap-1">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}" class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary hover:bg-surface-container-low"><span class="material-symbols-outlined text-[18px]">chevron_left</span></a>
+                    {% endif %}
+                    {% for num in paginator.page_range %}
+                        {% if num == page_obj.number %}
+                            <button class="w-8 h-8 flex items-center justify-center rounded border border-primary bg-primary-container text-on-primary text-label-md font-label-md">{{ num }}</button>
+                        {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                            <a href="?page={{ num }}" class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-on-surface hover:bg-surface-container-low text-label-md font-label-md">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary hover:bg-surface-container-low"><span class="material-symbols-outlined text-[18px]">chevron_right</span></a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

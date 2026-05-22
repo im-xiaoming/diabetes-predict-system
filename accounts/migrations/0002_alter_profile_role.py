@@ -15,9 +15,9 @@ class Migration(migrations.Migration):
             name="role",
             field=models.CharField(
                 choices=[
-                    ("doctor", "Bac si"),
-                    ("admin", "Quan tri vien"),
-                    ("patient", "Benh nhan"),
+                    ("doctor", "Bác sĩ"),
+                    ("admin", "Quản trị viên"),
+                    ("patient", "Bệnh nhân"),
                 ],
                 default="doctor",
                 max_length=20,

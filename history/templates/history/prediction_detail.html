@@ -2,325 +2,170 @@
 {% load static %}
 
 {% block title %}
-    <title>Chi tiết Kết quả Dự đoán - GlucoPredict AI</title>
+    <title>Chi tiết kết quả dự đoán - GlucoPredict AI</title>
 {% endblock %}
 
-
 {% block page_content %}
-    <!-- Page Content -->
     <div class="p-container-padding flex-1 max-w-[1400px] w-full mx-auto flex flex-col gap-stack-lg">
-    <!-- Breadcrumb & Header -->
-    <div class="flex flex-col gap-stack-sm">
-        <div class="flex items-center gap-2 text-label-sm font-label-sm text-secondary">
-        <a class="hover:text-primary transition-colors" href="#">History</a>
-        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-        <a class="hover:text-primary transition-colors" href="#">Predictions</a>
-        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-        <span class="text-on-surface-variant">PRD-2023-10-24-001</span>
-        </div>
-
-        <div class="flex justify-between items-end">
-        <div>
-            <h2 class="text-display-lg font-display-lg text-on-surface">Prediction Detail</h2>
-            <p class="text-body-md font-body-md text-secondary mt-1">
-            Detailed analysis and risk assessment for execution PRD-2023-10-24-001
-            </p>
-        </div>
-
-        <div class="flex gap-stack-sm">
-            <button class="px-4 py-2 bg-surface-container-lowest border border-outline-variant text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-container-low transition-colors flex items-center gap-2 shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
-            <span class="material-symbols-outlined text-[18px]">print</span>
-            <span>Print Report</span>
-            </button>
-        </div>
-        </div>
-    </div>
-
-    <!-- Bento Grid Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-stack-lg">
-        <!-- Left Column: Patient & Model Details (4 cols) -->
-        <div class="lg:col-span-4 flex flex-col gap-stack-lg">
-        <!-- Patient Summary Card -->
-        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex flex-col gap-stack-md">
-            <div class="flex items-center gap-stack-sm border-b border-surface-variant pb-stack-sm">
-            <span class="material-symbols-outlined text-secondary">person</span>
-            <h3 class="text-title-lg font-title-lg text-on-surface">Patient Summary</h3>
+        <div class="flex flex-col gap-stack-sm">
+            <div class="flex items-center gap-2 text-label-sm font-label-sm text-secondary">
+                <a class="hover:text-primary transition-colors" href="{% url 'history' %}">History</a>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-on-surface-variant">PRD-{{ prediction.id }}</span>
             </div>
-
-            <div class="flex items-center gap-stack-md">
-            <div class="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container text-headline-md font-headline-md">
-                NV
-            </div>
-
-            <div>
-                <div class="text-headline-sm font-headline-sm text-on-surface">Nguyen Van A</div>
-                <div class="text-label-md font-label-md text-secondary">ID: PID-883921</div>
-            </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-y-stack-sm mt-stack-sm">
-            <div>
-                <div class="text-label-sm font-label-sm text-secondary">Gender</div>
-                <div class="text-body-md font-body-md text-on-surface">Male</div>
-            </div>
-
-            <div>
-                <div class="text-label-sm font-label-sm text-secondary">Age</div>
-                <div class="text-body-md font-body-md text-on-surface">54</div>
-            </div>
-
-            <div>
-                <div class="text-label-sm font-label-sm text-secondary">Date of Birth</div>
-                <div class="text-body-md font-body-md text-on-surface">12/05/1969</div>
-            </div>
-
-            <div>
-                <div class="text-label-sm font-label-sm text-secondary">Last Visit</div>
-                <div class="text-body-md font-body-md text-on-surface">24/10/2023</div>
-            </div>
+            <div class="flex justify-between items-end">
+                <div>
+                    <h2 class="text-display-lg font-display-lg text-on-surface">Prediction Detail</h2>
+                    <p class="text-body-md font-body-md text-secondary mt-1">Detailed analysis for prediction PRD-{{ prediction.id }}</p>
+                </div>
+                <button class="px-4 py-2 bg-surface-container-lowest border border-outline-variant text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-container-low transition-colors flex items-center gap-2 shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+                    <span class="material-symbols-outlined text-[18px]">print</span>
+                    <span>Print Report</span>
+                </button>
             </div>
         </div>
 
-        <!-- Model Info Card -->
-        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex flex-col gap-stack-md">
-            <div class="flex items-center gap-stack-sm border-b border-surface-variant pb-stack-sm">
-            <span class="material-symbols-outlined text-secondary">memory</span>
-            <h3 class="text-title-lg font-title-lg text-on-surface">Model Information</h3>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-stack-lg">
+            <div class="lg:col-span-4 flex flex-col gap-stack-lg">
+                <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex flex-col gap-stack-md">
+                    <div class="flex items-center gap-stack-sm border-b border-surface-variant pb-stack-sm">
+                        <span class="material-symbols-outlined text-secondary">person</span>
+                        <h3 class="text-title-lg font-title-lg text-on-surface">Patient Summary</h3>
+                    </div>
+                    <div class="flex items-center gap-stack-md">
+                        <div class="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container text-headline-md font-headline-md">
+                            {{ patient.name|slice:":1"|upper }}
+                        </div>
+                        <div>
+                            <div class="text-headline-sm font-headline-sm text-on-surface">{{ patient.name }}</div>
+                            <div class="text-label-md font-label-md text-secondary">ID: BN-{{ patient.id }}</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-y-stack-sm mt-stack-sm">
+                        <div>
+                            <div class="text-label-sm font-label-sm text-secondary">Gender</div>
+                            <div class="text-body-md font-body-md text-on-surface">{{ patient.get_sex_display }}</div>
+                        </div>
+                        <div>
+                            <div class="text-label-sm font-label-sm text-secondary">Age</div>
+                            <div class="text-body-md font-body-md text-on-surface">{{ record.age }}</div>
+                        </div>
+                        <div>
+                            <div class="text-label-sm font-label-sm text-secondary">Created</div>
+                            <div class="text-body-md font-body-md text-on-surface">{{ patient.created_at|date:"d/m/Y" }}</div>
+                        </div>
+                        <div>
+                            <div class="text-label-sm font-label-sm text-secondary">Record time</div>
+                            <div class="text-body-md font-body-md text-on-surface">{{ record.created_at|date:"d/m/Y" }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex flex-col gap-stack-md">
+                    <div class="flex items-center gap-stack-sm border-b border-surface-variant pb-stack-sm">
+                        <span class="material-symbols-outlined text-secondary">memory</span>
+                        <h3 class="text-title-lg font-title-lg text-on-surface">Model Information</h3>
+                    </div>
+                    <div class="flex flex-col gap-stack-sm">
+                        <div class="flex justify-between items-center">
+                            <span class="text-label-md font-label-md text-secondary">Model Name</span>
+                            <span class="text-body-sm font-body-sm text-on-surface font-medium">{{ prediction.model_name|default:"-" }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-label-md font-label-md text-secondary">Version</span>
+                            <span class="px-2 py-0.5 bg-surface-variant text-on-surface-variant rounded text-label-sm font-label-sm">{{ prediction.model_version|default:"-" }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-label-md font-label-md text-secondary">Risk Level</span>
+                            <span class="px-2 py-0.5 {% if prediction.risk_level == 'high' or prediction.risk_level == 'very_high' %}bg-error-container text-on-error-container{% elif prediction.risk_level == 'medium' %}bg-[#F59E0B]/10 text-[#D97706]{% else %}bg-[#10B981]/10 text-[#059669]{% endif %} rounded text-label-sm font-label-sm">{{ prediction.risk_level }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-label-md font-label-md text-secondary">Execution Time</span>
+                            <span class="text-body-sm font-body-sm text-on-surface">{% if request_log %}{{ request_log.latency_ms|floatformat:0 }}ms{% else %}-{% endif %}</span>
+                        </div>
+                    </div>
+                    {% if request_log %}
+                        <div class="mt-stack-sm pt-stack-sm border-t border-surface-variant text-label-md font-label-md text-secondary">
+                            RequestLog: REQ-{{ request_log.id }} / {{ request_log.status_code }}
+                        </div>
+                    {% endif %}
+                </div>
             </div>
 
-            <div class="flex flex-col gap-stack-sm">
-            <div class="flex justify-between items-center">
-                <span class="text-label-md font-label-md text-secondary">Model Name</span>
-                <span class="text-body-sm font-body-sm text-on-surface font-medium">DiabRisk-XGB</span>
-            </div>
+            <div class="lg:col-span-8 flex flex-col gap-stack-lg">
+                <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-stack-md shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex flex-col gap-stack-md relative overflow-hidden">
+                    <div class="flex items-center justify-between border-b border-surface-variant pb-stack-sm z-10">
+                        <div class="flex items-center gap-stack-sm">
+                            <span class="material-symbols-outlined text-primary">monitoring</span>
+                            <h3 class="text-title-lg font-title-lg text-on-surface">Complication Risk Analysis</h3>
+                        </div>
+                        <span class="text-label-sm font-label-sm text-secondary">Generated: {{ prediction.created_at|date:"d/m/Y H:i" }}</span>
+                    </div>
 
-            <div class="flex justify-between items-center">
-                <span class="text-label-md font-label-md text-secondary">Version</span>
-                <span class="px-2 py-0.5 bg-surface-variant text-on-surface-variant rounded text-label-sm font-label-sm">v2.4.1</span>
-            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md z-10">
+                        {% for row in score_rows %}
+                            <div class="p-stack-sm rounded-lg bg-surface flex items-center gap-stack-sm border-l-4 {% if row.color == 'error' %}border-[#ba1a1a]{% elif row.color == 'warning' %}border-[#bc4800]{% else %}border-[#004ac6]{% endif %}">
+                                <div class="w-12 h-12 rounded-full border-[3px] border-surface-variant relative flex items-center justify-center">
+                                    <svg class="absolute inset-0 w-full h-full -rotate-90" viewbox="0 0 36 36">
+                                        <path class="{% if row.color == 'error' %}text-[#ba1a1a]{% elif row.color == 'warning' %}text-[#bc4800]{% else %}text-[#004ac6]{% endif %}" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="{{ row.dash }}" stroke-width="3"></path>
+                                    </svg>
+                                    <span class="text-label-sm font-label-sm font-bold {% if row.color == 'error' %}text-[#93000a]{% elif row.color == 'warning' %}text-[#7d2d00]{% else %}text-[#003ea8]{% endif %}">{{ row.percent|floatformat:0 }}%</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-label-md font-label-md text-on-surface">{{ row.target_name }}</div>
+                                    <div class="flex gap-2 mt-1">
+                                        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold {% if row.color == 'error' %}bg-[#ffdad6] text-[#93000a]{% elif row.color == 'warning' %}bg-[#ffdbcd] text-[#7d2d00]{% else %}bg-[#dbe1ff] text-[#00174b]{% endif %}">{{ row.risk_text }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="md:col-span-2 py-8 text-center text-secondary">Chưa có RiskScoreDetail cho prediction này.</div>
+                        {% endfor %}
+                    </div>
 
-            <div class="flex justify-between items-center">
-                <span class="text-label-md font-label-md text-secondary">Stage</span>
-                <span class="px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed rounded text-label-sm font-label-sm">Production</span>
-            </div>
+                    {% if alert_scores %}
+                        <div class="mt-stack-sm bg-[#ffdad6] bg-opacity-30 rounded-lg p-stack-sm border border-[#ffdad6] z-10 flex gap-stack-sm">
+                            <span class="material-symbols-outlined text-[#ba1a1a] mt-0.5">error</span>
+                            <div>
+                                <h4 class="text-label-md font-label-md text-[#93000a]">Alert Generated</h4>
+                                <p class="text-body-sm font-body-sm text-on-surface-variant mt-1">{{ prediction.warning_message|default:"Prediction có ít nhất một biến chứng dương tính." }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
 
-            <div class="flex justify-between items-center">
-                <span class="text-label-md font-label-md text-secondary">Execution Time</span>
-                <span class="text-body-sm font-body-sm text-on-surface">1.2s</span>
-            </div>
-            </div>
-
-            <div class="mt-stack-sm pt-stack-sm border-t border-surface-variant">
-            <a class="text-primary hover:text-primary-container text-label-md font-label-md flex items-center gap-1 transition-colors" href="#">
-                <span class="material-symbols-outlined text-[16px]">link</span>
-                <span>View Related Request Log</span>
-            </a>
+                <div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col">
+                    <div class="p-stack-md border-b border-surface-variant flex items-center justify-between bg-surface-bright">
+                        <div class="flex items-center gap-stack-sm">
+                            <span class="material-symbols-outlined text-secondary">science</span>
+                            <h3 class="text-title-lg font-title-lg text-on-surface">Input Clinical Profile</h3>
+                        </div>
+                        <span class="text-label-sm font-label-sm text-secondary bg-surface-variant px-2 py-1 rounded">{{ features|length }} Features Processed</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-surface border-b border-outline-variant">
+                                    <th class="py-3 px-stack-md text-label-sm font-label-sm text-secondary uppercase tracking-wider">Feature</th>
+                                    <th class="py-3 px-stack-md text-label-sm font-label-sm text-secondary uppercase tracking-wider">Value</th>
+                                    <th class="py-3 px-stack-md text-label-sm font-label-sm text-secondary uppercase tracking-wider">Unit</th>
+                                    <th class="py-3 px-stack-md text-label-sm font-label-sm text-secondary uppercase tracking-wider">Reference Range</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-body-sm font-body-sm divide-y divide-surface-variant">
+                                {% for name, value, unit, reference in features %}
+                                    <tr class="hover:bg-surface-container-low transition-colors">
+                                        <td class="py-3 px-stack-md font-medium text-on-surface">{{ name }}</td>
+                                        <td class="py-3 px-stack-md">{{ value }}</td>
+                                        <td class="py-3 px-stack-md text-secondary">{{ unit }}</td>
+                                        <td class="py-3 px-stack-md text-secondary">{{ reference }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-        </div>
-
-        <!-- Right Column: Results & Clinical Profile (8 cols) -->
-        <div class="lg:col-span-8 flex flex-col gap-stack-lg">
-        <!-- Risk Analysis Results (Glassmorphism inspired light styling) -->
-        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-stack-md shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex flex-col gap-stack-md relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-primary-fixed opacity-30 rounded-full blur-3xl -z-10 translate-x-1/3 -translate-y-1/3"></div>
-
-            <div class="flex items-center justify-between border-b border-surface-variant pb-stack-sm z-10">
-            <div class="flex items-center gap-stack-sm">
-                <span class="material-symbols-outlined text-primary">monitoring</span>
-                <h3 class="text-title-lg font-title-lg text-on-surface">Complication Risk Analysis</h3>
-            </div>
-            <span class="text-label-sm font-label-sm text-secondary">Generated: 24/10/2023 14:30</span>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md z-10">
-            <!-- Retinopathy -->
-            <div class="p-stack-sm rounded-lg bg-surface flex items-center gap-stack-sm border-l-4 border-[#ba1a1a]">
-                <div class="w-12 h-12 rounded-full border-[3px] border-surface-variant relative flex items-center justify-center">
-                <svg class="absolute inset-0 w-full h-full -rotate-90" viewbox="0 0 36 36">
-                    <path class="text-[#ba1a1a]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="82, 100" stroke-width="3"></path>
-                </svg>
-                <span class="text-label-sm font-label-sm font-bold text-[#93000a]">82%</span>
-                </div>
-
-                <div class="flex-1">
-                <div class="text-label-md font-label-md text-on-surface">Diabetic Retinopathy</div>
-                <div class="flex gap-2 mt-1">
-                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#ffdad6] text-[#93000a]">High Risk</span>
-                </div>
-                </div>
-            </div>
-
-            <!-- Neuropathy -->
-            <div class="p-stack-sm rounded-lg bg-surface flex items-center gap-stack-sm border-l-4 border-[#bc4800]">
-                <div class="w-12 h-12 rounded-full border-[3px] border-surface-variant relative flex items-center justify-center">
-                <svg class="absolute inset-0 w-full h-full -rotate-90" viewbox="0 0 36 36">
-                    <path class="text-[#bc4800]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="64, 100" stroke-width="3"></path>
-                </svg>
-                <span class="text-label-sm font-label-sm font-bold text-[#7d2d00]">64%</span>
-                </div>
-
-                <div class="flex-1">
-                <div class="text-label-md font-label-md text-on-surface">Neuropathy</div>
-                <div class="flex gap-2 mt-1">
-                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#ffdbcd] text-[#7d2d00]">Medium Risk</span>
-                </div>
-                </div>
-            </div>
-
-            <!-- Nephropathy -->
-            <div class="p-stack-sm rounded-lg bg-surface flex items-center gap-stack-sm border-l-4 border-[#004ac6]">
-                <div class="w-12 h-12 rounded-full border-[3px] border-surface-variant relative flex items-center justify-center">
-                <svg class="absolute inset-0 w-full h-full -rotate-90" viewbox="0 0 36 36">
-                    <path class="text-[#004ac6]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="28, 100" stroke-width="3"></path>
-                </svg>
-                <span class="text-label-sm font-label-sm font-bold text-[#003ea8]">28%</span>
-                </div>
-
-                <div class="flex-1">
-                <div class="text-label-md font-label-md text-on-surface">Nephropathy</div>
-                <div class="flex gap-2 mt-1">
-                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#dbe1ff] text-[#00174b]">Low Risk</span>
-                </div>
-                </div>
-            </div>
-
-            <!-- Cardiovascular -->
-            <div class="p-stack-sm rounded-lg bg-surface flex items-center gap-stack-sm border-l-4 border-[#bc4800]">
-                <div class="w-12 h-12 rounded-full border-[3px] border-surface-variant relative flex items-center justify-center">
-                <svg class="absolute inset-0 w-full h-full -rotate-90" viewbox="0 0 36 36">
-                    <path class="text-[#bc4800]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="55, 100" stroke-width="3"></path>
-                </svg>
-                <span class="text-label-sm font-label-sm font-bold text-[#7d2d00]">55%</span>
-                </div>
-
-                <div class="flex-1">
-                <div class="text-label-md font-label-md text-on-surface">Cardiovascular Disease</div>
-                <div class="flex gap-2 mt-1">
-                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#ffdbcd] text-[#7d2d00]">Medium Risk</span>
-                </div>
-                </div>
-            </div>
-
-            <!-- Foot Ulcer -->
-            <div class="p-stack-sm rounded-lg bg-surface flex items-center gap-stack-sm border-l-4 border-[#004ac6] md:col-span-2 lg:col-span-1">
-                <div class="w-12 h-12 rounded-full border-[3px] border-surface-variant relative flex items-center justify-center">
-                <svg class="absolute inset-0 w-full h-full -rotate-90" viewbox="0 0 36 36">
-                    <path class="text-[#004ac6]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="15, 100" stroke-width="3"></path>
-                </svg>
-                <span class="text-label-sm font-label-sm font-bold text-[#003ea8]">15%</span>
-                </div>
-
-                <div class="flex-1">
-                <div class="text-label-md font-label-md text-on-surface">Diabetic Foot Ulcer</div>
-                <div class="flex gap-2 mt-1">
-                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#dbe1ff] text-[#00174b]">Low Risk</span>
-                </div>
-                </div>
-            </div>
-            </div>
-
-            <!-- System Generated Alerts based on Results -->
-            <div class="mt-stack-sm bg-[#ffdad6] bg-opacity-30 rounded-lg p-stack-sm border border-[#ffdad6] z-10 flex gap-stack-sm">
-            <span class="material-symbols-outlined text-[#ba1a1a] mt-0.5">error</span>
-            <div>
-                <h4 class="text-label-md font-label-md text-[#93000a]">Critical Alert Generated</h4>
-                <p class="text-body-sm font-body-sm text-on-surface-variant mt-1">
-                Patient's Retinopathy risk score (82%) exceeds the critical threshold (75%). Immediate ophthalmology consultation recommended. Elevated HbA1c and duration of diabetes are primary contributing factors.
-                </p>
-            </div>
-            </div>
-        </div>
-
-        <!-- Clinical Input Profile Table -->
-        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col">
-            <div class="p-stack-md border-b border-surface-variant flex items-center justify-between bg-surface-bright">
-            <div class="flex items-center gap-stack-sm">
-                <span class="material-symbols-outlined text-secondary">science</span>
-                <h3 class="text-title-lg font-title-lg text-on-surface">Input Clinical Profile</h3>
-            </div>
-            <span class="text-label-sm font-label-sm text-secondary bg-surface-variant px-2 py-1 rounded">24 Features Processed</span>
-            </div>
-
-            <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                <tr class="bg-surface border-b border-outline-variant">
-                    <th class="py-3 px-stack-md text-label-sm font-label-sm text-secondary uppercase tracking-wider">
-                    Feature
-                    </th>
-                    <th class="py-3 px-stack-md text-label-sm font-label-sm text-secondary uppercase tracking-wider">
-                    Value
-                    </th>
-                    <th class="py-3 px-stack-md text-label-sm font-label-sm text-secondary uppercase tracking-wider">
-                    Unit
-                    </th>
-                    <th class="py-3 px-stack-md text-label-sm font-label-sm text-secondary uppercase tracking-wider">
-                    Reference Range
-                    </th>
-                </tr>
-                </thead>
-
-                <tbody class="text-body-sm font-body-sm divide-y divide-surface-variant">
-                <tr class="hover:bg-surface-container-low transition-colors">
-                    <td class="py-3 px-stack-md font-medium text-on-surface">BMI</td>
-                    <td class="py-3 px-stack-md">28.5</td>
-                    <td class="py-3 px-stack-md text-secondary">kg/m²</td>
-                    <td class="py-3 px-stack-md text-secondary">18.5 - 24.9</td>
-                </tr>
-
-                <tr class="hover:bg-surface-container-low transition-colors border-l-4 border-[#ba1a1a]">
-                    <td class="py-3 px-stack-md font-medium text-on-surface">HbA1c</td>
-                    <td class="py-3 px-stack-md font-bold text-[#ba1a1a]">8.2</td>
-                    <td class="py-3 px-stack-md text-secondary">%</td>
-                    <td class="py-3 px-stack-md text-secondary">&lt; 5.7</td>
-                </tr>
-
-                <tr class="hover:bg-surface-container-low transition-colors">
-                    <td class="py-3 px-stack-md font-medium text-on-surface">Fasting Blood Glucose</td>
-                    <td class="py-3 px-stack-md">145</td>
-                    <td class="py-3 px-stack-md text-secondary">mg/dL</td>
-                    <td class="py-3 px-stack-md text-secondary">70 - 99</td>
-                </tr>
-
-                <tr class="hover:bg-surface-container-low transition-colors border-l-4 border-[#bc4800]">
-                    <td class="py-3 px-stack-md font-medium text-on-surface">Systolic BP</td>
-                    <td class="py-3 px-stack-md font-medium text-[#bc4800]">138</td>
-                    <td class="py-3 px-stack-md text-secondary">mmHg</td>
-                    <td class="py-3 px-stack-md text-secondary">&lt; 120</td>
-                </tr>
-
-                <tr class="hover:bg-surface-container-low transition-colors">
-                    <td class="py-3 px-stack-md font-medium text-on-surface">Diastolic BP</td>
-                    <td class="py-3 px-stack-md">85</td>
-                    <td class="py-3 px-stack-md text-secondary">mmHg</td>
-                    <td class="py-3 px-stack-md text-secondary">&lt; 80</td>
-                </tr>
-
-                <tr class="hover:bg-surface-container-low transition-colors">
-                    <td class="py-3 px-stack-md font-medium text-on-surface">Diabetes Duration</td>
-                    <td class="py-3 px-stack-md">12</td>
-                    <td class="py-3 px-stack-md text-secondary">years</td>
-                    <td class="py-3 px-stack-md text-secondary">-</td>
-                </tr>
-
-                <tr class="hover:bg-surface-container-low transition-colors">
-                    <td class="py-3 px-stack-md font-medium text-on-surface">LDL Cholesterol</td>
-                    <td class="py-3 px-stack-md">110</td>
-                    <td class="py-3 px-stack-md text-secondary">mg/dL</td>
-                    <td class="py-3 px-stack-md text-secondary">&lt; 100</td>
-                </tr>
-                </tbody>
-            </table>
-            </div>
-
-            <div class="p-3 bg-surface text-center border-t border-surface-variant">
-            <button class="text-primary hover:text-primary-container text-label-md font-label-md transition-colors">
-                View All 24 Features
-            </button>
-            </div>
-        </div>
-        </div>
-    </div>
     </div>
 {% endblock %}

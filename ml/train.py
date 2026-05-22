@@ -215,10 +215,10 @@ def main(tune=False, n_trials=30, timeout=None, register=False):
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--tune", action="store_true", help="dung Optuna de tim sieu tham so")
-    p.add_argument("--n-trials", type=int, default=30, help="so trial cho moi model")
-    p.add_argument("--timeout", type=int, default=None, help="timeout tinh bang giay cho moi model")
-    p.add_argument("--register", action="store_true", help="dang ky best model vao MLflow registry")
+    p.add_argument("--tune", action="store_true", help="dùng Optuna để tìm siêu tham số")
+    p.add_argument("--n-trials", type=int, default=30, help="số trial cho mỗi model")
+    p.add_argument("--timeout", type=int, default=None, help="timeout tính bằng giây cho mỗi model")
+    p.add_argument("--register", action="store_true", help="đăng ký best model vào MLflow registry")
     return p.parse_args()
 
 

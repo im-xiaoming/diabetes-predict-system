@@ -5,50 +5,41 @@
     <title>Nhật ký Request - GlucoPredict AI</title>
 {% endblock %}
 
-
 {% block page_content %}
     <div class="max-w-[1400px] mx-auto flex flex-col gap-stack-lg">
-        <!-- Header Section -->
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
                 <h1 class="text-display-lg font-display-lg text-on-background mb-1">Nhật ký Request</h1>
-                <p class="text-body-md font-body-md text-secondary">Theo dõi chi tiết các truy cập và phản hồi từ hệ thống API.</p>
+                <p class="text-body-md font-body-md text-secondary">Dữ liệu lấy từ bảng RequestLog.</p>
             </div>
-
             <button class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-label-md font-label-md text-on-surface hover:bg-surface-container-low transition-colors shadow-sm w-fit">
                 <span class="material-symbols-outlined text-[18px]">download</span>
                 Xuất báo cáo
             </button>
         </div>
 
-        <!-- Filters & Controls -->
         <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex flex-col lg:flex-row gap-4 items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
             <div class="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-                <!-- Search -->
                 <div class="relative w-full sm:w-80">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-                    <input class="w-full h-10 pl-10 pr-4 bg-surface rounded-lg border border-outline-variant text-body-sm font-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Tìm kiếm mã log, endpoint..." type="text" />
+                    <input class="w-full h-10 pl-10 pr-4 bg-surface rounded-lg border border-outline-variant text-body-sm font-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Tim endpoint..." type="text" />
                 </div>
-
-                <!-- Status Filter -->
                 <div class="relative w-full sm:w-48">
                     <select class="w-full h-10 pl-3 pr-10 bg-surface rounded-lg border border-outline-variant text-body-sm font-body-sm text-on-surface appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
                         <option value="">Tất cả Status Code</option>
-                        <option value="200">200 OK</option>
-                        <option value="400">4XX Client Error</option>
-                        <option value="500">5XX Server Error</option>
+                        <option value="200">2XX</option>
+                        <option value="400">4XX</option>
+                        <option value="500">5XX</option>
                     </select>
                     <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none">expand_more</span>
                 </div>
             </div>
-
             <div class="flex items-center gap-2 text-label-sm font-label-sm text-secondary w-full lg:w-auto justify-end">
                 <span class="material-symbols-outlined text-[16px]">refresh</span>
-                Cập nhật 2 phút trước
+                {% if latest_log %}Mới nhất: {{ latest_log.created_at|date:"H:i d/m/Y" }}{% else %}Chưa có request{% endif %}
             </div>
         </div>
 
-        <!-- Log Table -->
         <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[900px]">
@@ -59,192 +50,77 @@
                             <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Endpoint</th>
                             <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Status</th>
                             <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Latency</th>
-                            <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Mã Kết Quả</th>
-                            <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-right">Chi Tiết</th>
+                            <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Prediction</th>
+                            <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-right">Chi tiết</th>
                         </tr>
                     </thead>
-
                     <tbody class="divide-y divide-outline-variant">
-                        <!-- Row 1: Success -->
-                        <tr class="hover:bg-surface-container-low transition-colors group">
-                            <td class="py-3 px-4">
-                                <span class="bg-surface-variant text-on-surface-variant px-1.5 py-0.5 rounded text-label-sm font-label-sm tracking-widest">REQ-992A-4B</span>
-                            </td>
-
-                            <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">24-10-2023 14:32:01</td>
-
-                            <td class="py-3 px-4">
-                                <span class="text-primary text-body-sm font-body-sm bg-surface-variant px-1.5 py-0.5 rounded">/v1/predict/risk</span>
-                            </td>
-
-                            <td class="py-3 px-4">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant text-label-sm font-label-sm">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-primary-container mr-1.5"></span>
-                                    200 OK
-                                </span>
-                            </td>
-
-                            <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">142 ms</td>
-
-                            <td class="py-3 px-4">
-                                <span class="text-body-sm font-body-sm text-secondary">RES-8812</span>
-                            </td>
-
-                            <td class="py-3 px-4 text-right">
-                                <button class="text-secondary hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Row 2: Success -->
-                        <tr class="hover:bg-surface-container-low transition-colors group">
-                            <td class="py-3 px-4">
-                                <span class="bg-surface-variant text-on-surface-variant px-1.5 py-0.5 rounded text-label-sm font-label-sm tracking-widest">REQ-992A-4C</span>
-                            </td>
-
-                            <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">24-10-2023 14:31:45</td>
-
-                            <td class="py-3 px-4">
-                                <span class="text-primary text-body-sm font-body-sm bg-surface-variant px-1.5 py-0.5 rounded">/v1/patient/history</span>
-                            </td>
-
-                            <td class="py-3 px-4">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant text-label-sm font-label-sm">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-primary-container mr-1.5"></span>
-                                    200 OK
-                                </span>
-                            </td>
-
-                            <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">89 ms</td>
-
-                            <td class="py-3 px-4">
-                                <span class="text-body-sm font-body-sm text-secondary">-</span>
-                            </td>
-
-                            <td class="py-3 px-4 text-right">
-                                <button class="text-secondary hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Row 3: Client Error (Validation) -->
-                        <tr class="hover:bg-surface-container-low transition-colors group">
-                            <td class="py-3 px-4">
-                                <span class="bg-surface-variant text-on-surface-variant px-1.5 py-0.5 rounded text-label-sm font-label-sm tracking-widest">REQ-992A-4D</span>
-                            </td>
-
-                            <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">24-10-2023 14:28:12</td>
-
-                            <td class="py-3 px-4">
-                                <span class="text-primary text-body-sm font-body-sm bg-surface-variant px-1.5 py-0.5 rounded">/v1/predict/risk</span>
-                            </td>
-
-                            <td class="py-3 px-4">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant text-label-sm font-label-sm border border-tertiary-fixed-dim">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-tertiary-container mr-1.5"></span>
-                                    422 Unprocessable Entity
-                                </span>
-                            </td>
-
-                            <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">45 ms</td>
-
-                            <td class="py-3 px-4">
-                                <span class="text-body-sm font-body-sm text-secondary">-</span>
-                            </td>
-
-                            <td class="py-3 px-4 text-right">
-                                <button class="text-secondary hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Row 4: Server Error (High Alert) -->
-                        <tr class="hover:bg-error-container hover:bg-opacity-20 transition-colors group border-l-4 border-l-error">
-                            <td class="py-3 px-4 pl-3">
-                                <span class="bg-surface-variant text-on-surface-variant px-1.5 py-0.5 rounded text-label-sm font-label-sm tracking-widest">REQ-992A-4E</span>
-                            </td>
-
-                            <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">24-10-2023 14:15:00</td>
-
-                            <td class="py-3 px-4">
-                                <span class="text-primary text-body-sm font-body-sm bg-surface-variant px-1.5 py-0.5 rounded">/v1/model/inference</span>
-                            </td>
-
-                            <td class="py-3 px-4">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-error-container text-on-error-container text-label-sm font-label-sm font-bold">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-error mr-1.5"></span>
-                                    500 Internal Server Error
-                                </span>
-                            </td>
-
-                            <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface font-semibold text-error">3240 ms</td>
-
-                            <td class="py-3 px-4">
-                                <span class="text-body-sm font-body-sm text-secondary">-</span>
-                            </td>
-
-                            <td class="py-3 px-4 text-right">
-                                <button class="text-error hover:text-on-error-container transition-colors">
-                                    <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Row 5: Success -->
-                        <tr class="hover:bg-surface-container-low transition-colors group border-l-4 border-l-transparent">
-                            <td class="py-3 px-4 pl-3">
-                                <span class="bg-surface-variant text-on-surface-variant px-1.5 py-0.5 rounded text-label-sm font-label-sm tracking-widest">REQ-992A-4F</span>
-                            </td>
-
-                            <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">24-10-2023 14:10:22</td>
-
-                            <td class="py-3 px-4">
-                                <span class="text-primary text-body-sm font-body-sm bg-surface-variant px-1.5 py-0.5 rounded">/v1/predict/risk</span>
-                            </td>
-
-                            <td class="py-3 px-4">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant text-label-sm font-label-sm">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-primary-container mr-1.5"></span>
-                                    200 OK
-                                </span>
-                            </td>
-
-                            <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">156 ms</td>
-
-                            <td class="py-3 px-4">
-                                <span class="text-body-sm font-body-sm text-secondary">RES-8811</span>
-                            </td>
-
-                            <td class="py-3 px-4 text-right">
-                                <button class="text-secondary hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-                                </button>
-                            </td>
-                        </tr>
+                        {% for log in logs %}
+                            <tr class="hover:bg-surface-container-low transition-colors group {% if log.status_code >= 500 %}border-l-4 border-l-error{% elif log.status_code >= 400 %}border-l-4 border-l-[#f59e0b]{% else %}border-l-4 border-l-transparent{% endif %}">
+                                <td class="py-3 px-4">
+                                    <span class="bg-surface-variant text-on-surface-variant px-1.5 py-0.5 rounded text-label-sm font-label-sm tracking-widest">REQ-{{ log.id }}</span>
+                                </td>
+                                <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">{{ log.created_at|date:"d-m-Y H:i:s" }}</td>
+                                <td class="py-3 px-4">
+                                    <span class="text-primary text-body-sm font-body-sm bg-surface-variant px-1.5 py-0.5 rounded">{{ log.endpoint }}</span>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm {% if log.status_code >= 500 %}bg-error-container text-on-error-container font-bold{% elif log.status_code >= 400 %}bg-tertiary-fixed text-on-tertiary-fixed-variant border border-tertiary-fixed-dim{% else %}bg-secondary-fixed text-on-secondary-fixed-variant{% endif %}">
+                                        <span class="w-1.5 h-1.5 rounded-full {% if log.status_code >= 500 %}bg-error{% elif log.status_code >= 400 %}bg-tertiary-container{% else %}bg-primary-container{% endif %} mr-1.5"></span>
+                                        {{ log.status_code }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-body-sm font-body-sm {% if log.status_code >= 500 %}text-error font-semibold{% else %}text-on-surface{% endif %}">{{ log.latency_ms|floatformat:0 }} ms</td>
+                                <td class="py-3 px-4">
+                                    {% if log.prediction_id %}
+                                        <span class="text-body-sm font-body-sm text-secondary">PRD-{{ log.prediction_id }}</span>
+                                    {% else %}
+                                        <span class="text-body-sm font-body-sm text-secondary">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 px-4 text-right">
+                                    {% if log.prediction_id %}
+                                        <a href="{% url 'history_detail' log.prediction_id %}" class="{% if log.status_code >= 500 %}text-error{% else %}text-secondary hover:text-primary{% endif %} transition-colors">
+                                            <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                                        </a>
+                                    {% else %}
+                                        <span class="text-secondary">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="py-8 px-4 text-center text-secondary">Chưa có request log nào trong DB.</td>
+                            </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
 
-            <!-- Pagination -->
             <div class="px-4 py-3 border-t border-outline-variant bg-surface-container-lowest flex items-center justify-between">
-                <span class="text-body-sm font-body-sm text-secondary">Hiển thị 1 đến 5 trong số 124 bản ghi</span>
-
+                {% if paginator.count %}
+                    <span class="text-body-sm font-body-sm text-secondary">Hiển thị {{ page_obj.start_index }} đến {{ page_obj.end_index }} trong số {{ paginator.count }} bản ghi</span>
+                {% else %}
+                    <span class="text-body-sm font-body-sm text-secondary">Tổng: 0 bản ghi</span>
+                {% endif %}
                 <div class="flex items-center gap-1">
-                    <button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary hover:bg-surface-container-low disabled:opacity-50" disabled>
-                        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
-                    </button>
-
-                    <button class="w-8 h-8 flex items-center justify-center rounded border border-primary bg-primary-container text-on-primary text-label-md font-label-md">1</button>
-                    <button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-on-surface hover:bg-surface-container-low text-label-md font-label-md">2</button>
-                    <button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-on-surface hover:bg-surface-container-low text-label-md font-label-md">3</button>
-                    <span class="px-1 text-secondary">...</span>
-
-                    <button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary hover:bg-surface-container-low">
-                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                    </button>
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}" class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary hover:bg-surface-container-low"><span class="material-symbols-outlined text-[18px]">chevron_left</span></a>
+                    {% else %}
+                        <button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary opacity-50" disabled><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>
+                    {% endif %}
+                    {% for num in paginator.page_range %}
+                        {% if num == page_obj.number %}
+                            <button class="w-8 h-8 flex items-center justify-center rounded border border-primary bg-primary-container text-on-primary text-label-md font-label-md">{{ num }}</button>
+                        {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                            <a href="?page={{ num }}" class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-on-surface hover:bg-surface-container-low text-label-md font-label-md">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary hover:bg-surface-container-low"><span class="material-symbols-outlined text-[18px]">chevron_right</span></a>
+                    {% else %}
+                        <button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary opacity-50" disabled><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+                    {% endif %}
                 </div>
             </div>
         </div>
