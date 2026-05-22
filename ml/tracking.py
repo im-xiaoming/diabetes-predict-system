@@ -12,10 +12,24 @@ EXP_NAME = "diabetes-complication-training"
 
 
 def setup_tracking():
-    uri = MLRUNS_DIR.resolve().as_uri()
-    mlflow.set_tracking_uri(uri)
+    MLRUNS_DIR.mkdir(parents=True, exist_ok=True)
+
+    db_path = ROOT_DIR / "mlflow.db"
+    tracking_uri = f"sqlite:///{db_path.resolve().as_posix()}"
+    artifact_uri = MLRUNS_DIR.resolve().as_uri()
+
+    mlflow.set_tracking_uri(tracking_uri)
+
+    exp = mlflow.get_experiment_by_name(EXP_NAME)
+    if exp is None:
+        mlflow.create_experiment(
+            name=EXP_NAME,
+            artifact_location=artifact_uri
+        )
+
     mlflow.set_experiment(EXP_NAME)
-    return uri
+
+    return tracking_uri
 
 
 def start_run(name):
