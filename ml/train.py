@@ -116,9 +116,15 @@ def score_model(name, mdl, x_train, x_test, y_train, y_test, tg):
     return res, rep_txt, rep_js
 
 
-def build_tuned_models(x_train, y_train, n_trials, timeout):
+def build_tuned_models(x_train, y_train, n_trials, timeout, log_trials=True):
     print(f"\noptuna_tuning: n_trials={n_trials} timeout={timeout}")
-    results = tune_all(x_train, y_train, n_trials=n_trials, timeout=timeout)
+    results = tune_all(
+        x_train,
+        y_train,
+        n_trials=n_trials,
+        timeout=timeout,
+        log_trials=log_trials,
+    )
     models = {}
     tuned_meta = {}
     for name, r in results.items():
@@ -165,6 +171,7 @@ def main(
     promotion_metric="f1_macro",
     promotion_min_delta=0.0,
     force_promote=False,
+    log_optuna_trials=True,
 ):
     data_path = Path(data_path)
     df = load_data(data_path)
@@ -193,7 +200,13 @@ def main(
         "promotion_min_delta": promotion_min_delta,
     }
     if tune:
-        models_iter, tuned_meta = build_tuned_models(x_train, y_train, n_trials, timeout)
+        models_iter, tuned_meta = build_tuned_models(
+            x_train,
+            y_train,
+            n_trials,
+            timeout,
+            log_trials=log_optuna_trials,
+        )
     else:
         models_iter, tuned_meta = make_models(), {}
     rows = []
@@ -301,6 +314,11 @@ def parse_args():
     p.add_argument("--promotion-metric", default="f1_macro", help="Metric used to compare candidate with champion")
     p.add_argument("--promotion-min-delta", type=float, default=0.0, help="Minimum metric improvement required")
     p.add_argument("--force-promote", action="store_true", help="Promote candidate even if it is worse than champion")
+    p.add_argument(
+        "--no-log-optuna-trials",
+        action="store_true",
+        help="Do not create one MLflow run for each Optuna trial",
+    )
     return p.parse_args()
 
 
@@ -315,4 +333,5 @@ if __name__ == "__main__":
         promotion_metric=args.promotion_metric,
         promotion_min_delta=args.promotion_min_delta,
         force_promote=args.force_promote,
+        log_optuna_trials=not args.no_log_optuna_trials,
     )

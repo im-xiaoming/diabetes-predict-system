@@ -94,3 +94,23 @@ Pipeline hiện có hai stage:
 Nếu candidate bị reject, `dvc repro` vẫn chạy thành công nhưng `ml/artifacts/model.pkl` không đổi.
 
 Ngoại lệ vận hành: nếu candidate bị reject nhưng champion artifact cũ không thể restore/load trong môi trường hiện tại, ví dụ do lệch phiên bản scikit-learn khi unpickle, `train.py` sẽ promote candidate để API vẫn có `model.pkl` chạy được. Trường hợp này cần xem lại dependency trong `requirements.txt` để tránh model pickle bị lệch version giữa các lần train/deploy.
+
+## Airflow
+
+Airflow không định nghĩa lại từng bước export/train/promote. Các bước đó đã nằm trong `dvc.yaml` và `ml/train.py`.
+
+Airflow chỉ lên lịch và chạy:
+
+```text
+dvc repro -> dvc push
+```
+
+DAG hiện tại:
+
+```text
+retrain_diabetes_model
+  -> dvc_repro
+  -> dvc_push
+```
+
+Nếu `dvc_repro` fail thì `dvc_push` không chạy. Nếu candidate model bị reject bởi promotion gate, `dvc_repro` vẫn thành công miễn là `ml/artifacts/model.pkl` được giữ hoặc restore hợp lệ.
