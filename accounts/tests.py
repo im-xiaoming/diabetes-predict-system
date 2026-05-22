@@ -42,7 +42,7 @@ class AccountsAuthTests(TestCase):
             {"username": "doctor1", "password": "StrongPass123!"},
         )
 
-        self.assertRedirects(response, reverse("login"))
+        self.assertRedirects(response, reverse("dashboard"))
         self.assertEqual(int(self.client.session["_auth_user_id"]), user.pk)
 
     def test_login_accepts_email(self):
@@ -57,7 +57,7 @@ class AccountsAuthTests(TestCase):
             {"username": "doctor@example.com", "password": "StrongPass123!"},
         )
 
-        self.assertRedirects(response, reverse("login"))
+        self.assertRedirects(response, reverse("dashboard"))
         self.assertEqual(int(self.client.session["_auth_user_id"]), user.pk)
 
     def test_register_success_message_is_consumed_on_login_page(self):
@@ -67,7 +67,7 @@ class AccountsAuthTests(TestCase):
                 "full_name": "Nguyen Van A",
                 "email": "message@example.com",
                 "username": "messageuser",
-                "role": Profile.Role.PATIENT,
+                "role": Profile.Role.DOCTOR,
                 "password1": "StrongPass123!",
                 "password2": "StrongPass123!",
                 "terms": "on",
