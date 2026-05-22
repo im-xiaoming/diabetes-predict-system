@@ -15,6 +15,7 @@ class PredictionResult(models.Model):
 
 
 class RiskScoreDetail(models.Model):
+    """Prediction results."""
     prediction = models.ForeignKey(PredictionResult, on_delete=models.CASCADE, related_name="scores")
     target = models.CharField(max_length=20)
     risk_score = models.FloatField()

@@ -56,3 +56,7 @@ dist/
 *pkl
 *.csv
 *.db
+
+# Airflow runtime files
+airflow/logs/
+airflow/config/airflow.cfg
