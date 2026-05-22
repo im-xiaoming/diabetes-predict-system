@@ -1,52 +1,43 @@
-Trong project này, DVC nên quản lý:
+# Quy trình DVC
 
-- `data/data.csv`
-- `ml/artifacts/model.pkl`
-- có thể thêm `mlruns/` artifact quan trọng nếu muốn, nhưng thường MLflow đã quản lý experiment rồi nên không nhất thiết đưa toàn bộ `mlruns` vào DVC.
+Trong project này, DB là nguồn dữ liệu vận hành, còn DVC quản lý các artifact có thể version:
 
-Luồng hợp lý:
+- `data/data.csv`: seed dataset gốc.
+- `data/training.csv`: dataset dùng để train, được export/merge từ DB và seed dataset.
+- `ml/artifacts/model.pkl`: model artifact sau khi train.
+
+Luồng retrain:
 
 ```text
-Git: code, config, pipeline definition
-DVC: dataset, model artifact
-MLflow: experiment tracking, metrics, registry
-Airflow/Cron: lịch retrain định kỳ
-Django: UI thao tác thủ công/xem trạng thái
+Mock HIS / HIS thật -> DB
+ClinicalRecord + ClinicalRecordLabel -> data/training.csv
+data/training.csv -> ml/train.py -> ml/artifacts/model.pkl
 ```
 
-Thứ tự nên làm:
+Không train bằng `RiskScoreDetail.risk_label` vì đây là output của model. Chỉ dùng ground-truth label trong `ClinicalRecordLabel`.
 
-1. Cài và init DVC:
-   ```bash
-   pip install dvc
-   dvc init
-   ```
+Chạy export riêng:
 
-2. Track dataset:
-   ```bash
-   dvc add data/data.csv
-   git add data/data.csv.dvc .gitignore
-   git commit -m "Track dataset with DVC"
-   ```
+```powershell
+python ml/export_training_data.py --output data/training.csv --fallback data/data.csv
+```
 
-4. Cấu hình remote DVC:
-   ```bash
-   ...
-   dvc push -r origin
-   ```
+Chạy train nhanh không tune:
 
-Bước “chuẩn” hơn nữa là tạo `dvc.yaml` để pipeline có thể reproduce:
+```powershell
+python ml/train.py --data data/training.csv
+```
 
-```bash
-dvc stage add -n train_model \
-  -d data/data.csv \
-  -d ml/train.py \
-  -o ml/artifacts/model.pkl \
-  python ml/train.py --tune --n-trials 5 --timeout 600 --register
+Chạy pipeline DVC:
 
+```powershell
 dvc repro
-
-dvc push -r origin
+dvc push
 ```
 
-Tóm lại: **đúng, DVC là bước tiếp theo nếu bạn muốn version data/model**. Sau DVC mới tính tiếp scheduler như Airflow để tự động chạy lại pipeline.
+`export_training_data` được đặt `always_changed: true` vì DB là runtime input, không nên commit hay track `db.sqlite3` trong DVC. Mỗi lần `dvc repro`, stage export sẽ chạy lại và merge:
+
+- seed rows từ `data/data.csv`
+- labeled rows từ DB
+
+Sau đó stage này drop duplicate theo feature + label để tạo `data/training.csv`.

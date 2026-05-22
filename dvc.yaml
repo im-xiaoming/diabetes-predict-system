@@ -1,6 +1,15 @@
 stages:
+  export_training_data:
+    cmd: python ml/export_training_data.py --output data/training.csv --fallback data/data.csv
+    always_changed: true
+    deps:
+    - data/data.csv
+    - ml/export_training_data.py
+    outs:
+    - data/training.csv
+
   train_model:
-    cmd: python ml/train.py --tune --n-trials 5 --timeout 600 --register
+    cmd: python ml/train.py --data data/training.csv --tune --n-trials 5 --timeout 600 --register
     deps:
     - data/training.csv
     - ml/train.py

@@ -131,8 +131,9 @@ def build_tuned_models(x_train, y_train, n_trials, timeout):
     return models, tuned_meta
 
 
-def main(tune=False, n_trials=30, timeout=None, register=False):
-    df = load_data(DATA_PATH)
+def main(data_path=DATA_PATH, tune=False, n_trials=30, timeout=None, register=False):
+    data_path = Path(data_path)
+    df = load_data(data_path)
     raw_n = len(df)
     df = clean_data(df)
     print(f"rows_raw: {raw_n}")
@@ -153,6 +154,7 @@ def main(tune=False, n_trials=30, timeout=None, register=False):
         "duplicates_dropped": raw_n - len(df),
         "test_size": TEST_SIZE,
         "random_state": RANDOM_STATE,
+        "data_path": str(data_path),
     }
     if tune:
         models_iter, tuned_meta = build_tuned_models(x_train, y_train, n_trials, timeout)
@@ -215,6 +217,7 @@ def main(tune=False, n_trials=30, timeout=None, register=False):
 
 def parse_args():
     p = argparse.ArgumentParser()
+    p.add_argument("--data", default=str(DATA_PATH), help="CSV training data path")
     p.add_argument("--tune", action="store_true", help="dùng Optuna để tìm siêu tham số")
     p.add_argument("--n-trials", type=int, default=30, help="số trial cho mỗi model")
     p.add_argument("--timeout", type=int, default=None, help="timeout tính bằng giây cho mỗi model")
@@ -224,4 +227,4 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    main(tune=args.tune, n_trials=args.n_trials, timeout=args.timeout, register=args.register)
+    main(data_path=args.data, tune=args.tune, n_trials=args.n_trials, timeout=args.timeout, register=args.register)
