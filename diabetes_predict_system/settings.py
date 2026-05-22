@@ -24,7 +24,8 @@ INSTALLED_APPS = [
     "alerts",
     "history",
     "modeling",
-    "logs"
+    "logs",
+    "django_extensions"
 ]
 
 MIDDLEWARE = [
