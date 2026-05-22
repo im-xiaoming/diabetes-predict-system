@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Train Model - GlucoPredict AI</title>
+{% endblock %}
+
+{% block css %}
+    <style>
+        .training-form input[type="number"] {
+            width: 100%;
+            border-radius: 0.5rem;
+            border: 1px solid #c3c6d7;
+            background-color: #ffffff;
+            padding: 0.625rem 0.75rem;
+            color: #191c1e;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            transition: border-color 150ms ease, box-shadow 150ms ease;
+        }
+
+        .training-form input[type="number"]:focus {
+            border-color: #004ac6;
+            box-shadow: 0 0 0 1px #004ac6;
+            outline: none;
+        }
+
+        .training-form .input-with-icon input[type="number"] {
+            padding-left: 2.5rem;
+        }
+
+        .training-form input[type="checkbox"] {
+            width: 1.125rem;
+            height: 1.125rem;
+            border-radius: 0.375rem;
+            border-color: #c3c6d7;
+            color: #004ac6;
+        }
+    </style>
+{% endblock %}
+
+{% block page_content %}
+    <div class="max-w-[1200px] mx-auto space-y-stack-lg">
+        {% if messages %}
+            <div class="space-y-stack-sm">
+                {% for message in messages %}
+                    <div class="flex items-start gap-2 rounded-xl border px-4 py-3 text-body-sm font-body-sm shadow-[0_1px_3px_rgba(0,0,0,0.05)] {% if message.tags == 'success' %}border-[#10B981]/30 bg-[#10B981]/10 text-on-surface{% elif message.tags == 'error' %}border-error/30 bg-error-container text-on-error-container{% else %}border-outline-variant bg-surface-container-lowest text-on-surface{% endif %}">
+                        <span class="material-symbols-outlined text-[20px] {% if message.tags == 'success' %}text-[#10B981]{% elif message.tags == 'error' %}text-error{% else %}text-primary{% endif %}">
+                            {% if message.tags == 'success' %}check_circle{% elif message.tags == 'error' %}error{% else %}info{% endif %}
+                        </span>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-stack-md pb-stack-sm border-b border-outline-variant">
+            <div>
+                <a
+                    class="inline-flex items-center gap-1 text-label-md font-label-md text-secondary hover:text-primary transition-colors mb-stack-sm"
+                    href="{% url 'modeling' %}"
+                >
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                    Quay lại Model
+                </a>
+                <h2 class="text-headline-md font-headline-md text-on-surface">Huấn luyện model mới</h2>
+                <p class="text-body-sm font-body-sm text-on-surface-variant mt-1 max-w-[760px]">
+                    Cấu hình pipeline training, tối ưu tham số bằng Optuna và đăng ký model tốt nhất vào MLflow Registry.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-lowest border border-outline-variant rounded-full text-label-sm font-label-sm shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+                    <span class="w-2 h-2 rounded-full bg-[#10B981]"></span>
+                    Training job: Synchronous
+                </div>
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-lowest border border-outline-variant rounded-full text-label-sm font-label-sm shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+                    <span class="material-symbols-outlined text-primary text-[18px]">monitoring</span>
+                    MLflow tracking
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-gutter items-start">
+            <section class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+                <div class="px-stack-lg py-stack-md border-b border-outline-variant bg-surface-bright flex items-start justify-between gap-stack-md">
+                    <div>
+                        <h3 class="text-title-lg font-title-lg text-on-surface">Cấu hình training</h3>
+                        <p class="text-body-sm font-body-sm text-on-surface-variant mt-1">
+                            Trang sẽ chờ đến khi training hoàn tất. Tiến trình và lỗi sẽ được in trực tiếp trong console Django.
+                        </p>
+                    </div>
+                    <span class="material-symbols-outlined text-primary text-[28px]">model_training</span>
+                </div>
+
+                <form method="POST" class="training-form p-stack-lg space-y-stack-lg">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="rounded-lg border border-error/30 bg-error-container text-on-error-container px-4 py-3 text-body-sm font-body-sm">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+                        <label
+                            for="{{ form.tune.id_for_label }}"
+                            class="flex items-start gap-stack-sm rounded-xl border border-outline-variant bg-surface p-stack-md hover:bg-surface-container-low transition-colors cursor-pointer"
+                        >
+                            <div class="pt-1">{{ form.tune }}</div>
+                            <span class="flex-1">
+                                <span class="flex items-center gap-2 text-label-md font-label-md text-on-surface">
+                                    <span class="material-symbols-outlined text-primary text-[20px]">tune</span>
+                                    {{ form.tune.label }}
+                                </span>
+                                <span class="block text-body-sm font-body-sm text-on-surface-variant mt-1">
+                                    Tự động thử nhiều bộ tham số để chọn model có điểm đánh giá tốt hơn.
+                                </span>
+                                {% if form.tune.errors %}
+                                    <span class="block text-label-sm font-label-sm text-error mt-2">{{ form.tune.errors }}</span>
+                                {% endif %}
+                            </span>
+                        </label>
+
+                        <label
+                            for="{{ form.register.id_for_label }}"
+                            class="flex items-start gap-stack-sm rounded-xl border border-outline-variant bg-surface p-stack-md hover:bg-surface-container-low transition-colors cursor-pointer"
+                        >
+                            <div class="pt-1">{{ form.register }}</div>
+                            <span class="flex-1">
+                                <span class="flex items-center gap-2 text-label-md font-label-md text-on-surface">
+                                    <span class="material-symbols-outlined text-primary text-[20px]">verified</span>
+                                    {{ form.register.label }}
+                                </span>
+                                <span class="block text-body-sm font-body-sm text-on-surface-variant mt-1">
+                                    Lưu artifact và metadata của model tốt nhất vào registry để triển khai.
+                                </span>
+                                {% if form.register.errors %}
+                                    <span class="block text-label-sm font-label-sm text-error mt-2">{{ form.register.errors }}</span>
+                                {% endif %}
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+                        <div>
+                            <label class="block text-label-md font-label-md text-on-surface mb-2" for="{{ form.n_trials.id_for_label }}">
+                                {{ form.n_trials.label }}
+                            </label>
+                            <div class="relative input-with-icon">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">science</span>
+                                {{ form.n_trials }}
+                            </div>
+                            <p class="text-label-sm font-label-sm text-on-surface-variant mt-2">
+                                Số lần Optuna thử cấu hình. Giá trị cao hơn có thể tăng thời gian chạy.
+                            </p>
+                            {% if form.n_trials.errors %}
+                                <p class="text-label-sm font-label-sm text-error mt-2">{{ form.n_trials.errors }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label class="block text-label-md font-label-md text-on-surface mb-2" for="{{ form.timeout.id_for_label }}">
+                                {{ form.timeout.label }}
+                            </label>
+                            <div class="relative input-with-icon">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">timer</span>
+                                {{ form.timeout }}
+                            </div>
+                            <p class="text-label-sm font-label-sm text-on-surface-variant mt-2">
+                                Giới hạn thời gian cho mỗi model để tránh job chạy quá lâu.
+                            </p>
+                            {% if form.timeout.errors %}
+                                <p class="text-label-sm font-label-sm text-error mt-2">{{ form.timeout.errors }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-stack-md pt-stack-md border-t border-outline-variant">
+                        <p class="text-body-sm font-body-sm text-on-surface-variant max-w-[620px]">
+                            Sau khi bấm chạy, giữ nguyên trình duyệt chờ đến khi training hoàn tất rồi mới chuyển về trang quản lý model.
+                        </p>
+                        <button
+                            type="submit"
+                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-container text-on-primary-container rounded-lg text-label-md font-label-md hover:bg-surface-tint transition-colors shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
+                        >
+                            <span class="material-symbols-outlined text-[20px]">play_arrow</span>
+                            Chạy training
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <aside class="space-y-stack-md">
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+                    <div class="flex items-center justify-between mb-stack-sm">
+                        <h3 class="text-title-lg font-title-lg text-on-surface">Pipeline</h3>
+                        <span class="material-symbols-outlined text-primary">account_tree</span>
+                    </div>
+                    <div class="space-y-stack-sm">
+                        <div class="flex gap-3">
+                            <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[18px]">dataset</span>
+                            </span>
+                            <div>
+                                <p class="text-label-md font-label-md text-on-surface">Load dữ liệu</p>
+                                <p class="text-body-sm font-body-sm text-on-surface-variant">Đọc dataset, làm sạch và chuẩn hóa feature.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[18px]">psychology</span>
+                            </span>
+                            <div>
+                                <p class="text-label-md font-label-md text-on-surface">Train và tune</p>
+                                <p class="text-body-sm font-body-sm text-on-surface-variant">Huấn luyện model, chạy Optuna nếu bật tối ưu.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[18px]">bar_chart</span>
+                            </span>
+                            <div>
+                                <p class="text-label-md font-label-md text-on-surface">Ghi metrics</p>
+                                <p class="text-body-sm font-body-sm text-on-surface-variant">Log F1, recall, hamming loss và report vào MLflow.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+                    <h3 class="text-title-lg font-title-lg text-on-surface mb-stack-sm">Khuyến nghị</h3>
+                    <div class="space-y-3 text-body-sm font-body-sm text-on-surface-variant">
+                        <p class="flex gap-2">
+                            <span class="material-symbols-outlined text-[#10B981] text-[18px] shrink-0">check_circle</span>
+                            Dùng 5-20 trials khi cần kiểm tra nhanh.
+                        </p>
+                        <p class="flex gap-2">
+                            <span class="material-symbols-outlined text-[#F59E0B] text-[18px] shrink-0">schedule</span>
+                            Tăng timeout nếu dataset hoặc search space lớn.
+                        </p>
+                        <p class="flex gap-2">
+                            <span class="material-symbols-outlined text-primary text-[18px] shrink-0">history</span>
+                            Kiểm tra registry sau khi job hoàn tất để chọn phiên bản deploy.
+                        </p>
+                    </div>
+                </div>
+
+                {% if message %}
+                    <div class="rounded-xl border border-primary/20 bg-primary/10 p-stack-md text-body-sm font-body-sm text-on-surface">
+                        <div class="flex gap-2">
+                            <span class="material-symbols-outlined text-primary text-[20px]">info</span>
+                            <p>{{ message }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </aside>
+        </div>
+    </div>
+{% endblock %}
