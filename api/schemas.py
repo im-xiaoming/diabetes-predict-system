@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -34,3 +34,31 @@ class PredictResponse(BaseModel):
     warning_message: str
     model_name: str
     model_version: str
+
+
+class TruthLabels(BaseModel):
+    nep: Optional[int] = Field(default=None, alias="NEP")
+    neu: Optional[int] = Field(default=None, alias="NEU")
+    ret: Optional[int] = Field(default=None, alias="RET")
+    cv: Optional[int] = Field(default=None, alias="CV")
+    per_vas: Optional[int] = Field(default=None, alias="PER VAS")
+
+
+class IngestRequest(PredictRequest):
+    patient_id: int
+    patient_name: str
+    source: str = "his"
+    source_idx: Optional[int] = None
+    truth: Optional[TruthLabels] = None
+
+
+class IngestResponse(PredictResponse):
+    saved: bool
+    already_saved: bool
+    patient_id: int
+    clinical_record_id: int
+    prediction_id: int
+    alert_ids: List[int]
+    watchlist_ids: List[int]
+    truth_saved: bool
+    request_log_id: Optional[int] = None

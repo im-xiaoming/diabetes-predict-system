@@ -173,7 +173,7 @@
                         <div class="p-stack-md overflow-y-auto json-viewer text-[#d4d4d4] flex-1">
                             <pre><code id="console-json">{
   "status": "ready",
-  "message": "Auto feed will start when FastAPI is online"
+  "message": "Background feed can run without opening this page"
 }</code></pre>
                         </div>
                         <div class="p-2 border-t border-[#333] bg-[#252526] flex justify-end">
@@ -220,7 +220,7 @@
         let nextIdx = 0;
         let running = false;
         let paused = false;
-        let stat = { sent: 0, ok: 0, fail: 0 };
+        let stat = { sent: sentSet.size, ok: sentSet.size, fail: 0 };
 
         function show(obj, ok = true) {
             consoleJson.textContent = JSON.stringify(obj, null, 2);
@@ -254,8 +254,22 @@
             el.className = `inline-flex px-2 py-1 rounded text-label-sm font-label-sm ${cls}`;
         }
 
+        function statusInfo(rec) {
+            if (rec.status === "success") {
+                return {
+                    text: "Thanh cong",
+                    cls: "bg-[#10b981]/10 text-[#059669]"
+                };
+            }
+            return {
+                text: "Chua gui",
+                cls: "bg-surface-container-low text-secondary"
+            };
+        }
+
         function rowHtml(rec) {
             const bar = rec.complete === 100 ? "bg-[#10b981]" : rec.complete >= 80 ? "bg-[#f59e0b]" : "bg-error";
+            const st = statusInfo(rec);
             const action = rec.ready
                 ? `<button data-idx="${rec.idx}" class="send-btn text-primary hover:text-primary-container text-label-md font-label-md px-3 py-1 border border-primary rounded hover:bg-primary-fixed transition-colors">Gửi hồ sơ</button>`
                 : `<button class="text-secondary text-label-md font-label-md px-3 py-1 border border-outline-variant rounded opacity-50 cursor-not-allowed" disabled>Missing Data</button>`;
@@ -283,6 +297,12 @@
                 if (recordMap.has(rec.idx)) return;
                 recordMap.set(rec.idx, rec);
                 records.push(rec);
+                if (rec.status === "success") {
+                    sentSet.add(rec.idx);
+                    stat.sent += 1;
+                    stat.ok += 1;
+                    updateStats();
+                }
                 bodyEl.insertAdjacentHTML("beforeend", rowHtml(rec));
             });
         }
@@ -471,8 +491,5 @@
 
         updateStats();
         setFeedButtons();
-        window.addEventListener("load", () => {
-            setTimeout(() => startFeed(true), 800);
-        });
     </script>
 {% endblock %}

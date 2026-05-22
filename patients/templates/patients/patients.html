@@ -20,7 +20,7 @@
                         </div>
                     </div>
                     <div class="w-full md:w-1/4">
-                        <label class="block text-label-md font-label-md text-on-surface mb-unit">Mức nguy cơ</label>
+                        <label class="block text-label-md font-label-md text-on-surface mb-unit">Mức nguy cơ tổng</label>
                         <select id="level-filter" class="w-full bg-surface border border-outline-variant rounded p-2 text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
                             <option value="">Tất cả mức độ</option>
                             <option value="low">Low</option>
@@ -43,7 +43,7 @@
                                 <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Mã BN</th>
                                 <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Tên bệnh nhân</th>
                                 <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Tuổi/GT</th>
-                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Mức nguy cơ</th>
+                                <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Mức nguy cơ tổng</th>
                                 <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Cảnh báo</th>
                                 <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Cập nhật</th>
                                 <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-right">Thao tác</th>
@@ -64,7 +64,7 @@
                                         </span>
                                     </td>
                                     <td class="py-3 px-4">
-                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-error-container text-on-error-container text-label-sm font-label-sm">{{ patient.war }}</span>
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-error-container text-on-error-container text-label-sm font-label-sm">{{ patient.alert_count }}</span>
                                     </td>
                                     <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">{{ patient.updated_at|date:"H:i, d/m/Y" }}</td>
                                     <td class="py-3 px-4 text-right">

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}
+    <title>Watchlist nguy cơ trung bình - GlucoPredict AI</title>
+{% endblock %}
+
+{% block page_content %}
+    <div class="max-w-[1400px] mx-auto space-y-stack-lg">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-stack-md">
+            <div>
+                <a href="{% url 'alerts' %}" class="text-primary-container text-label-md font-label-md">Quay lại Alerts</a>
+                <h2 class="text-headline-md font-headline-md text-on-background mt-2">Watchlist nguy cơ trung bình</h2>
+                <p class="text-body-sm font-body-sm text-secondary mt-1">Danh sách theo dõi các biến chứng medium để bác sĩ tra cứu trước khi chúng cần thành alert ưu tiên cao.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-stack-sm w-full sm:w-auto">
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3">
+                    <div class="text-label-sm font-label-sm text-secondary">open</div>
+                    <div class="text-title-lg font-title-lg text-on-surface">{{ total_open }}</div>
+                </div>
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3">
+                    <div class="text-label-sm font-label-sm text-secondary">reviewed</div>
+                    <div class="text-title-lg font-title-lg text-on-surface">{{ total_reviewed }}</div>
+                </div>
+            </div>
+        </div>
+
+        <form method="get" class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex flex-col md:flex-row gap-stack-sm md:items-end">
+            <div class="w-full md:min-w-[260px] md:flex-1">
+                <label class="block text-label-md font-label-md text-on-surface mb-1">Bệnh nhân</label>
+                <input name="q" value="{{ filters.q }}" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-sm font-body-sm" placeholder="Tìm tên hoặc mã bệnh nhân" />
+            </div>
+            <div class="w-full md:w-[190px]">
+                <label class="block text-label-md font-label-md text-on-surface mb-1">Biến chứng</label>
+                <select name="target" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-sm font-body-sm">
+                    {% for val, label in targets %}
+                        <option value="{{ val }}" {% if filters.target == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="w-full md:w-[190px]">
+                <label class="block text-label-md font-label-md text-on-surface mb-1">Trạng thái</label>
+                <select name="status" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-sm font-body-sm">
+                    {% for val, label in statuses %}
+                        <option value="{{ val }}" {% if filters.status == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex gap-2">
+                <button class="rounded bg-primary-container text-on-primary px-4 py-2 text-label-md font-label-md">Lọc</button>
+                <a href="{% url 'watchlist' %}" class="rounded border border-outline-variant px-4 py-2 text-label-md font-label-md text-on-surface">Xóa lọc</a>
+            </div>
+        </form>
+
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[980px]">
+                    <thead>
+                        <tr class="border-b border-outline-variant bg-surface-container-low text-label-sm font-label-sm text-secondary">
+                            <th class="py-3 px-4">Mã WL</th>
+                            <th class="py-3 px-4">Bệnh nhân</th>
+                            <th class="py-3 px-4">Biến chứng</th>
+                            <th class="py-3 px-4">Risk score</th>
+                            <th class="py-3 px-4">Nội dung</th>
+                            <th class="py-3 px-4">Thời gian</th>
+                            <th class="py-3 px-4">Rà soát</th>
+                            <th class="py-3 px-4 text-right">Hồ sơ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-body-sm font-body-sm">
+                        {% for item in watchlist %}
+                            <tr class="border-b border-outline-variant hover:bg-surface-container-low">
+                                <td class="py-3 px-4 font-medium">WL-{{ item.id }}</td>
+                                <td class="py-3 px-4">
+                                    <div class="font-medium text-on-surface">{{ item.patient.name }}</div>
+                                    <div class="text-label-sm font-label-sm text-secondary">BN-{{ item.patient.id }}</div>
+                                </td>
+                                <td class="py-3 px-4">{{ item.target }}</td>
+                                <td class="py-3 px-4">{{ item.score.risk_score|floatformat:3 }}</td>
+                                <td class="py-3 px-4 max-w-[360px]">{{ item.message }}</td>
+                                <td class="py-3 px-4 text-secondary">
+                                    <div>Tạo {{ item.created_at|date:"H:i, d/m/Y" }}</div>
+                                    {% if item.reviewed_at %}
+                                        <div class="text-label-sm font-label-sm">Đã xem {{ item.reviewed_at|date:"H:i, d/m/Y" }}</div>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 px-4 min-w-[260px]">
+                                    <form method="post" action="{% url 'watchlist-status' item.id %}" class="space-y-2">
+                                        {% csrf_token %}
+                                        <select name="status" class="w-full bg-surface border border-outline-variant rounded px-2 py-1 text-label-sm font-label-sm">
+                                            {% for val, label in statuses %}
+                                                {% if val %}
+                                                    <option value="{{ val }}" {% if item.status == val %}selected{% endif %}>{{ label }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                        <textarea name="doctor_note" rows="2" class="w-full bg-surface border border-outline-variant rounded px-2 py-1 text-label-sm font-label-sm" placeholder="Ghi chú rà soát">{{ item.doctor_note }}</textarea>
+                                        <button class="px-3 py-1 rounded bg-primary-container text-on-primary text-label-sm font-label-sm">
+                                            {% if item.status == "reviewed" %}Cập nhật{% else %}Đánh dấu đã xem{% endif %}
+                                        </button>
+                                    </form>
+                                </td>
+                                <td class="py-3 px-4 text-right">
+                                    <a href="{% url 'patient-detail' item.patient_id %}" class="text-primary-container text-label-md font-label-md">Xem bệnh nhân</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8" class="py-8 px-4 text-center text-secondary">Không có watchlist phù hợp bộ lọc.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="border-t border-outline-variant px-4 py-3 flex flex-col sm:flex-row gap-3 justify-between sm:items-center">
+                <p class="text-body-sm font-body-sm text-on-surface-variant">
+                    Hiển thị {{ page_obj.start_index }} đến {{ page_obj.end_index }} trong {{ paginator.count }} watchlist
+                </p>
+                <div class="flex gap-1">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}&q={{ filters.q|urlencode }}&target={{ filters.target|urlencode }}&status={{ filters.status|urlencode }}" class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary">
+                            <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                        </a>
+                    {% endif %}
+                    <span class="min-w-8 h-8 px-2 flex items-center justify-center rounded bg-surface-container-low text-label-md font-label-md">{{ page_obj.number }}/{{ paginator.num_pages }}</span>
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}&q={{ filters.q|urlencode }}&target={{ filters.target|urlencode }}&status={{ filters.status|urlencode }}" class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-secondary">
+                            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
