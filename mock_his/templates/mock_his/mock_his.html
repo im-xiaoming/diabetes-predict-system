@@ -41,7 +41,7 @@
                             </h3>
                             <span class="bg-secondary-container text-on-secondary-container px-2 py-1 rounded text-label-sm font-label-sm">{{ total }} Records</span>
                         </div>
-                        <div class="overflow-y-auto flex-1 p-stack-sm bg-surface">
+                        <div style="padding-top: 0" class="overflow-y-auto flex-1 p-stack-sm bg-surface">
                             <table class="w-full text-left border-collapse">
                                 <thead class="sticky top-0 bg-surface z-10 shadow-soft">
                                     <tr>
@@ -200,6 +200,13 @@
         const bulkUrl = "{{ bulk_url }}";
         const healthUrl = "{{ health_url }}";
         const recordsUrl = "{{ records_url }}";
+        const feedStartUrl = "{{ feed_start_url }}";
+        const feedPauseUrl = "{{ feed_pause_url }}";
+        const feedResumeUrl = "{{ feed_resume_url }}";
+        const feedStopUrl = "{{ feed_stop_url }}";
+        const feedResetUrl = "{{ feed_reset_url }}";
+        const feedStatusUrl = "{{ feed_status_url }}";
+        const isUnlabeled = "{{ unlabeled|yesno:'true,false' }}" === "true";
         const token = "{{ csrf_token }}";
         const consoleJson = document.getElementById("console-json");
         const consoleStatus = document.getElementById("console-status");
@@ -391,69 +398,104 @@
             stopBtn.disabled = !running;
         }
 
-        function stopFeed(done = false) {
+        function applyFeedState(feed) {
+            running = Boolean(feed.running);
+            paused = Boolean(feed.paused);
+            nextIdx = Number(feed.next_idx || 0);
+            stat = {
+                sent: Number(feed.sent || 0),
+                ok: Number(feed.ok || 0),
+                fail: Number(feed.fail || 0)
+            };
+            Object.entries(feed.statuses || {}).forEach(([idx, item]) => {
+                const ok = item.ok;
+                const cls = ok === true
+                    ? "bg-[#10b981]/10 text-[#059669]"
+                    : ok === false
+                        ? "bg-error/10 text-error"
+                        : "bg-[#F59E0B]/10 text-[#D97706]";
+                setStatus(Number(idx), item.text || "Dang gui", cls);
+            });
+            updateStats();
+            setFeedButtons();
+            if (feed.last_result) {
+                show({
+                    ok: true,
+                    message: feed.message,
+                    feed: {
+                        running: feed.running,
+                        paused: feed.paused,
+                        done: feed.done,
+                        next_idx: feed.next_idx,
+                        sent: feed.sent,
+                        success: feed.ok,
+                        failed: feed.fail
+                    },
+                    last_result: feed.last_result
+                }, !feed.last_result.error);
+            }
+            if (!running && timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+        }
+
+        async function feedPost(url, data = {}) {
+            const out = await post(url, data);
+            if (out.body.feed) applyFeedState(out.body.feed);
+            show(out.body, out.ok);
+            return out;
+        }
+
+        async function pollFeed() {
+            const res = await fetch(feedStatusUrl);
+            const body = await res.json().catch(() => ({ error: "Invalid JSON response" }));
+            if (res.ok && body.feed) applyFeedState(body.feed);
+            return body.feed || null;
+        }
+
+        function ensurePoller() {
+            if (timer) return;
+            timer = setInterval(pollFeed, 1000);
+        }
+
+        async function stopFeed(done = false) {
+            await feedPost(feedStopUrl);
             if (timer) clearInterval(timer);
             timer = null;
-            running = false;
-            paused = false;
             busy = false;
-            setFeedButtons();
             if (done) show({ ok: true, message: "Auto feed completed", sent: stat.sent, success: stat.ok, failed: stat.fail }, true);
         }
 
-        function pauseFeed() {
-            if (timer) clearInterval(timer);
-            timer = null;
-            paused = true;
-            setFeedButtons();
+        async function pauseFeed() {
+            await feedPost(feedPauseUrl);
         }
 
-        async function tickFeed() {
-            if (busy || !running || paused) return;
-            busy = true;
-            try {
-                while (nextIdx < totalRecords && sentSet.has(nextIdx)) {
-                    nextIdx += 1;
-                }
-                if (nextIdx >= totalRecords) {
-                    stopFeed(true);
-                    return;
-                }
-                const idx = nextIdx;
-                nextIdx += 1;
-                updateStats();
-                const out = await sendOne(idx, true);
-                if (!out.ok && !out.body.skipped) {
-                    pauseFeed();
-                    show({ ok: false, message: "Auto feed paused because FastAPI returned an error", detail: out.body }, false);
-                }
-            } catch (err) {
-                pauseFeed();
-                show({ ok: false, message: "Auto feed paused", error: err.message }, false);
-            } finally {
-                busy = false;
-            }
+        async function resumeFeed() {
+            await feedPost(feedResumeUrl);
+            ensurePoller();
         }
 
         async function startFeed(reset = false) {
             const ok = await health();
             if (!ok) return;
-            if (reset && nextIdx >= totalRecords) nextIdx = 0;
-            running = true;
-            paused = false;
-            setFeedButtons();
-            updateStats();
-            await tickFeed();
-            timer = setInterval(tickFeed, Number(intervalSelect.value) * 1000);
+            await feedPost(feedStartUrl, {
+                interval: Number(intervalSelect.value),
+                reset,
+                unlabeled: isUnlabeled
+            });
+            ensurePoller();
         }
 
         startBtn.addEventListener("click", () => startFeed(true));
         pauseBtn.addEventListener("click", pauseFeed);
-        resumeBtn.addEventListener("click", () => startFeed(false));
+        resumeBtn.addEventListener("click", resumeFeed);
         stopBtn.addEventListener("click", () => stopFeed(false));
 
-        document.getElementById("reset-btn").addEventListener("click", () => {
-            stopFeed(false);
+        document.getElementById("reset-btn").addEventListener("click", async () => {
+            await feedPost(feedResetUrl);
+            if (timer) clearInterval(timer);
+            timer = null;
             nextIdx = 0;
             stat = { sent: 0, ok: 0, fail: 0 };
             sentSet.clear();
@@ -471,7 +513,12 @@
 
         updateStats();
         setFeedButtons();
-        window.addEventListener("load", () => {
+        window.addEventListener("load", async () => {
+            const feed = await pollFeed();
+            if (feed && feed.running) {
+                ensurePoller();
+                return;
+            }
             setTimeout(() => startFeed(true), 800);
         });
     </script>

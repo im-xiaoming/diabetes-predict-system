@@ -30,7 +30,16 @@ def patient_detail_view(request, pk):
     pred = patient.predictions.order_by("-created_at").first()
     cr = pred.clinical_record if pred else patient.clinical_records.order_by("-created_at").first()
     hist = patient.predictions.order_by("-created_at")[:10]
-    return render(request, "patients/patient_detail.html", {"patient": patient, "prediction": pred, "record": cr, "history": hist})
+    return render(
+        request,
+        "patients/patient_detail.html",
+        {
+            "patient": patient,
+            "prediction": pred,
+            "record": cr,
+            "history": hist,
+        },
+    )
 
 
 @login_required(login_url="login")

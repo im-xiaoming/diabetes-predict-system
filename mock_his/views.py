@@ -11,6 +11,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from patients.models import ClinicalRecord, ClinicalRecordLabel, Patient
 from predictions.models import PredictionResult, RequestLog, RiskScoreDetail
+from .feed_runner import feed_runner
 from .sample_loader import load_record, load_records, total_records
 import requests
 
@@ -212,6 +213,12 @@ def page_context(request, *, unlabeled=False):
         "bulk_url": reverse("his-inference-send-bulk" if unlabeled else "mock-his-send-bulk"),
         "health_url": reverse("mock-his-health"),
         "records_url": reverse("his-inference-records" if unlabeled else "mock-his-records"),
+        "feed_start_url": reverse("mock-his-feed-start"),
+        "feed_pause_url": reverse("mock-his-feed-pause"),
+        "feed_resume_url": reverse("mock-his-feed-resume"),
+        "feed_stop_url": reverse("mock-his-feed-stop"),
+        "feed_reset_url": reverse("mock-his-feed-reset"),
+        "feed_status_url": reverse("mock-his-feed-status"),
         "mode_label": "No ground truth labels" if unlabeled else "Ground truth labels included",
         "unlabeled": unlabeled,
     }
@@ -342,3 +349,44 @@ def health_view(request):
         return JsonResponse({"ok": res.status_code == 200, "status_code": res.status_code, "response": data})
     except requests.RequestException as exc:
         return JsonResponse({"ok": False, "status_code": 503, "error": str(exc)}, status=503)
+
+
+@login_required(login_url="login")
+@require_GET
+def feed_status_view(request):
+    return JsonResponse({"ok": True, "feed": feed_runner.status()})
+
+
+@login_required(login_url="login")
+@require_POST
+def feed_start_view(request):
+    data = body(request)
+    interval = int(data.get("interval", 5))
+    reset = bool(data.get("reset", False))
+    unlabeled = bool(data.get("unlabeled", False))
+    state = feed_runner.start(interval=interval, reset=reset, unlabeled=unlabeled)
+    return JsonResponse({"ok": True, "feed": state})
+
+
+@login_required(login_url="login")
+@require_POST
+def feed_pause_view(request):
+    return JsonResponse({"ok": True, "feed": feed_runner.pause()})
+
+
+@login_required(login_url="login")
+@require_POST
+def feed_resume_view(request):
+    return JsonResponse({"ok": True, "feed": feed_runner.resume()})
+
+
+@login_required(login_url="login")
+@require_POST
+def feed_stop_view(request):
+    return JsonResponse({"ok": True, "feed": feed_runner.stop()})
+
+
+@login_required(login_url="login")
+@require_POST
+def feed_reset_view(request):
+    return JsonResponse({"ok": True, "feed": feed_runner.reset()})
