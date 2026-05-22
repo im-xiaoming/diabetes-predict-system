@@ -19,8 +19,12 @@ try:
 except ImportError:
     XGBClassifier = None
 
+import argparse
+
 from ml.preprocessing import build_preprocessor, clean_data, load_data, split_xy
 from ml.tracking import log_metrics, log_model, log_params, log_report, start_run
+from ml.tune import tune_all
+from ml.registry import register_best_model
 
 
 DATA_PATH = ROOT_DIR / "data" / "data.csv"
@@ -112,7 +116,22 @@ def score_model(name, mdl, x_train, x_test, y_train, y_test, tg):
     return res, rep_txt, rep_js
 
 
-def main():
+def build_tuned_models(x_train, y_train, n_trials, timeout):
+    print(f"\noptuna_tuning: n_trials={n_trials} timeout={timeout}")
+    results = tune_all(x_train, y_train, n_trials=n_trials, timeout=timeout)
+    models = {}
+    tuned_meta = {}
+    for name, r in results.items():
+        print(f"  {name}: best_cv_f1_macro={r['best_cv_f1_macro']:.4f} params={r['best_params']}")
+        models[name] = r["pipeline"]
+        tuned_meta[name] = {
+            "best_params": r["best_params"],
+            "best_cv_f1_macro": r["best_cv_f1_macro"],
+        }
+    return models, tuned_meta
+
+
+def main(tune=False, n_trials=30, timeout=None, register=False):
     df = load_data(DATA_PATH)
     raw_n = len(df)
     df = clean_data(df)
@@ -135,17 +154,26 @@ def main():
         "test_size": TEST_SIZE,
         "random_state": RANDOM_STATE,
     }
+    if tune:
+        models_iter, tuned_meta = build_tuned_models(x_train, y_train, n_trials, timeout)
+    else:
+        models_iter, tuned_meta = make_models(), {}
     rows = []
     best_name = None
     best_mdl = None
     best_f1 = -1
-    for name, mdl in make_models().items():
+    best_metrics = None
+    for name, mdl in models_iter.items():
         try:
             with start_run(name):
                 res, rep_txt, rep_js = score_model(name, mdl, x_train, x_test, y_train, y_test, tg)
                 met = {k: v for k, v in res.items() if k != "model"}
                 params = dict(base)
                 params["model_name"] = name
+                if name in tuned_meta:
+                    params["tuned"] = True
+                    params["best_params"] = tuned_meta[name]["best_params"]
+                    params["best_cv_f1_macro"] = tuned_meta[name]["best_cv_f1_macro"]
                 log_params(params)
                 log_metrics(met)
                 log_report(rep_txt, rep_js)
@@ -155,6 +183,7 @@ def main():
                 best_f1 = res["f1_macro"]
                 best_name = name
                 best_mdl = mdl
+                best_metrics = met
         except Exception as exc:
             print(f"\n{name} skipped: {exc}")
     if not rows:
@@ -174,6 +203,25 @@ def main():
     joblib.dump(bundle, MODEL_PATH)
     print(f"\nsaved_model: {MODEL_PATH}")
 
+    if register:
+        reg_params = dict(base)
+        reg_params["model_name"] = best_name
+        if best_name in tuned_meta:
+            reg_params["best_params"] = tuned_meta[best_name]["best_params"]
+            reg_params["best_cv_f1_macro"] = tuned_meta[best_name]["best_cv_f1_macro"]
+        info = register_best_model(bundle, best_name, best_metrics, reg_params)
+        print(f"\nregistered_model: {info}")
+
+
+def parse_args():
+    p = argparse.ArgumentParser()
+    p.add_argument("--tune", action="store_true", help="dung Optuna de tim sieu tham so")
+    p.add_argument("--n-trials", type=int, default=30, help="so trial cho moi model")
+    p.add_argument("--timeout", type=int, default=None, help="timeout tinh bang giay cho moi model")
+    p.add_argument("--register", action="store_true", help="dang ky best model vao MLflow registry")
+    return p.parse_args()
+
 
 if __name__ == "__main__":
-    main()
+    args = parse_args()
+    main(tune=args.tune, n_trials=args.n_trials, timeout=args.timeout, register=args.register)
