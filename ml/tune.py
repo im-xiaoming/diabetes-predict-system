@@ -6,6 +6,7 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 import optuna
+import mlflow
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
@@ -19,6 +20,7 @@ except ImportError:
     XGBClassifier = None
 
 from ml.preprocessing import build_preprocessor
+from ml.tracking import setup_tracking
 
 
 N_SPLITS = 3
@@ -90,6 +92,37 @@ def _objective_xgb(trial, x, y):
     return _cv_f1_macro(_build_pipe(est), x, y)
 
 
+def _mlflow_param_value(value):
+    if value is None:
+        return "None"
+    return value
+
+
+def _log_optuna_trial(model_name, study_name, trial, score):
+    setup_tracking()
+    with mlflow.start_run(
+        run_name=f"trial_{trial.number}",
+        nested=mlflow.active_run() is not None,
+    ):
+        mlflow.set_tags(
+            {
+                "run_type": "optuna_trial",
+                "model_family": model_name,
+                "study_name": study_name,
+            }
+        )
+        mlflow.log_params(
+            {
+                "model_name": model_name,
+                "trial_number": trial.number,
+                "n_splits": N_SPLITS,
+                **{k: _mlflow_param_value(v) for k, v in trial.params.items()},
+            }
+        )
+        mlflow.log_metric("cv_f1_macro", float(score))
+        mlflow.log_metric("objective_value", float(score))
+
+
 OBJECTIVES = {
     "logistic_regression": _objective_logreg,
     "random_forest": _objective_rf,
@@ -110,13 +143,48 @@ def _final_estimator(name, params):
     raise ValueError(f"unknown model: {name}")
 
 
-def tune_model(name, x, y, n_trials=30, timeout=None):
+def tune_model(name, x, y, n_trials=30, timeout=None, log_trials=True):
     if name not in OBJECTIVES:
         raise ValueError(f"no objective for {name}")
     objective = OBJECTIVES[name]
     sampler = optuna.samplers.TPESampler(seed=RANDOM_STATE)
-    study = optuna.create_study(direction="maximize", sampler=sampler, study_name=f"tune_{name}")
-    study.optimize(lambda t: objective(t, x, y), n_trials=n_trials, timeout=timeout, show_progress_bar=False)
+    study_name = f"tune_{name}"
+    study = optuna.create_study(direction="maximize", sampler=sampler, study_name=study_name)
+
+    def wrapped_objective(trial):
+        score = objective(trial, x, y)
+        if log_trials:
+            _log_optuna_trial(name, study_name, trial, score)
+        return score
+
+    if log_trials:
+        setup_tracking()
+        with mlflow.start_run(
+            run_name=f"optuna_{name}",
+            nested=mlflow.active_run() is not None,
+        ):
+            mlflow.set_tags(
+                {
+                    "run_type": "optuna_study",
+                    "model_family": name,
+                    "study_name": study_name,
+                }
+            )
+            mlflow.log_params(
+                {
+                    "model_name": name,
+                    "n_trials": n_trials,
+                    "timeout": _mlflow_param_value(timeout),
+                    "n_splits": N_SPLITS,
+                }
+            )
+            study.optimize(wrapped_objective, n_trials=n_trials, timeout=timeout, show_progress_bar=False)
+            mlflow.log_metric("best_cv_f1_macro", float(study.best_value))
+            mlflow.log_params(
+                {f"best_{k}": _mlflow_param_value(v) for k, v in study.best_params.items()}
+            )
+    else:
+        study.optimize(wrapped_objective, n_trials=n_trials, timeout=timeout, show_progress_bar=False)
     best_params = study.best_params
     best_score = study.best_value
     pipe = _build_pipe(_final_estimator(name, best_params))
@@ -129,5 +197,8 @@ def tune_model(name, x, y, n_trials=30, timeout=None):
     }
 
 
-def tune_all(x, y, n_trials=30, timeout=None):
-    return {name: tune_model(name, x, y, n_trials=n_trials, timeout=timeout) for name in OBJECTIVES}
+def tune_all(x, y, n_trials=30, timeout=None, log_trials=True):
+    return {
+        name: tune_model(name, x, y, n_trials=n_trials, timeout=timeout, log_trials=log_trials)
+        for name in OBJECTIVES
+    }
