@@ -3,14 +3,14 @@ stages:
   train_model:
     cmd: python ml/train.py --tune --n-trials 5 --timeout 600 --register
     deps:
-    - path: data/data.csv
+    - path: data/training.csv
       hash: md5
       md5: 271fc955dfe67386e93b54be9f8720ae
       size: 178725
     - path: ml/train.py
       hash: md5
-      md5: a159ab52a64fe3293fd68bf16f94530d
-      size: 8154
+      md5: 602cecca3afd200730ef9ee11e562604
+      size: 8176
     outs:
     - path: ml/artifacts/model.pkl
       hash: md5
