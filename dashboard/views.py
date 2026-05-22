@@ -7,27 +7,43 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 
-from patients.models import Patient, ClinicalRecordLabel
+from alerts.models import Alert, AlertStatus
+from patients.models import ClinicalRecord, Patient
+from predictions.models import PredictionResult, RiskScoreDetail
 from . import services
+
+
+def dashboard_result():
+    total_patient = Patient.objects.count()
+    total_war = Alert.objects.exclude(status=AlertStatus.RESOLVED).count()
+    total_prediction = PredictionResult.objects.count()
+    return {
+        "total_patient": total_patient,
+        "total_war": total_war,
+        "high_patient": Patient.objects.filter(level__in=["high", "very_high"]).count(),
+        "nep": RiskScoreDetail.objects.filter(target="NEP", risk_label=1).count(),
+        "neu": RiskScoreDetail.objects.filter(target="NEU", risk_label=1).count(),
+        "ret": RiskScoreDetail.objects.filter(target="RET", risk_label=1).count(),
+        "cv": RiskScoreDetail.objects.filter(target="CV", risk_label=1).count(),
+        "per_vas": RiskScoreDetail.objects.filter(target="PER VAS", risk_label=1).count(),
+        "processed_profile": ClinicalRecord.objects.count(),
+        "total_prediction": total_prediction,
+    }
 
 
 @login_required(login_url="login")
 def dashboard(request):
-    total_patient = Patient.objects.count()
-    total_war = Patient.objects.filter(level__in=["medium", "high", "very_high"]).count()
-    total_prediction = ClinicalRecordLabel.objects.count()
-    result = {
-        "total_patient": total_patient,
-        "total_war": total_war,
-        "nep": ClinicalRecordLabel.objects.filter(nep=1).count(),
-        "neu": ClinicalRecordLabel.objects.filter(neu=1).count(),
-        "ret": ClinicalRecordLabel.objects.filter(ret=1).count(),
-        "cv": ClinicalRecordLabel.objects.filter(cv=1).count(),
-        "per_vas": ClinicalRecordLabel.objects.filter(per_vas=1).count(),
-        "processed_profile": total_prediction,
-        "total_prediction": total_prediction,
-    }
-    return render(request, "dashboard/dashboard.html", {"result": result})
+    rows = (
+        Alert.objects.exclude(status=AlertStatus.RESOLVED)
+        .select_related("patient", "score")
+        .order_by("-created_at")[:5]
+    )
+    return render(request, "dashboard/dashboard.html", {"result": dashboard_result(), "alerts": rows})
+
+
+@login_required(login_url="login")
+def dashboard_stats(request):
+    return JsonResponse({"ok": True, "result": dashboard_result()})
 
 
 @login_required(login_url="login")

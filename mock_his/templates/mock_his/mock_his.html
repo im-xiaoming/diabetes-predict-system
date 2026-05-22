@@ -10,7 +10,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-stack-md">
                 <div>
                     <h2 class="text-display-lg font-display-lg text-on-surface">Mock HIS Simulation</h2>
-                    <p class="text-body-md font-body-md text-secondary mt-unit">Auto fake real-time feed: Mock HIS starts sending patient records to FastAPI when this page opens.</p>
+                    <p class="text-body-md font-body-md text-secondary mt-unit">Fake real-time feed can run in the background from Django management command.</p>
                 </div>
                 <div class="flex gap-stack-sm">
                     <button id="reset-btn" class="bg-surface-container-lowest border border-outline-variant text-on-surface-variant rounded-lg py-2 px-4 text-label-md font-label-md flex items-center gap-2 hover:bg-surface-container-low transition-colors shadow-soft">
@@ -58,7 +58,11 @@
                                                 </div>
                                             </td>
                                             <td class="p-3 border-b border-outline-variant">
-                                                <span id="status-{{ rec.idx }}" class="inline-flex px-2 py-1 rounded bg-surface-container-low text-secondary text-label-sm font-label-sm">Chua gui</span>
+                                                {% if rec.status == "success" %}
+                                                    <span id="status-{{ rec.idx }}" class="inline-flex px-2 py-1 rounded bg-[#10b981]/10 text-[#059669] text-label-sm font-label-sm">Thanh cong</span>
+                                                {% else %}
+                                                    <span id="status-{{ rec.idx }}" class="inline-flex px-2 py-1 rounded bg-surface-container-low text-secondary text-label-sm font-label-sm">Chua gui</span>
+                                                {% endif %}
                                             </td>
                                             <td class="p-3 border-b border-outline-variant text-right">
                                                 {% if rec.ready %}
@@ -165,7 +169,7 @@
                         <div class="p-stack-md overflow-y-auto json-viewer text-[#d4d4d4] flex-1">
                             <pre><code id="console-json">{
   "status": "ready",
-  "message": "Auto feed will start when FastAPI is online"
+  "message": "Background feed can run without opening this page"
 }</code></pre>
                         </div>
                         <div class="p-2 border-t border-[#333] bg-[#252526] flex justify-end">
@@ -187,7 +191,7 @@
         const totalRecords = Number("{{ total }}");
         const batchSize = 20;
         const recordMap = new Map(records.map((rec) => [rec.idx, rec]));
-        const sentSet = new Set();
+        const sentSet = new Set(records.filter((rec) => rec.status === "success").map((rec) => rec.idx));
         const sendUrl = "{% url 'mock-his-send' %}";
         const bulkUrl = "{% url 'mock-his-send-bulk' %}";
         const healthUrl = "{% url 'mock-his-health' %}";
@@ -212,7 +216,7 @@
         let nextIdx = 0;
         let running = false;
         let paused = false;
-        let stat = { sent: 0, ok: 0, fail: 0 };
+        let stat = { sent: sentSet.size, ok: sentSet.size, fail: 0 };
 
         function show(obj, ok = true) {
             consoleJson.textContent = JSON.stringify(obj, null, 2);
@@ -246,8 +250,22 @@
             el.className = `inline-flex px-2 py-1 rounded text-label-sm font-label-sm ${cls}`;
         }
 
+        function statusInfo(rec) {
+            if (rec.status === "success") {
+                return {
+                    text: "Thanh cong",
+                    cls: "bg-[#10b981]/10 text-[#059669]"
+                };
+            }
+            return {
+                text: "Chua gui",
+                cls: "bg-surface-container-low text-secondary"
+            };
+        }
+
         function rowHtml(rec) {
             const bar = rec.complete === 100 ? "bg-[#10b981]" : rec.complete >= 80 ? "bg-[#f59e0b]" : "bg-error";
+            const st = statusInfo(rec);
             const action = rec.ready
                 ? `<button data-idx="${rec.idx}" class="send-btn text-primary hover:text-primary-container text-label-md font-label-md px-3 py-1 border border-primary rounded hover:bg-primary-fixed transition-colors">Gui ho so</button>`
                 : `<button class="text-secondary text-label-md font-label-md px-3 py-1 border border-outline-variant rounded opacity-50 cursor-not-allowed" disabled>Missing Data</button>`;
@@ -264,7 +282,7 @@
                         </div>
                     </td>
                     <td class="p-3 border-b border-outline-variant">
-                        <span id="status-${rec.idx}" class="inline-flex px-2 py-1 rounded bg-surface-container-low text-secondary text-label-sm font-label-sm">Chua gui</span>
+                        <span id="status-${rec.idx}" class="inline-flex px-2 py-1 rounded text-label-sm font-label-sm ${st.cls}">${st.text}</span>
                     </td>
                     <td class="p-3 border-b border-outline-variant text-right">${action}</td>
                 </tr>`;
@@ -275,6 +293,12 @@
                 if (recordMap.has(rec.idx)) return;
                 recordMap.set(rec.idx, rec);
                 records.push(rec);
+                if (rec.status === "success") {
+                    sentSet.add(rec.idx);
+                    stat.sent += 1;
+                    stat.ok += 1;
+                    updateStats();
+                }
                 bodyEl.insertAdjacentHTML("beforeend", rowHtml(rec));
             });
         }
@@ -449,8 +473,16 @@
             nextIdx = 0;
             stat = { sent: 0, ok: 0, fail: 0 };
             sentSet.clear();
-            records.forEach((rec) => setStatus(rec.idx, "Chua gui", "bg-surface-container-low text-secondary"));
-            show({ status: "ready", message: "Auto feed will start when FastAPI is online" }, true);
+            records.forEach((rec) => {
+                if (rec.status === "success") {
+                    sentSet.add(rec.idx);
+                    stat.sent += 1;
+                    stat.ok += 1;
+                }
+                const st = statusInfo(rec);
+                setStatus(rec.idx, st.text, st.cls);
+            });
+            show({ status: "ready", message: "Background feed can run without opening this page" }, true);
             consoleStatus.textContent = "Idle";
             consoleStatus.className = "text-label-sm font-label-sm text-[#858585] uppercase tracking-wider";
             consoleDot.className = "relative inline-flex rounded-full h-2 w-2 bg-[#858585]";
@@ -463,8 +495,5 @@
 
         updateStats();
         setFeedButtons();
-        window.addEventListener("load", () => {
-            setTimeout(() => startFeed(true), 800);
-        });
     </script>
 {% endblock %}
