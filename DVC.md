@@ -29,13 +29,6 @@ Thứ tự nên làm:
    git commit -m "Track dataset with DVC"
    ```
 
-3. Track model artifact:
-   ```bash
-   dvc add ml/artifacts/model.pkl
-   git add ml/artifacts/model.pkl.dvc .gitignore
-   git commit -m "Track trained model artifact with DVC"
-   ```
-
 4. Cấu hình remote DVC:
    ```bash
    ...
