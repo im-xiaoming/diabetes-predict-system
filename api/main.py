@@ -3,6 +3,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 
+from api.metrics import metrics_response, track_http
 from api.schemas import PredictRequest, PredictResponse
 from ml.predictor import predict_one
 
@@ -11,6 +12,11 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 MODEL_PATH = ROOT_DIR / "ml" / "artifacts" / "model.pkl"
 
 app = FastAPI(title="Diabetes Complication Prediction API")
+
+
+@app.middleware("http")
+async def metrics_middleware(req, call_next):
+    return await track_http(req, call_next)
 
 
 def to_dict(req):
@@ -27,6 +33,11 @@ def health():
         "model_file_exists": exists,
         "model_path": str(MODEL_PATH),
     }
+
+
+@app.get("/metrics", include_in_schema=False)
+def metrics():
+    return metrics_response()
 
 
 @app.post("/api/predict/", response_model=PredictResponse)
