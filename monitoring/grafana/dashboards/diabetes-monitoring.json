@@ -1,0 +1,619 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations and Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "FastAPI operations from Prometheus plus prediction data from the Django SQLite database.",
+  "editable": true,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "panels": [],
+      "title": "API Metrics from Prometheus",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "text": "DOWN"
+                },
+                "1": {
+                  "color": "green",
+                  "text": "UP"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "up{job=\"fastapi\"}",
+          "instant": true,
+          "legendFormat": "FastAPI",
+          "refId": "A"
+        }
+      ],
+      "title": "FastAPI Target",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 10,
+        "x": 4,
+        "y": 1
+      },
+      "id": 3,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (route) (rate(diabetes_http_requests_total[1m]))",
+          "legendFormat": "{{route}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Request Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 10,
+        "x": 14,
+        "y": 1
+      },
+      "id": 4,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (outcome) (increase(diabetes_prediction_requests_total[5m]))",
+          "legendFormat": "{{outcome}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Predict Requests in 5m",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 5
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "100 * sum(rate(diabetes_http_requests_total{status=~\"4..|5..\"}[5m])) / clamp_min(sum(rate(diabetes_http_requests_total[5m])), 0.001)",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "title": "HTTP Error Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "id": 6,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (route) (rate(diabetes_http_request_duration_seconds_sum[5m])) / sum by (route) (rate(diabetes_http_request_duration_seconds_count[5m]))",
+          "legendFormat": "avg {{route}}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le, route) (rate(diabetes_http_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "p95 {{route}}",
+          "refId": "B"
+        }
+      ],
+      "title": "Latency by Route",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 9
+      },
+      "id": 7,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (status) (rate(diabetes_http_requests_total[5m]))",
+          "legendFormat": "status {{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "HTTP Status Rate",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "id": 8,
+      "panels": [],
+      "title": "Prediction Data from Database",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "diabetes_sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 18
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "diabetes_sqlite"
+          },
+          "queryType": "table",
+          "rawQueryText": "SELECT COUNT(*) AS value FROM predictions_predictionresult",
+          "queryText": "SELECT COUNT(*) AS value FROM predictions_predictionresult",
+          "timeColumns": [],
+          "refId": "A"
+        }
+      ],
+      "title": "Prediction Results",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "diabetes_sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 18
+      },
+      "id": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "diabetes_sqlite"
+          },
+          "queryType": "table",
+          "rawQueryText": "SELECT ROUND(COALESCE(AVG(latency_ms), 0), 2) AS value FROM predictions_requestlog",
+          "queryText": "SELECT ROUND(COALESCE(AVG(latency_ms), 0), 2) AS value FROM predictions_requestlog",
+          "timeColumns": [],
+          "refId": "A"
+        }
+      ],
+      "title": "DB Avg Latency",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "diabetes_sqlite"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 18
+      },
+      "id": 11,
+      "options": {
+        "displayLabels": [
+          "name",
+          "percent",
+          "value"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "diabetes_sqlite"
+          },
+          "queryType": "table",
+          "rawQueryText": "SELECT risk_level AS metric, COUNT(*) AS value FROM predictions_predictionresult GROUP BY risk_level ORDER BY value DESC",
+          "queryText": "SELECT risk_level AS metric, COUNT(*) AS value FROM predictions_predictionresult GROUP BY risk_level ORDER BY value DESC",
+          "timeColumns": [],
+          "refId": "A"
+        }
+      ],
+      "title": "Overall Risk Distribution",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "diabetes_sqlite"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 18
+      },
+      "id": 12,
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "diabetes_sqlite"
+          },
+          "queryType": "table",
+          "rawQueryText": "SELECT COALESCE(NULLIF(model_name, ''), 'Unknown') AS model_name, COALESCE(NULLIF(model_version, ''), 'Unknown') AS model_version, COUNT(*) AS predictions, MAX(created_at) AS last_prediction FROM predictions_predictionresult GROUP BY model_name, model_version ORDER BY predictions DESC",
+          "queryText": "SELECT COALESCE(NULLIF(model_name, ''), 'Unknown') AS model_name, COALESCE(NULLIF(model_version, ''), 'Unknown') AS model_version, COUNT(*) AS predictions, MAX(created_at) AS last_prediction FROM predictions_predictionresult GROUP BY model_name, model_version ORDER BY predictions DESC",
+          "timeColumns": [],
+          "refId": "A"
+        }
+      ],
+      "title": "Model Usage",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "diabetes_sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
+      "id": 13,
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "diabetes_sqlite"
+          },
+          "queryType": "time series",
+          "rawQueryText": "SELECT CAST(strftime('%s', created_at) AS INTEGER) AS time, COUNT(*) AS predictions FROM predictions_predictionresult GROUP BY strftime('%Y-%m-%d %H:%M', created_at) ORDER BY time",
+          "queryText": "SELECT CAST(strftime('%s', created_at) AS INTEGER) AS time, COUNT(*) AS predictions FROM predictions_predictionresult GROUP BY strftime('%Y-%m-%d %H:%M', created_at) ORDER BY time",
+          "timeColumns": [
+            "time"
+          ],
+          "refId": "A"
+        }
+      ],
+      "title": "Prediction Activity",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "diabetes_sqlite"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "id": 14,
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "diabetes_sqlite"
+          },
+          "queryType": "table",
+          "rawQueryText": "SELECT target AS metric, COUNT(*) AS value FROM predictions_riskscoredetail WHERE risk_label = 1 GROUP BY target ORDER BY value DESC",
+          "queryText": "SELECT target AS metric, COUNT(*) AS value FROM predictions_riskscoredetail WHERE risk_label = 1 GROUP BY target ORDER BY value DESC",
+          "timeColumns": [],
+          "refId": "A"
+        }
+      ],
+      "title": "Positive Targets",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "diabetes_sqlite"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 33
+      },
+      "id": 15,
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "diabetes_sqlite"
+          },
+          "queryType": "table",
+          "rawQueryText": "SELECT target AS metric, ROUND(AVG(risk_score), 4) AS value FROM predictions_riskscoredetail GROUP BY target ORDER BY value DESC",
+          "queryText": "SELECT target AS metric, ROUND(AVG(risk_score), 4) AS value FROM predictions_riskscoredetail GROUP BY target ORDER BY value DESC",
+          "timeColumns": [],
+          "refId": "A"
+        }
+      ],
+      "title": "Average Risk Score by Target",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "diabetes_sqlite"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 33
+      },
+      "id": 16,
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "diabetes_sqlite"
+          },
+          "queryType": "table",
+          "rawQueryText": "SELECT log.id AS request_id, log.endpoint, log.status_code, ROUND(log.latency_ms, 2) AS latency_ms, log.created_at, result.id AS prediction_id, result.model_version FROM predictions_requestlog log JOIN predictions_predictionresult result ON result.id = log.prediction_id ORDER BY log.created_at DESC LIMIT 20",
+          "queryText": "SELECT log.id AS request_id, log.endpoint, log.status_code, ROUND(log.latency_ms, 2) AS latency_ms, log.created_at, result.id AS prediction_id, result.model_version FROM predictions_requestlog log JOIN predictions_predictionresult result ON result.id = log.prediction_id ORDER BY log.created_at DESC LIMIT 20",
+          "timeColumns": [],
+          "refId": "A"
+        }
+      ],
+      "title": "Latest Request Logs",
+      "type": "table"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": [
+    "diabetes",
+    "fastapi",
+    "monitoring"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Diabetes Prediction Monitoring",
+  "uid": "diabetes-prediction-monitoring",
+  "version": 1,
+  "weekStart": ""
+}
