@@ -24,7 +24,7 @@ import argparse
 from ml.preprocessing import build_preprocessor, clean_data, load_data, split_xy
 from ml.tracking import log_metrics, log_model, log_params, log_report, start_run
 from ml.tune import tune_all
-from ml.registry import register_best_model
+from ml.registry import get_champion_metrics, register_best_model, restore_champion_model
 
 
 DATA_PATH = ROOT_DIR / "data" / "data.csv"
@@ -131,8 +131,43 @@ def build_tuned_models(x_train, y_train, n_trials, timeout):
     return models, tuned_meta
 
 
-def main(tune=False, n_trials=30, timeout=None, register=False):
-    df = load_data(DATA_PATH)
+def promotion_decision(candidate_metrics, champion_info, metric, min_delta, force=False):
+    candidate_score = candidate_metrics.get(metric)
+    if candidate_score is None:
+        raise ValueError(f"Candidate metric not found: {metric}")
+    if force:
+        return True, f"force_promote=true; candidate {metric}={candidate_score:.6f}"
+    if not champion_info:
+        return True, "no champion found"
+
+    champion_score = champion_info.get("metrics", {}).get(metric)
+    if champion_score is None:
+        return True, f"champion metric not found: {metric}"
+
+    threshold = champion_score + min_delta
+    if candidate_score > threshold:
+        return (
+            True,
+            f"candidate {metric}={candidate_score:.6f} > champion {metric}={champion_score:.6f} + delta {min_delta:.6f}",
+        )
+    return (
+        False,
+        f"candidate {metric}={candidate_score:.6f} <= champion {metric}={champion_score:.6f} + delta {min_delta:.6f}",
+    )
+
+
+def main(
+    data_path=DATA_PATH,
+    tune=False,
+    n_trials=30,
+    timeout=None,
+    register=False,
+    promotion_metric="f1_macro",
+    promotion_min_delta=0.0,
+    force_promote=False,
+):
+    data_path = Path(data_path)
+    df = load_data(data_path)
     raw_n = len(df)
     df = clean_data(df)
     print(f"rows_raw: {raw_n}")
@@ -153,6 +188,9 @@ def main(tune=False, n_trials=30, timeout=None, register=False):
         "duplicates_dropped": raw_n - len(df),
         "test_size": TEST_SIZE,
         "random_state": RANDOM_STATE,
+        "data_path": str(data_path),
+        "promotion_metric": promotion_metric,
+        "promotion_min_delta": promotion_min_delta,
     }
     if tune:
         models_iter, tuned_meta = build_tuned_models(x_train, y_train, n_trials, timeout)
@@ -200,28 +238,81 @@ def main(tune=False, n_trials=30, timeout=None, register=False):
         "numeric": num,
         "categorical": cat,
     }
+    champion_info = get_champion_metrics() if register else None
+    promoted, reason = promotion_decision(
+        best_metrics,
+        champion_info,
+        promotion_metric,
+        promotion_min_delta,
+        force=force_promote,
+    )
+    print(f"\npromotion_decision: {'promote' if promoted else 'reject'}")
+    print(f"promotion_reason: {reason}")
+
+    if not promoted:
+        try:
+            restore_champion_model(MODEL_PATH)
+            joblib.load(MODEL_PATH)
+        except Exception as exc:
+            promoted = True
+            reason = f"candidate promoted because champion artifact could not be restored in this environment: {exc}"
+            print(f"champion_restore_failed: {exc}")
+        else:
+            champion_version = champion_info["version"] if champion_info else "unknown"
+            print(f"restored_model: {MODEL_PATH}")
+            print(f"kept_champion_version: {champion_version}")
+            return {
+                "promoted": False,
+                "candidate_model": best_name,
+                "candidate_metrics": best_metrics,
+                "champion": champion_info,
+                "reason": reason,
+            }
+
     joblib.dump(bundle, MODEL_PATH)
-    print(f"\nsaved_model: {MODEL_PATH}")
+    print(f"saved_model: {MODEL_PATH}")
 
     if register:
         reg_params = dict(base)
         reg_params["model_name"] = best_name
+        reg_params["promoted"] = True
+        reg_params["promotion_reason"] = reason
         if best_name in tuned_meta:
             reg_params["best_params"] = tuned_meta[best_name]["best_params"]
             reg_params["best_cv_f1_macro"] = tuned_meta[best_name]["best_cv_f1_macro"]
         info = register_best_model(bundle, best_name, best_metrics, reg_params)
         print(f"\nregistered_model: {info}")
 
+    return {
+        "promoted": True,
+        "candidate_model": best_name,
+        "candidate_metrics": best_metrics,
+        "reason": reason,
+    }
+
 
 def parse_args():
     p = argparse.ArgumentParser()
+    p.add_argument("--data", default=str(DATA_PATH), help="CSV training data path")
     p.add_argument("--tune", action="store_true", help="dùng Optuna để tìm siêu tham số")
     p.add_argument("--n-trials", type=int, default=30, help="số trial cho mỗi model")
     p.add_argument("--timeout", type=int, default=None, help="timeout tính bằng giây cho mỗi model")
     p.add_argument("--register", action="store_true", help="đăng ký best model vào MLflow registry")
+    p.add_argument("--promotion-metric", default="f1_macro", help="Metric used to compare candidate with champion")
+    p.add_argument("--promotion-min-delta", type=float, default=0.0, help="Minimum metric improvement required")
+    p.add_argument("--force-promote", action="store_true", help="Promote candidate even if it is worse than champion")
     return p.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    main(tune=args.tune, n_trials=args.n_trials, timeout=args.timeout, register=args.register)
+    main(
+        data_path=args.data,
+        tune=args.tune,
+        n_trials=args.n_trials,
+        timeout=args.timeout,
+        register=args.register,
+        promotion_metric=args.promotion_metric,
+        promotion_min_delta=args.promotion_min_delta,
+        force_promote=args.force_promote,
+    )

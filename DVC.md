@@ -1,52 +1,96 @@
-Trong project này, DVC nên quản lý:
+# Quy trình DVC và retrain model
 
-- `data/data.csv`
-- `ml/artifacts/model.pkl`
-- có thể thêm `mlruns/` artifact quan trọng nếu muốn, nhưng thường MLflow đã quản lý experiment rồi nên không nhất thiết đưa toàn bộ `mlruns` vào DVC.
+Trong project này, DB là nguồn dữ liệu vận hành, còn DVC quản lý các artifact có thể version:
 
-Luồng hợp lý:
+- `data/data.csv`: seed dataset gốc.
+- `data/training.csv`: dataset dùng để train, được export/merge từ DB và seed dataset.
+- `ml/artifacts/model.pkl`: model đang được API sử dụng để predict.
+
+## Luồng dữ liệu
 
 ```text
-Git: code, config, pipeline definition
-DVC: dataset, model artifact
-MLflow: experiment tracking, metrics, registry
-Airflow/Cron: lịch retrain định kỳ
-Django: UI thao tác thủ công/xem trạng thái
+Mock HIS / HIS thật -> DB
+ClinicalRecord + ClinicalRecordLabel -> data/training.csv
+data/training.csv -> ml/train.py -> candidate model
+candidate tốt hơn champion -> ml/artifacts/model.pkl + MLflow champion mới
+candidate kém hơn champion -> giữ nguyên model.pkl và champion cũ
 ```
 
-Thứ tự nên làm:
+Không train bằng `RiskScoreDetail.risk_label` vì đây là output của model. Chỉ dùng ground-truth label trong `ClinicalRecordLabel`.
 
-1. Cài và init DVC:
-   ```bash
-   pip install dvc
-   dvc init
-   ```
+## Export dữ liệu train
 
-2. Track dataset:
-   ```bash
-   dvc add data/data.csv
-   git add data/data.csv.dvc .gitignore
-   git commit -m "Track dataset with DVC"
-   ```
+Chạy export riêng:
 
-4. Cấu hình remote DVC:
-   ```bash
-   ...
-   dvc push -r origin
-   ```
+```powershell
+python ml/export_training_data.py --output data/training.csv --fallback data/data.csv
+```
 
-Bước “chuẩn” hơn nữa là tạo `dvc.yaml` để pipeline có thể reproduce:
+Stage export sẽ:
 
-```bash
-dvc stage add -n train_model \
-  -d data/data.csv \
-  -d ml/train.py \
-  -o ml/artifacts/model.pkl \
-  python ml/train.py --tune --n-trials 5 --timeout 600 --register
+- đọc seed rows từ `data/data.csv`
+- đọc labeled rows từ DB
+- merge hai nguồn
+- drop duplicate theo feature + label
+- ghi ra `data/training.csv`
 
+`export_training_data` được đặt `always_changed: true` trong `dvc.yaml` vì DB là runtime input, không nên commit hay track `db.sqlite3` trong DVC. Mỗi lần `dvc repro`, stage export sẽ chạy lại để lấy label mới từ DB.
+
+## Train và promotion gate
+
+Chạy train nhanh không tune:
+
+```powershell
+python ml/train.py --data data/training.csv
+```
+
+Chạy train có register MLflow và promotion gate:
+
+```powershell
+python ml/train.py --data data/training.csv --tune --n-trials 5 --timeout 600 --register --promotion-metric f1_macro --promotion-min-delta 0.0
+```
+
+Trong một lần retrain, `ml/train.py` vẫn chọn model tốt nhất của lần chạy đó theo `f1_macro`. Model này được gọi là candidate.
+
+Candidate chỉ được promote nếu:
+
+```text
+candidate.f1_macro > champion.f1_macro + promotion_min_delta
+```
+
+Với cấu hình hiện tại:
+
+```text
+promotion_metric = f1_macro
+promotion_min_delta = 0.0
+```
+
+Tức là candidate phải tốt hơn champion hiện tại. Nếu candidate kém hơn hoặc chỉ bằng champion, code sẽ:
+
+- không ghi đè `ml/artifacts/model.pkl`
+- không chuyển MLflow alias `champion`
+- giữ nguyên model đang chạy trước đó
+
+Nếu cần ép promote thủ công, dùng:
+
+```powershell
+python ml/train.py --data data/training.csv --register --force-promote
+```
+
+Chỉ dùng `--force-promote` khi đã kiểm tra kỹ metric và chấp nhận thay champion.
+
+## Chạy pipeline DVC
+
+```powershell
 dvc repro
-
-dvc push -r origin
+dvc push
 ```
 
-Tóm lại: **đúng, DVC là bước tiếp theo nếu bạn muốn version data/model**. Sau DVC mới tính tiếp scheduler như Airflow để tự động chạy lại pipeline.
+Pipeline hiện có hai stage:
+
+- `export_training_data`: tạo `data/training.csv`
+- `train_model`: train candidate, kiểm tra promotion gate, rồi chỉ ghi `ml/artifacts/model.pkl` nếu candidate đạt điều kiện
+
+Nếu candidate bị reject, `dvc repro` vẫn chạy thành công nhưng `ml/artifacts/model.pkl` không đổi.
+
+Ngoại lệ vận hành: nếu candidate bị reject nhưng champion artifact cũ không thể restore/load trong môi trường hiện tại, ví dụ do lệch phiên bản scikit-learn khi unpickle, `train.py` sẽ promote candidate để API vẫn có `model.pkl` chạy được. Trường hợp này cần xem lại dependency trong `requirements.txt` để tránh model pickle bị lệch version giữa các lần train/deploy.
