@@ -2,17 +2,25 @@
 {% load static %}
 
 {% block title %}
-    <title>Mock HIS - GlucoPredict AI</title>
+    <title>{{ page_title|default:"Mock HIS Simulation" }} - GlucoPredict AI</title>
 {% endblock %}
 
 {% block page_content %}
         <div class="max-w-7xl mx-auto w-full flex flex-col gap-stack-lg">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-stack-md">
                 <div>
-                    <h2 class="text-display-lg font-display-lg text-on-surface">Mock HIS Simulation</h2>
-                    <p class="text-body-md font-body-md text-secondary mt-unit">Auto fake real-time feed: Mock HIS starts sending patient records to FastAPI when this page opens.</p>
+                    <h2 class="text-display-lg font-display-lg text-on-surface">{{ page_title|default:"Mock HIS Simulation" }}</h2>
+                    <p class="text-body-md font-body-md text-secondary mt-unit">{{ page_subtitle }}</p>
                 </div>
                 <div class="flex gap-stack-sm">
+                    <a href="{% url 'mock-his' %}" class="bg-surface-container-lowest border border-outline-variant text-on-surface-variant rounded-lg py-2 px-4 text-label-md font-label-md flex items-center gap-2 hover:bg-surface-container-low transition-colors shadow-soft">
+                        <span class="material-symbols-outlined text-[18px]">fact_check</span>
+                        Có nhãn
+                    </a>
+                    <a href="{% url 'his-inference' %}" class="bg-surface-container-lowest border border-outline-variant text-on-surface-variant rounded-lg py-2 px-4 text-label-md font-label-md flex items-center gap-2 hover:bg-surface-container-low transition-colors shadow-soft">
+                        <span class="material-symbols-outlined text-[18px]">online_prediction</span>
+                        Không nhãn
+                    </a>
                     <button id="reset-btn" class="bg-surface-container-lowest border border-outline-variant text-on-surface-variant rounded-lg py-2 px-4 text-label-md font-label-md flex items-center gap-2 hover:bg-surface-container-low transition-colors shadow-soft">
                         <span class="material-symbols-outlined text-[18px]">refresh</span>
                         Reset Data
@@ -29,7 +37,7 @@
                         <div class="p-stack-md border-b border-outline-variant flex justify-between items-center bg-surface-bright">
                             <h3 class="text-title-lg font-title-lg text-on-surface flex items-center gap-2">
                                 <span class="material-symbols-outlined text-secondary text-[20px]">folder_shared</span>
-                                Patient Records Ready for Transmission
+                                {{ records_title|default:"Patient Records Ready for Transmission" }}
                             </h3>
                             <span class="bg-secondary-container text-on-secondary-container px-2 py-1 rounded text-label-sm font-label-sm">{{ total }} Records</span>
                         </div>
@@ -83,7 +91,7 @@
                         <div class="flex flex-col gap-stack-sm">
                             <label class="text-label-md font-label-md text-on-surface">Endpoint Config</label>
                             <select id="endpoint-select" class="flex-1 bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
-                                <option>Localhost FastAPI</option>
+                                <option>{{ mode_label|default:"Localhost FastAPI" }}</option>
                                 <option disabled>Staging Environment</option>
                                 <option disabled>Production Read-Only</option>
                             </select>
@@ -188,10 +196,10 @@
         const batchSize = 20;
         const recordMap = new Map(records.map((rec) => [rec.idx, rec]));
         const sentSet = new Set();
-        const sendUrl = "{% url 'mock-his-send' %}";
-        const bulkUrl = "{% url 'mock-his-send-bulk' %}";
-        const healthUrl = "{% url 'mock-his-health' %}";
-        const recordsUrl = "{% url 'mock-his-records' %}";
+        const sendUrl = "{{ send_url }}";
+        const bulkUrl = "{{ bulk_url }}";
+        const healthUrl = "{{ health_url }}";
+        const recordsUrl = "{{ records_url }}";
         const token = "{{ csrf_token }}";
         const consoleJson = document.getElementById("console-json");
         const consoleStatus = document.getElementById("console-status");

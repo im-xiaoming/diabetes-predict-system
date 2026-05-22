@@ -54,7 +54,9 @@
                                 <tr class="patient-row hover:bg-surface-container-low transition-colors relative" data-text="{{ patient.id }} {{ patient.name|lower }}" data-level="{{ patient.level }}">
                                     <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface">{{ patient.id }}</td>
                                     <td class="py-3 px-4 text-body-sm font-body-sm text-on-surface font-medium">{{ patient.name }}</td>
-                                    <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">{{ patient.age }} / {{ patient.get_sex_display }}</td>
+                                    <td class="py-3 px-4 text-body-sm font-body-sm text-secondary">
+                                        {% if patient.latest_record %}{{ patient.latest_record.age }}{% else %}N/A{% endif %} / {{ patient.get_sex_display }}
+                                    </td>
                                     <td class="py-3 px-4">
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm {% if patient.level == 'high' or patient.level == 'very_high' %}bg-error/10 text-error{% elif patient.level == 'medium' %}bg-[#F59E0B]/10 text-[#D97706]{% else %}bg-[#10B981]/10 text-[#059669]{% endif %}">
                                             <span class="w-1.5 h-1.5 rounded-full mr-1.5 {% if patient.level == 'high' or patient.level == 'very_high' %}bg-error{% elif patient.level == 'medium' %}bg-[#D97706]{% else %}bg-[#059669]{% endif %}"></span>

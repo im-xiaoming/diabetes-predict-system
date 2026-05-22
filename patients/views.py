@@ -7,10 +7,12 @@ from patients.models import Patient
 
 @login_required(login_url="login")
 def patients_view(request):
-    patient_list = Patient.objects.all().order_by("-updated_at")
+    patient_list = Patient.objects.prefetch_related("clinical_records").all().order_by("-updated_at")
     paginator = Paginator(patient_list, 10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
+    for patient in page_obj.object_list:
+        patient.latest_record = patient.clinical_records.order_by("-created_at").first()
     return render(
         request,
         "patients/patients.html",

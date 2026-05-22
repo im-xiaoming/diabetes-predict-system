@@ -17,7 +17,7 @@
                         <p class="text-body-sm font-body-sm text-secondary">Mã bệnh nhân: {{ patient.id }}</p>
                     </div>
                 </div>
-                <a href="{% url 'mock-his' %}" class="px-4 py-2 bg-primary-container text-on-primary rounded-lg text-label-md font-label-md hover:opacity-90 transition-opacity">
+                <a href="{% url 'his-inference' %}" class="px-4 py-2 bg-primary-container text-on-primary rounded-lg text-label-md font-label-md hover:opacity-90 transition-opacity">
                     Chạy dự đoán mới
                 </a>
             </div>
@@ -30,7 +30,9 @@
                             </div>
                             <div>
                                 <h3 class="text-title-lg font-title-lg text-on-surface">{{ patient.name }}</h3>
-                                <p class="text-body-sm font-body-sm text-secondary">{{ patient.get_sex_display }} • {{ patient.age }} tuổi</p>
+                                <p class="text-body-sm font-body-sm text-secondary">
+                                    {{ patient.get_sex_display }} • {% if record %}{{ record.age }} tuổi{% else %}chưa có tuổi{% endif %}
+                                </p>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-stack-sm text-body-sm font-body-sm">
@@ -111,7 +113,7 @@
                                                 {{ item.risk_level }}
                                             </span>
                                         </div>
-                                        <span class="text-label-sm font-label-sm text-on-surface-variant block mt-2">Label {{ item.risk_label }}</span>
+                                        <span class="text-label-sm font-label-sm text-on-surface-variant block mt-2">Dự đoán {{ item.risk_label }}</span>
                                     </div>
                                 {% endfor %}
                             </div>

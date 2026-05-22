@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST
 
 from patients.models import ClinicalRecord, ClinicalRecordLabel, Patient
@@ -187,10 +188,43 @@ def call_predict(rec):
     }
 
 
+def without_truth(rec):
+    out = dict(rec)
+    out.pop("truth", None)
+    return out
+
+
+def page_context(request, *, unlabeled=False):
+    records = load_records(offset=0, limit=20)
+    if unlabeled:
+        records = [without_truth(rec) for rec in records]
+    return {
+        "records": records,
+        "total": total_records(),
+        "page_title": "Unlabeled HIS Feed" if unlabeled else "Mock HIS Simulation",
+        "page_subtitle": (
+            "Gửi hồ sơ không nhãn đến FastAPI để model tạo dự đoán và lưu PredictionResult."
+            if unlabeled
+            else "Auto fake real-time feed: Mock HIS starts sending patient records to FastAPI when this page opens."
+        ),
+        "records_title": "Unlabeled Patient Records" if unlabeled else "Patient Records Ready for Transmission",
+        "send_url": reverse("his-inference-send" if unlabeled else "mock-his-send"),
+        "bulk_url": reverse("his-inference-send-bulk" if unlabeled else "mock-his-send-bulk"),
+        "health_url": reverse("mock-his-health"),
+        "records_url": reverse("his-inference-records" if unlabeled else "mock-his-records"),
+        "mode_label": "No ground truth labels" if unlabeled else "Ground truth labels included",
+        "unlabeled": unlabeled,
+    }
+
+
 @login_required(login_url="login")
 def mock_his_view(request):
-    records = load_records(offset=0, limit=20)
-    return render(request, "mock_his/mock_his.html", {"records": records, "total": total_records()})
+    return render(request, "mock_his/mock_his.html", page_context(request))
+
+
+@login_required(login_url="login")
+def his_inference_view(request):
+    return render(request, "mock_his/mock_his.html", page_context(request, unlabeled=True))
 
 
 @login_required(login_url="login")
@@ -206,6 +240,22 @@ def send_one_view(request):
     if not rec["ready"]:
         return JsonResponse({"ok": False, "saved": False, "idx": idx, "skipped": True, "error": "Record has missing values"}, status=400)
     out = call_predict(rec)
+    return JsonResponse(out, status=200 if out["ok"] else 502)
+
+
+@login_required(login_url="login")
+@require_POST
+def send_unlabeled_one_view(request):
+    data = body(request)
+    idx = int(data.get("idx", 0))
+    if idx < 0:
+        return JsonResponse({"ok": False, "saved": False, "error": "Invalid record index"}, status=400)
+    rec = load_record(idx)
+    if not rec:
+        return JsonResponse({"ok": False, "saved": False, "idx": idx, "error": "Record not found"}, status=404)
+    if not rec["ready"]:
+        return JsonResponse({"ok": False, "saved": False, "idx": idx, "skipped": True, "error": "Record has missing values"}, status=400)
+    out = call_predict(without_truth(rec))
     return JsonResponse(out, status=200 if out["ok"] else 502)
 
 
@@ -229,12 +279,49 @@ def send_bulk_view(request):
 
 
 @login_required(login_url="login")
+@require_POST
+def send_unlabeled_bulk_view(request):
+    data = body(request)
+    count = int(data.get("count", 20))
+    offset = int(data.get("offset", 0))
+    records = [without_truth(rec) for rec in load_records(offset=offset, limit=count) if rec["ready"]]
+    rows = [call_predict(rec) for rec in records]
+    ok = sum(1 for row in rows if row["ok"])
+    out = {
+        "ok": ok == len(rows),
+        "total": len(rows),
+        "success": ok,
+        "failed": len(rows) - ok,
+        "results": rows,
+    }
+    return JsonResponse(out, status=200 if out["ok"] else 502)
+
+
+@login_required(login_url="login")
 @require_GET
 def records_view(request):
     offset = int(request.GET.get("offset", 0))
     limit = int(request.GET.get("limit", 20))
     limit = max(1, min(limit, 100))
     records = load_records(offset=offset, limit=limit)
+    return JsonResponse(
+        {
+            "ok": True,
+            "offset": offset,
+            "limit": limit,
+            "total": total_records(),
+            "records": records,
+        }
+    )
+
+
+@login_required(login_url="login")
+@require_GET
+def unlabeled_records_view(request):
+    offset = int(request.GET.get("offset", 0))
+    limit = int(request.GET.get("limit", 20))
+    limit = max(1, min(limit, 100))
+    records = [without_truth(rec) for rec in load_records(offset=offset, limit=limit)]
     return JsonResponse(
         {
             "ok": True,

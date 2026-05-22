@@ -104,6 +104,10 @@
                     <span class="material-symbols-outlined">database</span>
                     Mock HIS
                 </a>
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'his-inference' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'his-inference' %}">
+                    <span class="material-symbols-outlined">online_prediction</span>
+                    HIS Inference
+                </a>
                 <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'monitor' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'monitor' %}">
                     <span class="material-symbols-outlined">analytics</span>
                     System Monitoring
