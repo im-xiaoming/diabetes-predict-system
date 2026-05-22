@@ -2,7 +2,7 @@ stages:
   train_model:
     cmd: python ml/train.py --tune --n-trials 5 --timeout 600 --register
     deps:
-    - data/data.csv
+    - data/training.csv
     - ml/train.py
     outs:
     - ml/artifacts/model.pkl
