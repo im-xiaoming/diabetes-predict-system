@@ -43,6 +43,7 @@ dictdiffer==0.9.0
 diskcache==5.6.3
 distro==1.9.0
 Django==5.2.14
+django-extensions==4.1
 djangorestframework==3.17.1
 docker==7.1.0
 dpath==2.2.0
@@ -121,7 +122,7 @@ pathspec==1.1.1
 pillow==12.2.0
 platformdirs==4.9.6
 prettytable==3.17.0
-prometheus-client==0.24.1
+prometheus_client==0.25.0
 prompt_toolkit==3.0.52
 propcache==0.5.2
 protobuf==6.33.6
