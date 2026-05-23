@@ -1,5 +1,4 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Count, Max, Min
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -12,6 +11,7 @@ import time
 from urllib.error import URLError
 from urllib.request import urlopen
 
+from accounts.permissions import admin_required
 from predictions.models import PredictionResult, RequestLog
 from .forms import TrainModelForm
 
@@ -95,7 +95,7 @@ def _model_registry_rows():
     return rows
 
 
-@login_required(login_url="login")
+@admin_required
 def modeling(request):
     model_rows = _model_registry_rows()
     production_model = model_rows[0] if model_rows else None
@@ -163,7 +163,7 @@ def _start_mlflow_ui():
     subprocess.Popen(cmd, **kwargs)
 
 
-@login_required(login_url="login")
+@admin_required
 def open_mlflow_ui(request):
     missing_packages = _missing_training_packages()
     if "mlflow" in missing_packages:
@@ -186,7 +186,7 @@ def open_mlflow_ui(request):
     return redirect(MLFLOW_UI_URL)
 
 
-@login_required(login_url="login")
+@admin_required
 def train_model_view(request):
     if request.method == "POST":
         form = TrainModelForm(request.POST)

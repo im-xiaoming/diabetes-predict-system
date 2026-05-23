@@ -1,7 +1,7 @@
-from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import render
 
+from accounts.permissions import doctor_or_admin_required
 from predictions.models import RiskScoreDetail
 
 
@@ -14,7 +14,7 @@ TARGET_NAMES = {
 }
 
 
-@login_required(login_url="login")
+@doctor_or_admin_required
 def alerts(request):
     score_qs = (
         RiskScoreDetail.objects.filter(risk_label=1)

@@ -15,7 +15,7 @@ LEVEL_MAP = {
     "Thấp": "low",
     "Trung bình": "medium",
     "Cao": "high",
-    "Rất cao": "very_high",
+    "Rất cao": "high",
 }
 
 SEX_MAP = {0: "female", 1: "male"}

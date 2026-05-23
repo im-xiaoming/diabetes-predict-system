@@ -1,12 +1,12 @@
-from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Max
 from django.shortcuts import render
 from django.utils import timezone
 
+from accounts.permissions import admin_required
 from predictions.models import PredictionResult, RequestLog, RiskScoreDetail
 
 
-@login_required(login_url="login")
+@admin_required
 def monitor(request):
     since = timezone.now() - timezone.timedelta(hours=24)
     logs = RequestLog.objects.filter(created_at__gte=since)

@@ -47,7 +47,7 @@ python ml/train.py --data data/training.csv
 Chạy train có register MLflow và promotion gate:
 
 ```powershell
-python ml/train.py --data data/training.csv --tune --n-trials 5 --timeout 600 --register --promotion-metric f1_macro --promotion-min-delta 0.0
+python ml/train.py --data data/training.csv --tune --n-trials 5 --timeout 600 --register --promotion-metric f1_macro --promotion-min-delta 0.01
 ```
 
 Trong một lần retrain, `ml/train.py` vẫn chọn model tốt nhất của lần chạy đó theo `f1_macro`. Model này được gọi là candidate.
@@ -62,7 +62,7 @@ Với cấu hình hiện tại:
 
 ```text
 promotion_metric = f1_macro
-promotion_min_delta = 0.0
+promotion_min_delta = 0.01
 ```
 
 Tức là candidate phải tốt hơn champion hiện tại. Nếu candidate kém hơn hoặc chỉ bằng champion, code sẽ:
@@ -102,15 +102,55 @@ Airflow không định nghĩa lại từng bước export/train/promote. Các b�
 Airflow chỉ lên lịch và chạy:
 
 ```text
-dvc repro -> dvc push
+check_retrain_policy -> dvc repro -> dvc push -> mark_retrain_success
 ```
 
 DAG hiện tại:
 
 ```text
 retrain_diabetes_model
+  -> check_retrain_policy
   -> dvc_repro
   -> dvc_push
+  -> mark_retrain_success
 ```
+
+## Retrain policy gate
+
+Airflow khong retrain ngay khi DB chi co vai label moi. Truoc khi chay DVC, DAG goi:
+
+```powershell
+python ml/retrain_policy.py check
+```
+
+Ba lop kiem soat:
+
+```text
+ml/retrain_policy.py: quyet dinh co nen retrain khong
+dvc.yaml: export training data va train candidate model
+ml/train.py: promotion gate, model moi co duoc dung khong
+```
+
+`ml/retrain_policy.py` chi cho retrain khi du lieu ground truth moi trong `ClinicalRecordLabel` du nguong:
+
+- it nhat 100 label moi hoac 10% so voi training set lan truoc
+- it nhat 20 positive labels moi tren 5 target
+- positive labels xuat hien o it nhat 2 target
+- cach lan retrain truoc it nhat 7 ngay, tru khi co tu 500 label moi
+- du lieu moi khong vuot nguong missing/duplicate va target van la 0/1
+
+Neu chua du dieu kien, command exit code `99`; Airflow danh dau task la skipped va khong retrain. Khi can demo hoac retrain thu cong:
+
+```powershell
+python ml/retrain_policy.py check --force
+```
+
+Sau khi pipeline thanh cong, Airflow goi:
+
+```powershell
+python ml/retrain_policy.py mark-success
+```
+
+Lenh nay cap nhat `ml/artifacts/retrain_state.json` de lan sau tinh so label moi ke tu lan retrain gan nhat.
 
 Nếu `dvc_repro` fail thì `dvc_push` không chạy. Nếu candidate model bị reject bởi promotion gate, `dvc_repro` vẫn thành công miễn là `ml/artifacts/model.pkl` được giữ hoặc restore hợp lệ.

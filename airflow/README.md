@@ -35,8 +35,10 @@ DAG chính:
 
 ```text
 retrain_diabetes_model
+  -> check_retrain_policy
   -> dvc_repro
   -> dvc_push
+  -> mark_retrain_success
 ```
 
 File DAG:
@@ -45,30 +47,20 @@ File DAG:
 airflow/dags/retrain_diabetes_model.py
 ```
 
-Lịch test hiện tại trong môi trường dev:
-
-```text
-Chạy mỗi 1 phút.
-```
-
-Trong file DAG đang để:
+Lịch mặc định trong DAG là 02:00 mỗi ngày theo timezone `Asia/Ho_Chi_Minh`:
 
 ```python
-schedule="*/1 * * * *"
+schedule="0 2 * * *"
 ```
 
-Lịch 1 phút chỉ nên dùng để test. Pipeline retrain có thể mất thời gian và `dvc.yaml` có stage export được đánh dấu `always_changed`, nên Airflow sẽ chạy lại pipeline liên tục. Khi `max_active_runs=1`, nếu một lượt chạy chưa xong thì run mới sẽ bị giữ ở trạng thái `Queued` để chờ run trước chạy xong.
+Không nên để lịch 1 phút cho pipeline retrain thật. Pipeline retrain có thể mất thời gian và `dvc.yaml` có stage export từ DB, nên nếu một lượt chạy chưa xong thì run mới sẽ bị giữ ở trạng thái `Queued` để chờ run trước chạy xong.
+
+Khi cần demo, dùng nút Trigger trên Airflow UI hoặc tạm thời thêm `--force` vào task `check_retrain_policy`.
 
 Khi muốn chỉ chạy thủ công trên UI, đổi lại:
 
 ```python
 schedule=None
-```
-
-Khi cần chạy theo lịch thật, đổi `schedule` trong DAG, ví dụ 02:00 mỗi ngày theo timezone `Asia/Ho_Chi_Minh`:
-
-```python
-schedule="0 2 * * *"
 ```
 
 Không dùng `pendulum.now()` hoặc giá trị thay đổi theo thời gian cho `start_date`, vì Airflow sẽ xem DAG thay đổi version sau mỗi lần parse.
@@ -166,3 +158,50 @@ Các file runtime không commit:
 - `airflow/logs/`
 - `airflow/config/airflow.cfg`
 - `airflow/.env`
+
+## Retrain policy gate
+
+DAG hien tai khong goi `dvc repro` truc tiep. Airflow chay:
+
+```text
+check_retrain_policy -> dvc_repro -> dvc_push -> mark_retrain_success
+```
+
+`check_retrain_policy` goi:
+
+```bash
+python ml/retrain_policy.py check
+```
+
+Neu chua du nguong du lieu moi, command exit code `99`; Airflow danh dau task la skipped va khong chay retrain. Neu du nguong, DAG tiep tuc `dvc_repro`, `dvc_push`, roi cap nhat state bang:
+
+```bash
+python ml/retrain_policy.py mark-success
+```
+
+Lich va nguong retrain nam trong `airflow/.env`, khong can sua code DAG:
+
+```text
+DIABETES_RETRAIN_SCHEDULE=0 2 * * *
+DIABETES_RETRAIN_MIN_NEW_LABELS=100
+DIABETES_RETRAIN_MIN_NEW_RATIO=0.10
+DIABETES_RETRAIN_MIN_NEW_POSITIVES=20
+DIABETES_RETRAIN_MIN_POSITIVE_TARGETS=2
+DIABETES_RETRAIN_MIN_DAYS=7
+DIABETES_RETRAIN_URGENT_NEW_LABELS=500
+DIABETES_RETRAIN_MAX_MISSING_RATE=0.05
+DIABETES_RETRAIN_MAX_DUPLICATE_RATE=0.30
+DIABETES_RETRAIN_FORCE=False
+```
+
+Khi demo can ep retrain, doi:
+
+```text
+DIABETES_RETRAIN_FORCE=True
+```
+
+Sau khi sua `.env`, restart Airflow scheduler/dag processor de DAG doc lai gia tri moi:
+
+```powershell
+docker compose -f airflow\docker-compose.yaml restart airflow-scheduler airflow-dag-processor
+```

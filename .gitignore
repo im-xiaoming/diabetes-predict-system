@@ -45,6 +45,7 @@ htmlcov/
 .cache/
 .runtime/
 mlruns/
+ml/artifacts/retrain_state.json
 
 # Jupyter Notebook
 .ipynb_checkpoints/

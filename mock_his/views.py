@@ -2,13 +2,13 @@ import json
 from time import perf_counter
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST
 
+from accounts.permissions import admin_required
 from patients.models import ClinicalRecord, ClinicalRecordLabel, Patient
 from predictions.models import PredictionResult, RequestLog, RiskScoreDetail
 from .feed_runner import feed_runner
@@ -90,7 +90,7 @@ def save_result(rec, res):
     labels = res.get("risk_labels", {})
     scores = res.get("risk_scores", {})
     level = str(res.get("risk_level") or "low").lower()
-    if level not in ["low", "medium", "high", "very_high"]:
+    if level not in ["low", "medium", "high"]:
         level = "low"
 
     with transaction.atomic():
@@ -227,17 +227,17 @@ def page_context(request, *, unlabeled=False):
     }
 
 
-@login_required(login_url="login")
+@admin_required
 def mock_his_view(request):
     return render(request, "mock_his/mock_his.html", page_context(request))
 
 
-@login_required(login_url="login")
+@admin_required
 def his_inference_view(request):
     return render(request, "mock_his/mock_his.html", page_context(request, unlabeled=True))
 
 
-@login_required(login_url="login")
+@admin_required
 @require_POST
 def send_one_view(request):
     data = body(request)
@@ -253,7 +253,7 @@ def send_one_view(request):
     return JsonResponse(out, status=200 if out["ok"] else 502)
 
 
-@login_required(login_url="login")
+@admin_required
 @require_POST
 def send_unlabeled_one_view(request):
     data = body(request)
@@ -269,7 +269,7 @@ def send_unlabeled_one_view(request):
     return JsonResponse(out, status=200 if out["ok"] else 502)
 
 
-@login_required(login_url="login")
+@admin_required
 @require_POST
 def send_bulk_view(request):
     data = body(request)
@@ -288,7 +288,7 @@ def send_bulk_view(request):
     return JsonResponse(out, status=200 if out["ok"] else 502)
 
 
-@login_required(login_url="login")
+@admin_required
 @require_POST
 def send_unlabeled_bulk_view(request):
     data = body(request)
@@ -307,7 +307,7 @@ def send_unlabeled_bulk_view(request):
     return JsonResponse(out, status=200 if out["ok"] else 502)
 
 
-@login_required(login_url="login")
+@admin_required
 @require_GET
 def records_view(request):
     offset = int(request.GET.get("offset", 0))
@@ -325,7 +325,7 @@ def records_view(request):
     )
 
 
-@login_required(login_url="login")
+@admin_required
 @require_GET
 def unlabeled_records_view(request):
     offset = int(request.GET.get("offset", 0))
@@ -343,7 +343,7 @@ def unlabeled_records_view(request):
     )
 
 
-@login_required(login_url="login")
+@admin_required
 @require_GET
 def health_view(request):
     try:
@@ -354,13 +354,13 @@ def health_view(request):
         return JsonResponse({"ok": False, "status_code": 503, "error": str(exc)}, status=503)
 
 
-@login_required(login_url="login")
+@admin_required
 @require_GET
 def feed_status_view(request):
     return JsonResponse({"ok": True, "feed": feed_runner.status()})
 
 
-@login_required(login_url="login")
+@admin_required
 @require_POST
 def feed_start_view(request):
     data = body(request)
@@ -371,25 +371,25 @@ def feed_start_view(request):
     return JsonResponse({"ok": True, "feed": state})
 
 
-@login_required(login_url="login")
+@admin_required
 @require_POST
 def feed_pause_view(request):
     return JsonResponse({"ok": True, "feed": feed_runner.pause()})
 
 
-@login_required(login_url="login")
+@admin_required
 @require_POST
 def feed_resume_view(request):
     return JsonResponse({"ok": True, "feed": feed_runner.resume()})
 
 
-@login_required(login_url="login")
+@admin_required
 @require_POST
 def feed_stop_view(request):
     return JsonResponse({"ok": True, "feed": feed_runner.stop()})
 
 
-@login_required(login_url="login")
+@admin_required
 @require_POST
 def feed_reset_view(request):
     return JsonResponse({"ok": True, "feed": feed_runner.reset()})

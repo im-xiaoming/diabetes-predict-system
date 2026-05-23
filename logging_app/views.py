@@ -1,11 +1,11 @@
-from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import render
 
+from accounts.permissions import admin_required
 from predictions.models import RequestLog
 
 
-@login_required(login_url="login")
+@admin_required
 def logging_view(request):
     log_list = (
         RequestLog.objects.select_related("prediction", "prediction__patient")

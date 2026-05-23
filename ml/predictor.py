@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import sys
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -11,7 +12,7 @@ import pandas as pd
 from ml.preprocessing import COLS, parse_dia_life
 
 
-MODEL_PATH = ROOT_DIR / "ml" / "artifacts" / "model.pkl"
+MODEL_PATH = Path(os.environ.get("MODEL_PATH", ROOT_DIR / "ml" / "artifacts" / "model.pkl"))
 
 
 def load_model():
