@@ -79,7 +79,7 @@ Vì vậy DAG truyền riêng các biến môi trường sau cho task:
 
 ```text
 SQLITE_PATH=/opt/diabetes_predict_system/.runtime/db.sqlite3
-MLFLOW_TRACKING_URI=sqlite:////opt/diabetes_predict_system/.runtime/mlflow.db
+MLFLOW_TRACKING_URI=postgresql+psycopg2://airflow:airflow@postgres/mlflow
 MLFLOW_ARTIFACT_ROOT=file:///opt/diabetes_predict_system/mlruns
 MLFLOW_EXPERIMENT_NAME=diabetes-complication-training-airflow
 ```
@@ -135,10 +135,16 @@ Airflow UI:
 http://localhost:8080
 ```
 
+MLflow UI cho cac run do Airflow retrain tao:
+
+```text
+http://localhost:5001
+```
+
 Default local credentials:
 
 ```text
-airflow / airflow
+admin / 1
 ```
 
 ## DVC remote

@@ -51,8 +51,6 @@ x-airflow-common:
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
   image: ${AIRFLOW_IMAGE_NAME:-diabetes-airflow:latest}
   build: .
-  env_file:
-    - ../.env
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
@@ -68,6 +66,23 @@ x-airflow-common:
     AIRFLOW__API_AUTH__JWT_ISSUER: ${AIRFLOW__API_AUTH__JWT_ISSUER:-airflow}
     AIRFLOW__API_AUTH__JWT_LEEWAY: ${AIRFLOW__API_AUTH__JWT_LEEWAY:-60}
     DIABETES_PROJECT_DIR: ${DIABETES_PROJECT_DIR:-/opt/diabetes_predict_system}
+    DJANGO_DATABASE_URL: ${DATABASE_URL:-}
+    DJANGO_PGHOST: ${PGHOST:-}
+    DJANGO_PGDATABASE: ${PGDATABASE:-}
+    DJANGO_PGUSER: ${PGUSER:-}
+    DJANGO_PGPASSWORD: ${PGPASSWORD:-}
+    DJANGO_PGPORT: ${PGPORT:-5432}
+    DJANGO_PGSSLMODE: ${PGSSLMODE:-require}
+    DB_CONN_MAX_AGE: ${DB_CONN_MAX_AGE:-60}
+    DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-change-me-for-real-deployments}
+    DJANGO_DEBUG: ${DJANGO_DEBUG:-True}
+    DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0,django}
+    DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-http://localhost:8000,http://127.0.0.1:8000}
+    DVC_NO_ANALYTICS: ${DVC_NO_ANALYTICS:-True}
+    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+    AIRFLOW_MLFLOW_TRACKING_URI: ${AIRFLOW_MLFLOW_TRACKING_URI:-postgresql+psycopg2://airflow:airflow@postgres/mlflow}
+    AIRFLOW_MLFLOW_ARTIFACT_ROOT: ${AIRFLOW_MLFLOW_ARTIFACT_ROOT:-file:///opt/diabetes_predict_system/mlruns}
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
     # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
@@ -121,6 +136,21 @@ services:
       retries: 50
       start_period: 30s
     restart: always
+
+  mlflow-db-init:
+    image: postgres:16
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: airflow
+    command:
+      - bash
+      - -c
+      - |
+        psql -h postgres -U airflow -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'mlflow'" | grep -q 1 \
+          || createdb -h postgres -U airflow mlflow
+    restart: "no"
 
   airflow-apiserver:
     <<: *airflow-common
@@ -207,8 +237,37 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
+  mlflow-ui:
+    <<: *airflow-common
+    command:
+      - bash
+      - -c
+      - |
+        exec python -m mlflow ui \
+          --backend-store-uri "$${AIRFLOW_MLFLOW_TRACKING_URI}" \
+          --default-artifact-root "$${AIRFLOW_MLFLOW_ARTIFACT_ROOT}" \
+          --host 0.0.0.0 \
+          --port 5000
+    ports:
+      - "5001:5000"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      mlflow-db-init:
+        condition: service_completed_successfully
+
   airflow-init:
     <<: *airflow-common
+    depends_on:
+      <<: *airflow-common-depends-on
+      mlflow-db-init:
+        condition: service_completed_successfully
     entrypoint: /bin/bash
     # yamllint disable rule:line-length
     command:
@@ -294,6 +353,8 @@ services:
       <<: *airflow-common-env
       _AIRFLOW_DB_MIGRATE: 'true'
       _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-admin}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-1}
       _PIP_ADDITIONAL_REQUIREMENTS: ''
     user: "0:0"
 

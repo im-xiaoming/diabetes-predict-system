@@ -14,6 +14,14 @@ from airflow.providers.standard.operators.bash import BashOperator
 
 
 PROJECT_DIR = os.environ.get("DIABETES_PROJECT_DIR", "/opt/diabetes_predict_system")
+AIRFLOW_MLFLOW_TRACKING_URI = os.environ.get(
+    "AIRFLOW_MLFLOW_TRACKING_URI",
+    "postgresql+psycopg2://airflow:airflow@postgres/airflow",
+)
+AIRFLOW_MLFLOW_ARTIFACT_ROOT = os.environ.get(
+    "AIRFLOW_MLFLOW_ARTIFACT_ROOT",
+    f"file://{PROJECT_DIR}/mlruns",
+)
 RETRAIN_CONFIG_PATH = Path(
     os.environ.get(
         "AIRFLOW_RETRAIN_CONFIG_PATH",
@@ -29,8 +37,8 @@ DEFAULT_ENV = {
     "DVC_NO_ANALYTICS": "1",
     "DJANGO_SETTINGS_MODULE": "diabetes_predict_system.settings",
     "SQLITE_PATH": f"{PROJECT_DIR}/.runtime/db.sqlite3",
-    "MLFLOW_TRACKING_URI": f"sqlite:///{PROJECT_DIR}/.runtime/mlflow.db",
-    "MLFLOW_ARTIFACT_ROOT": f"file://{PROJECT_DIR}/mlruns",
+    "MLFLOW_TRACKING_URI": AIRFLOW_MLFLOW_TRACKING_URI,
+    "MLFLOW_ARTIFACT_ROOT": AIRFLOW_MLFLOW_ARTIFACT_ROOT,
     "MLFLOW_EXPERIMENT_NAME": "diabetes-complication-training-airflow",
 }
 
