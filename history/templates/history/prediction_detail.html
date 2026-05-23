@@ -77,7 +77,7 @@
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-label-md font-label-md text-secondary">Risk Level</span>
-                            <span class="px-2 py-0.5 {% if prediction.risk_level == 'high' or prediction.risk_level == 'very_high' %}bg-error-container text-on-error-container{% elif prediction.risk_level == 'medium' %}bg-[#F59E0B]/10 text-[#D97706]{% else %}bg-[#10B981]/10 text-[#059669]{% endif %} rounded text-label-sm font-label-sm">{{ prediction.risk_level }}</span>
+                            <span class="px-2 py-0.5 {% if prediction.risk_level == 'high' %}bg-error-container text-on-error-container{% elif prediction.risk_level == 'medium' %}bg-[#F59E0B]/10 text-[#D97706]{% else %}bg-[#10B981]/10 text-[#059669]{% endif %} rounded text-label-sm font-label-sm">{{ prediction.risk_level }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-label-md font-label-md text-secondary">Execution Time</span>

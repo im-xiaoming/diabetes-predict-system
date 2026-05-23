@@ -33,6 +33,7 @@
                 </div>
             </a>
             <!-- CTA -->
+            {% if request.user.is_staff or request.user.is_superuser or request.user.profile.role == "admin" %}
             <form id="upload-csv-form" method="POST" enctype="multipart/form-data" action="{% url 'patient-upload' %}" class="mb-stack-md">
                 {% csrf_token %}
                 <input type="file" id="csv-file-input" name="csv_file" accept=".csv" class="hidden" />
@@ -42,6 +43,7 @@
                 </button>
                 <p id="upload-csv-status" class="mt-2 text-label-sm font-label-sm text-secondary hidden"></p>
             </form>
+            {% endif %}
             <script>
                 (function () {
                     const form = document.getElementById('upload-csv-form');
@@ -49,6 +51,8 @@
                     const btn = document.getElementById('upload-csv-btn');
                     const label = document.getElementById('upload-csv-label');
                     const status = document.getElementById('upload-csv-status');
+
+                    if (!form || !input || !btn || !label || !status) return;
 
                     btn.addEventListener('click', () => input.click());
 
@@ -88,22 +92,25 @@
                     <span class="material-symbols-outlined">group</span>
                     Patients
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'modeling' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'modeling' %}">
-                <span class="material-symbols-outlined">smart_toy</span>
-                    Model
-                </a>
-                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all text-on-surface-variant hover:bg-surface-container-highest" href="{% url 'open_mlflow_ui' %}" target="_blank" rel="noopener">
-                    <span class="material-symbols-outlined">experiment</span>
-                    MLflow
-                </a>
-                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all text-on-surface-variant hover:bg-surface-container-highest" href="http://127.0.0.1:8080" target="_blank" rel="noopener">
-                    <span class="material-symbols-outlined">account_tree</span>
-                    Airflow
-                </a>
-                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all text-on-surface-variant hover:bg-surface-container-highest" href="http://127.0.0.1:3000" target="_blank" rel="noopener">
-                    <span class="material-symbols-outlined">monitoring</span>
-                    Grafana
-                </a>
+                {% if request.user.is_staff or request.user.is_superuser or request.user.profile.role == "admin" %}
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'modeling' or url_name == 'train_model' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'modeling' %}">
+                    <span class="material-symbols-outlined">smart_toy</span>
+                        Model
+                    </a>
+                    <div class="px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-outline">External MLOps Tools</div>
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all text-on-surface-variant hover:bg-surface-container-highest" href="{% url 'open_mlflow_ui' %}" target="_blank" rel="noopener">
+                        <span class="material-symbols-outlined">experiment</span>
+                        MLflow
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all text-on-surface-variant hover:bg-surface-container-highest" href="http://127.0.0.1:8080" target="_blank" rel="noopener">
+                        <span class="material-symbols-outlined">account_tree</span>
+                        Airflow
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all text-on-surface-variant hover:bg-surface-container-highest" href="http://127.0.0.1:3000" target="_blank" rel="noopener">
+                        <span class="material-symbols-outlined">monitoring</span>
+                        Grafana
+                    </a>
+                {% endif %}
                 <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'alerts' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'alerts' %}">
                     <span class="material-symbols-outlined">warning</span>
                     Alerts
@@ -112,22 +119,24 @@
                     <span class="material-symbols-outlined">history</span>
                     History
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'mock-his' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'mock-his' %}">
-                    <span class="material-symbols-outlined">database</span>
-                    Mock HIS
-                </a>
-                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'his-inference' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'his-inference' %}">
-                    <span class="material-symbols-outlined">online_prediction</span>
-                    HIS Inference
-                </a>
-                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'monitor' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'monitor' %}">
-                    <span class="material-symbols-outlined">analytics</span>
-                    System Monitoring
-                </a>
-                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'logging' or url_name == 'logs' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'logging' %}">
-                    <span class="material-symbols-outlined">receipt_long</span>
-                    Logging
-                </a>
+                {% if request.user.is_staff or request.user.is_superuser or request.user.profile.role == "admin" %}
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'mock-his' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'mock-his' %}">
+                        <span class="material-symbols-outlined">database</span>
+                        Mock HIS
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'his-inference' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'his-inference' %}">
+                        <span class="material-symbols-outlined">online_prediction</span>
+                        HIS Inference
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'monitor' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'monitor' %}">
+                        <span class="material-symbols-outlined">analytics</span>
+                        System Monitoring
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'logging' or url_name == 'logs' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'logging' %}">
+                        <span class="material-symbols-outlined">receipt_long</span>
+                        Logging
+                    </a>
+                {% endif %}
             </div>
             {% endwith %}
             <!-- Footer Links -->
@@ -136,7 +145,7 @@
                     <span class="material-symbols-outlined">help</span>
                     Help Center
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg text-label-md font-label-md" href="#">
+                <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg text-label-md font-label-md" href="{% url 'logout' %}">
                     <span class="material-symbols-outlined">logout</span>
                     Logout
                 </a>

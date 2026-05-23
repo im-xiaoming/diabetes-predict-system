@@ -1,0 +1,12 @@
+{
+  "schedule": "1m",
+  "min_new_labels": 100,
+  "min_new_ratio": 0.1,
+  "min_new_positives": 20,
+  "min_positive_targets": 2,
+  "min_days": 7,
+  "urgent_new_labels": 500,
+  "max_missing_rate": 0.05,
+  "max_duplicate_rate": 0.3,
+  "force": true
+}

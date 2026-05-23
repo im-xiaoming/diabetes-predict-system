@@ -19,5 +19,6 @@ RUN pip install --no-cache-dir \
     numpy==1.26.4 \
     optuna==4.8.0 \
     pandas==2.3.3 \
+    psycopg2-binary==2.9.11 \
     PyYAML==6.0.3 \
     scikit-learn==1.8.0

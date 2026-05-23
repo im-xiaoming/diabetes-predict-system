@@ -30,6 +30,41 @@ class AccountsAuthTests(TestCase):
         self.assertTrue(user.check_password("StrongPass123!"))
         self.assertEqual(user.profile.role, Profile.Role.DOCTOR)
 
+    def test_register_creates_admin_profile(self):
+        response = self.client.post(
+            reverse("register"),
+            {
+                "full_name": "Tran Thi B",
+                "email": "admin@example.com",
+                "username": "admin1",
+                "role": Profile.Role.ADMIN,
+                "password1": "StrongPass123!",
+                "password2": "StrongPass123!",
+                "terms": "on",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        user = User.objects.get(username="admin1")
+        self.assertEqual(user.profile.role, Profile.Role.ADMIN)
+
+    def test_register_rejects_patient_role(self):
+        response = self.client.post(
+            reverse("register"),
+            {
+                "full_name": "Le Van C",
+                "email": "patient@example.com",
+                "username": "patient1",
+                "role": "patient",
+                "password1": "StrongPass123!",
+                "password2": "StrongPass123!",
+                "terms": "on",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(User.objects.filter(username="patient1").exists())
+
     def test_login_accepts_username(self):
         user = User.objects.create_user(
             username="doctor1",

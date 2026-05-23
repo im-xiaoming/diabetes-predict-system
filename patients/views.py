@@ -1,11 +1,11 @@
-from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
+from accounts.permissions import doctor_or_admin_required
 from patients.models import Patient
 
 
-@login_required(login_url="login")
+@doctor_or_admin_required
 def patients_view(request):
     patient_list = Patient.objects.prefetch_related("clinical_records").all().order_by("-updated_at")
     paginator = Paginator(patient_list, 10)
@@ -24,7 +24,7 @@ def patients_view(request):
     )
 
 
-@login_required(login_url="login")
+@doctor_or_admin_required
 def patient_detail_view(request, pk):
     patient = get_object_or_404(Patient.objects.prefetch_related("predictions__scores", "clinical_records"), pk=pk)
     pred = patient.predictions.order_by("-created_at").first()
@@ -42,7 +42,7 @@ def patient_detail_view(request, pk):
     )
 
 
-@login_required(login_url="login")
+@doctor_or_admin_required
 def patient_detail_redirect(request):
     patient = Patient.objects.order_by("-updated_at").first()
     if patient:

@@ -1,7 +1,7 @@
-from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
+from accounts.permissions import doctor_or_admin_required
 from predictions.models import PredictionResult
 
 TARGET_NAMES = {
@@ -14,7 +14,7 @@ TARGET_NAMES = {
 
 
 # Create your views here.
-@login_required(login_url="login")
+@doctor_or_admin_required
 def history(request):
     prediction_list = (
         PredictionResult.objects.select_related("patient")
@@ -50,7 +50,7 @@ def history(request):
     )
 
 
-@login_required(login_url="login")
+@doctor_or_admin_required
 def history_detail(request, pk=None):
     if pk is None:
         latest = PredictionResult.objects.order_by("-created_at").first()

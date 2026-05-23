@@ -26,7 +26,6 @@
                             <option value="low">Low</option>
                             <option value="medium">Medium</option>
                             <option value="high">High</option>
-                            <option value="very_high">Very high</option>
                         </select>
                     </div>
                     <button id="clear-filter" class="px-4 py-2 bg-surface border border-outline-variant text-on-surface rounded text-label-md font-label-md hover:bg-surface-container-low transition-colors flex items-center gap-2">
@@ -58,8 +57,8 @@
                                         {% if patient.latest_record %}{{ patient.latest_record.age }}{% else %}N/A{% endif %} / {{ patient.get_sex_display }}
                                     </td>
                                     <td class="py-3 px-4">
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm {% if patient.level == 'high' or patient.level == 'very_high' %}bg-error/10 text-error{% elif patient.level == 'medium' %}bg-[#F59E0B]/10 text-[#D97706]{% else %}bg-[#10B981]/10 text-[#059669]{% endif %}">
-                                            <span class="w-1.5 h-1.5 rounded-full mr-1.5 {% if patient.level == 'high' or patient.level == 'very_high' %}bg-error{% elif patient.level == 'medium' %}bg-[#D97706]{% else %}bg-[#059669]{% endif %}"></span>
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm {% if patient.level == 'high' %}bg-error/10 text-error{% elif patient.level == 'medium' %}bg-[#F59E0B]/10 text-[#D97706]{% else %}bg-[#10B981]/10 text-[#059669]{% endif %}">
+                                            <span class="w-1.5 h-1.5 rounded-full mr-1.5 {% if patient.level == 'high' %}bg-error{% elif patient.level == 'medium' %}bg-[#D97706]{% else %}bg-[#059669]{% endif %}"></span>
                                             {{ patient.get_level_display }}
                                         </span>
                                     </td>
@@ -70,7 +69,7 @@
                                     <td class="py-3 px-4 text-right">
                                         <a href="{% url 'patient-detail' patient.id %}" class="text-primary hover:text-on-primary-fixed-variant text-label-md font-label-md font-medium">Xem chi tiết</a>
                                     </td>
-                                    {% if patient.level == "high" or patient.level == "very_high" %}
+                                    {% if patient.level == "high" %}
                                         <td class="absolute left-0 top-0 bottom-0 w-1 bg-error"></td>
                                     {% endif %}
                                 </tr>

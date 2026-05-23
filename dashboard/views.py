@@ -2,12 +2,12 @@ import os
 import tempfile
 import threading
 
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from accounts.permissions import admin_required, doctor_or_admin_required
 from patients.models import ClinicalRecord, Patient
 from predictions.models import PredictionResult, RiskScoreDetail
 from . import services
@@ -50,7 +50,7 @@ def _micro_f1_for_predictions(predictions):
     return (2 * tp / denom) if denom else None
 
 
-@login_required(login_url="login")
+@doctor_or_admin_required
 def dashboard(request):
     now = timezone.now()
     total_patient = Patient.objects.count()
@@ -65,7 +65,7 @@ def dashboard(request):
     patient_growth = ((patient_30d - prev_patient_30d) / prev_patient_30d * 100) if prev_patient_30d else None
 
     alert_predictions = (
-        PredictionResult.objects.filter(risk_level__in=["high", "very_high"])
+        PredictionResult.objects.filter(risk_level="high")
         .select_related("patient", "clinical_record")
         .prefetch_related("scores")
         .order_by("-created_at")
@@ -141,7 +141,7 @@ def dashboard(request):
     )
 
 
-@login_required(login_url="login")
+@admin_required
 @require_POST
 def upload_patients_csv_view(request):
     csv_file = request.FILES.get("csv_file")

@@ -10,7 +10,6 @@ class Level(models.TextChoices):
     LOW = "low", "Low"
     MEDIUM = "medium", "Medium"
     HIGH = "high", "High"
-    VERY_HIGH = "very_high", "Very high"
 
 
 class Patient(models.Model):
@@ -29,13 +28,11 @@ class Patient(models.Model):
 
     @property
     def war(self):
-        if self.level == "low":
-            return 0
         if self.level == "medium":
             return 1
         if self.level == "high":
             return 2
-        return 3
+        return 0
 
     def __str__(self):
         return f"{self.id} - {self.name}"

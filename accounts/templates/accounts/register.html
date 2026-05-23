@@ -92,9 +92,8 @@
                     </label>
                     <div class="relative">
                         <select class="w-full appearance-none bg-surface-container-lowest border border-outline-variant rounded-lg px-stack-sm py-[10px] font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors" id="role" name="role" required>
-                            <option value="doctor" {% if form.role.value == "doctor" %}selected{% endif %}>Bác sĩ (Chẩn đoán &amp; hồ sơ)</option>
-                            <option value="admin" {% if form.role.value == "admin" %}selected{% endif %}>Quản trị viên hệ thống</option>
-                            <option value="patient" {% if form.role.value == "patient" %}selected{% endif %}>Bệnh nhân</option>
+                            <option value="doctor" {% if form.role.value == "doctor" %}selected{% endif %}>Bác sĩ lâm sàng</option>
+                            <option value="admin" {% if form.role.value == "admin" %}selected{% endif %}>Admin/MLOps hệ thống</option>
                         </select>
                         <span class="material-symbols-outlined absolute right-stack-sm top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
                     </div>
