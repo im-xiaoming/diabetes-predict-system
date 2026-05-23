@@ -18,6 +18,25 @@ from ml.tracking import setup_tracking
 REGISTERED_MODEL = "diabetes-complication-best"
 
 
+def atomic_copyfile(source, destination):
+    destination = Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            dir=destination.parent,
+            prefix=f".{destination.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as tmp:
+            tmp_path = Path(tmp.name)
+        shutil.copyfile(source, tmp_path)
+        tmp_path.replace(destination)
+    finally:
+        if tmp_path and tmp_path.exists():
+            tmp_path.unlink()
+
+
 def get_champion_metrics(alias="champion"):
     setup_tracking()
     client = MlflowClient()
@@ -96,6 +115,5 @@ def restore_champion_model(destination):
     local_dir = client.download_artifacts(mv.run_id, "model")
     source = Path(local_dir) / "model.pkl"
     destination = Path(destination)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(source, destination)
+    atomic_copyfile(source, destination)
     return mv

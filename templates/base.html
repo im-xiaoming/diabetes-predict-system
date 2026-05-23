@@ -112,9 +112,9 @@
                     <span class="material-symbols-outlined">analytics</span>
                     System Monitoring
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'logs' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'logs' %}">
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'logging' or url_name == 'logs' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'logging' %}">
                     <span class="material-symbols-outlined">receipt_long</span>
-                    Logs
+                    Logging
                 </a>
             </div>
             {% endwith %}

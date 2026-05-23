@@ -6,7 +6,7 @@ from predictions.models import RequestLog
 
 
 @login_required(login_url="login")
-def logs(request):
+def logging_view(request):
     log_list = (
         RequestLog.objects.select_related("prediction", "prediction__patient")
         .order_by("-created_at")
@@ -16,7 +16,7 @@ def logs(request):
     latest_log = log_list.first()
     return render(
         request,
-        "logs/logs.html",
+        "logging/logging.html",
         {
             "logs": page_obj.object_list,
             "page_obj": page_obj,

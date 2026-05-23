@@ -66,6 +66,7 @@ x-airflow-common:
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://airflow-apiserver:8080/execution/'
     AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW__API_AUTH__JWT_SECRET:-airflow_jwt_secret}
     AIRFLOW__API_AUTH__JWT_ISSUER: ${AIRFLOW__API_AUTH__JWT_ISSUER:-airflow}
+    AIRFLOW__API_AUTH__JWT_LEEWAY: ${AIRFLOW__API_AUTH__JWT_LEEWAY:-60}
     DIABETES_PROJECT_DIR: ${DIABETES_PROJECT_DIR:-/opt/diabetes_predict_system}
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks

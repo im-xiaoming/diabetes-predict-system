@@ -1,6 +1,6 @@
 stages:
   export_training_data:
-    cmd: python ml/export_training_data.py --output data/training.csv --fallback data/data.csv
+    cmd: python -u ml/export_training_data.py --output data/training.csv --fallback data/data.csv
     always_changed: true
     deps:
     - data/data.csv
@@ -9,9 +9,10 @@ stages:
     - data/training.csv
 
   train_model:
-    cmd: python ml/train.py --data data/training.csv --tune --n-trials 5 --timeout 600 --register --promotion-metric f1_macro --promotion-min-delta 0.0
+    cmd: python -u ml/train.py --data data/training.csv --tune --n-trials 5 --timeout 600 --register --promotion-metric f1_macro --promotion-min-delta 0.0
     deps:
     - data/training.csv
     - ml/train.py
     outs:
-    - ml/artifacts/model.pkl
+    - ml/artifacts/model.pkl:
+        persist: true

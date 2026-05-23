@@ -1,4 +1,5 @@
 from pathlib import Path
+from importlib.util import find_spec
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,8 +25,11 @@ INSTALLED_APPS = [
     "alerts",
     "history",
     "modeling",
-    "logs"
+    "logging_app.apps.LoggingConfig",
 ]
+
+if find_spec("django_extensions"):
+    INSTALLED_APPS.append("django_extensions")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

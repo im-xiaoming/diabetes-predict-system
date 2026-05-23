@@ -1,6 +1,8 @@
 from pathlib import Path
 import argparse
+import logging
 import sys
+import time
 
 import pandas as pd
 
@@ -11,6 +13,8 @@ if str(ROOT_DIR) not in sys.path:
 
 from ml.preprocessing import FT, TG, rename_cols
 
+
+LOGGER = logging.getLogger("ml.export_training_data")
 
 DEFAULT_OUTPUT = ROOT_DIR / "data" / "training.csv"
 DEFAULT_FALLBACK = ROOT_DIR / "data" / "data.csv"
@@ -41,6 +45,15 @@ TRAINING_COLUMNS = [
 ]
 
 
+def configure_logging():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+        stream=sys.stdout,
+        force=True,
+    )
+
+
 def setup_django():
     import os
 
@@ -48,6 +61,10 @@ def setup_django():
     import django
 
     django.setup()
+    from django.conf import settings
+
+    db_name = settings.DATABASES.get("default", {}).get("NAME", "unknown")
+    LOGGER.info("django_ready database=%s", db_name)
 
 
 def sex_value(value):
@@ -66,6 +83,8 @@ def export_rows():
         .select_related("patient", "label")
         .order_by("id")
     )
+    record_count = records.count()
+    LOGGER.info("db_query_ready labeled_records=%s", record_count)
     rows = []
     for record in records:
         label = record.label
@@ -98,7 +117,18 @@ def export_rows():
     return rows
 
 
+def target_positive_counts(df):
+    counts = {}
+    for col in TG:
+        if col not in df.columns:
+            continue
+        counts[col] = int(pd.to_numeric(df[col], errors="coerce").fillna(0).sum())
+    return counts
+
+
 def write_training_csv(output, fallback):
+    started_at = time.monotonic()
+    LOGGER.info("export_start output=%s fallback=%s", output, fallback)
     setup_django()
     output = Path(output)
     fallback = Path(fallback) if fallback else None
@@ -108,25 +138,42 @@ def write_training_csv(output, fallback):
     frames = []
     fallback_rows = 0
     if fallback and fallback.exists():
+        LOGGER.info("fallback_read_start path=%s", fallback)
         fallback_df = rename_cols(pd.read_csv(fallback))
         fallback_df = fallback_df[[col for col in TRAINING_COLUMNS if col in fallback_df.columns]]
         frames.append(fallback_df)
         fallback_rows = len(fallback_df)
+        LOGGER.info(
+            "fallback_read_done rows=%s columns=%s",
+            fallback_rows,
+            list(fallback_df.columns),
+        )
+    elif fallback:
+        LOGGER.warning("fallback_missing path=%s", fallback)
 
     if rows:
         frames.append(pd.DataFrame(rows, columns=TRAINING_COLUMNS))
 
     if frames:
         training_df = pd.concat(frames, ignore_index=True)
+        before_dedup = len(training_df)
         training_df = training_df.drop_duplicates(subset=FT + TG).reset_index(drop=True)
+        duplicates_dropped = before_dedup - len(training_df)
     else:
         training_df = pd.DataFrame(columns=TRAINING_COLUMNS)
+        before_dedup = 0
+        duplicates_dropped = 0
 
     training_df.to_csv(output, index=False)
-    print(f"fallback_rows: {fallback_rows}")
-    print(f"db_labeled_rows: {len(rows)}")
-    print(f"training_rows: {len(training_df)}")
-    print(f"output: {output}")
+    output_size = output.stat().st_size if output.exists() else 0
+    LOGGER.info("fallback_rows=%s", fallback_rows)
+    LOGGER.info("db_labeled_rows=%s", len(rows))
+    LOGGER.info("training_rows_before_dedup=%s", before_dedup)
+    LOGGER.info("duplicates_dropped=%s", duplicates_dropped)
+    LOGGER.info("training_rows=%s", len(training_df))
+    LOGGER.info("target_positive_counts=%s", target_positive_counts(training_df))
+    LOGGER.info("output=%s bytes=%s", output, output_size)
+    LOGGER.info("export_done duration_sec=%.2f", time.monotonic() - started_at)
 
 
 def parse_args():
@@ -137,5 +184,6 @@ def parse_args():
 
 
 if __name__ == "__main__":
+    configure_logging()
     args = parse_args()
     write_training_csv(args.output, args.fallback)

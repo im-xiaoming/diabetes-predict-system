@@ -11,5 +11,5 @@ urlpatterns = [
     path("", include("alerts.urls")),
     path("", include("history.urls")),
     path("", include("modeling.urls")),
-    path("", include("logs.urls"))
+    path("", include("logging_app.urls"))
 ]
