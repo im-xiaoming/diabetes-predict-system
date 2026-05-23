@@ -35,7 +35,21 @@ Docker Compose tu doc file `.env` trong thu muc project. Neu muon container tu p
 ```text
 DVC_PULL=True
 DVC_REMOTE=origin
+AWS_ACCESS_KEY_ID=<dagshub-access-key>
+AWS_SECRET_ACCESS_KEY=<dagshub-secret-key>
 ```
+
+Remote DVC `origin` dang tro toi DagsHub trong `.dvc/config`. Khong dua `.dvc/config.local` vao Docker image; file do chi nen nam tren may local. Container se lay credential tu `.env` qua bien moi truong `AWS_ACCESS_KEY_ID` va `AWS_SECRET_ACCESS_KEY`.
+
+Neu muon MLflow log len DagsHub thay vi SQLite local, sua them:
+
+```text
+MLFLOW_TRACKING_URI=https://dagshub.com/<username>/<repo>.mlflow
+MLFLOW_TRACKING_USERNAME=<dagshub-username>
+MLFLOW_TRACKING_PASSWORD=<dagshub-token>
+```
+
+Neu giu mac dinh `sqlite:////app/runtime/mlflow.db`, MLflow se chay local trong Docker volume.
 
 ## Airflow
 

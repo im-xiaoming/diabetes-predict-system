@@ -1,6 +1,7 @@
 .git
 .gitignore
 .dvc/cache
+.dvc/config.local
 .runtime
 .env
 .env.*
