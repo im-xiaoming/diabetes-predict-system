@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import logging
 import sys
 import tempfile
@@ -32,6 +33,7 @@ from ml.registry import get_champion_metrics, register_best_model, restore_champ
 
 DATA_PATH = ROOT_DIR / "data" / "data.csv"
 MODEL_PATH = ROOT_DIR / "ml" / "artifacts" / "model.pkl"
+TRAINING_CONFIG_PATH = ROOT_DIR / "configs" / "model_training_config.json"
 TEST_SIZE = 0.2
 RANDOM_STATE = 42
 LOGGER = logging.getLogger("ml.train")
@@ -65,7 +67,26 @@ def atomic_joblib_dump(obj, destination):
             tmp_path.unlink()
 
 
-def make_models():
+def load_training_config(path=TRAINING_CONFIG_PATH):
+    path = Path(path)
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, TypeError):
+        LOGGER.warning("training_config_invalid path=%s", path)
+        return {}
+
+
+def config_value(config, key, fallback):
+    value = (config or {}).get(key)
+    return fallback if value is None else value
+
+
+def make_models(config=None):
+    enabled = set((config or {}).get("enabled_models") or ["logistic_regression", "random_forest", "xgboost"])
+    search_space = (config or {}).get("search_space", {})
+    random_state = int((config or {}).get("optuna", {}).get("random_state", RANDOM_STATE))
     models = {
         "logistic_regression": Pipeline(
             [
@@ -73,7 +94,10 @@ def make_models():
                 (
                     "mdl",
                     MultiOutputClassifier(
-                        LogisticRegression(max_iter=2000, class_weight="balanced")
+                        LogisticRegression(
+                            max_iter=int(search_space.get("logistic_regression", {}).get("max_iter", 2000)),
+                            class_weight=search_space.get("logistic_regression", {}).get("class_weight", "balanced"),
+                        )
                     ),
                 ),
             ]
@@ -86,9 +110,9 @@ def make_models():
                     MultiOutputClassifier(
                         RandomForestClassifier(
                             n_estimators=300,
-                            random_state=42,
-                            class_weight="balanced",
-                            n_jobs=-1,
+                            random_state=random_state,
+                            class_weight=search_space.get("random_forest", {}).get("class_weight", "balanced"),
+                            n_jobs=int(search_space.get("random_forest", {}).get("n_jobs", -1)),
                         )
                     ),
                 ),
@@ -109,13 +133,13 @@ def make_models():
                             subsample=0.9,
                             colsample_bytree=0.9,
                             eval_metric="logloss",
-                            random_state=42,
+                            random_state=random_state,
                         )
                     ),
                 ),
             ]
         )
-    return models
+    return {name: model for name, model in models.items() if name in enabled}
 
 
 def label_acc(y_true, y_pred):
@@ -158,7 +182,7 @@ def score_model(name, mdl, x_train, x_test, y_train, y_test, tg):
     return res, rep_txt, rep_js
 
 
-def build_tuned_models(x_train, y_train, n_trials, timeout, log_trials=True):
+def build_tuned_models(x_train, y_train, n_trials, timeout, log_trials=True, training_config=None):
     started_at = time.monotonic()
     LOGGER.info(
         "optuna_tuning_start n_trials=%s timeout=%s log_trials=%s",
@@ -172,6 +196,7 @@ def build_tuned_models(x_train, y_train, n_trials, timeout, log_trials=True):
         n_trials=n_trials,
         timeout=timeout,
         log_trials=log_trials,
+        config=training_config,
     )
     models = {}
     tuned_meta = {}
@@ -226,6 +251,7 @@ def main(
     promotion_min_delta=0.0,
     force_promote=False,
     log_optuna_trials=True,
+    training_config=None,
 ):
     started_at = time.monotonic()
     data_path = Path(data_path)
@@ -241,6 +267,8 @@ def main(
         force_promote,
     )
     LOGGER.info("model_output_path=%s", MODEL_PATH)
+    if training_config:
+        LOGGER.info("training_config=%s", training_config)
     df = load_data(data_path)
     raw_n = len(df)
     df = clean_data(df)
@@ -280,9 +308,10 @@ def main(
             n_trials,
             timeout,
             log_trials=log_optuna_trials,
+            training_config=training_config,
         )
     else:
-        models_iter, tuned_meta = make_models(), {}
+        models_iter, tuned_meta = make_models(training_config), {}
     rows = []
     best_name = None
     best_mdl = None
@@ -389,10 +418,11 @@ def main(
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--data", default=str(DATA_PATH), help="CSV training data path")
-    p.add_argument("--tune", action="store_true", help="dùng Optuna để tìm siêu tham số")
-    p.add_argument("--n-trials", type=int, default=30, help="số trial cho mỗi model")
-    p.add_argument("--timeout", type=int, default=None, help="timeout tính bằng giây cho mỗi model")
-    p.add_argument("--register", action="store_true", help="đăng ký best model vào MLflow registry")
+    p.add_argument("--config", default=str(TRAINING_CONFIG_PATH), help="JSON training config path")
+    p.add_argument("--tune", action="store_true", help="Use Optuna for hyperparameter tuning")
+    p.add_argument("--n-trials", type=int, default=30, help="Number of trials per model")
+    p.add_argument("--timeout", type=int, default=None, help="Timeout in seconds per model")
+    p.add_argument("--register", action="store_true", help="Register best model in MLflow registry")
     p.add_argument("--promotion-metric", default="f1_macro", help="Metric used to compare candidate with champion")
     p.add_argument("--promotion-min-delta", type=float, default=0.0, help="Minimum metric improvement required")
     p.add_argument("--force-promote", action="store_true", help="Promote candidate even if it is worse than champion")
@@ -407,14 +437,19 @@ def parse_args():
 if __name__ == "__main__":
     configure_logging()
     args = parse_args()
+    training_config = load_training_config(args.config)
+    timeout = config_value(training_config, "timeout", args.timeout)
+    if timeout == 0:
+        timeout = None
     main(
         data_path=args.data,
-        tune=args.tune,
-        n_trials=args.n_trials,
-        timeout=args.timeout,
-        register=args.register,
-        promotion_metric=args.promotion_metric,
-        promotion_min_delta=args.promotion_min_delta,
-        force_promote=args.force_promote,
-        log_optuna_trials=not args.no_log_optuna_trials,
+        tune=bool(config_value(training_config, "tune", args.tune)),
+        n_trials=int(config_value(training_config, "n_trials", args.n_trials)),
+        timeout=timeout,
+        register=bool(config_value(training_config, "register", args.register)),
+        promotion_metric=str(config_value(training_config, "promotion_metric", args.promotion_metric)),
+        promotion_min_delta=float(config_value(training_config, "promotion_min_delta", args.promotion_min_delta)),
+        force_promote=bool(config_value(training_config, "force_promote", args.force_promote)),
+        log_optuna_trials=bool(config_value(training_config, "log_optuna_trials", not args.no_log_optuna_trials)),
+        training_config=training_config,
     )

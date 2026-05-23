@@ -104,6 +104,15 @@ Modeling -> Airflow retrain config
 
 Gia tri schedule co the la cron (`0 2 * * *`), preset Airflow (`@daily`), `manual`/`none`, hoac interval nhu `15m`, `2h`, `1d`. Cac nguong policy va `force` cung nam o form nay. Khi bam Save trong admin, Django ghi vao `configs/airflow_retrain_config.json`; Airflow va `ml/retrain_policy.py` doc file nay nen khong can build lai Docker. Neu Airflow UI chua cap nhat ngay, restart scheduler va dag processor:
 
+Sieu tham so model va cau hinh Optuna cung doi trong Django admin:
+
+```text
+http://127.0.0.1:8000/admin/
+Modeling -> Model training config
+```
+
+Form nay quan ly `n_trials`, `timeout`, model duoc train, promotion metric, co log Optuna trial hay khong, va JSON search space cho tung model. Khi bam Save, Django ghi vao `configs/model_training_config.json`; `dvc repro`/`ml/train.py` doc file nay nen khong can sua `dvc.yaml`.
+
 ```bash
 cd airflow
 docker compose --env-file ../.env restart airflow-scheduler airflow-dag-processor

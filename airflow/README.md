@@ -201,6 +201,21 @@ configs/airflow_retrain_config.json
 
 Schedule co the la cron (`0 2 * * *`), preset Airflow (`@daily`), `manual`/`none`, hoac interval nhu `15m`, `2h`, `1d`. Airflow va `ml/retrain_policy.py` doc file nay nen khong can build lai Docker.
 
+Sieu tham so model va cau hinh Optuna doi trong Django admin:
+
+```text
+http://127.0.0.1:8000/admin/
+Modeling -> Model training config
+```
+
+Admin ghi cau hinh nay vao:
+
+```text
+configs/model_training_config.json
+```
+
+`dvc repro` goi `ml/train.py --config configs/model_training_config.json`, nen co the doi `n_trials`, `timeout`, model families, promotion settings va search space ma khong can sua `dvc.yaml`.
+
 Neu Airflow UI chua cap nhat ngay, restart Airflow scheduler/dag processor de DAG doc lai gia tri moi:
 
 ```powershell

@@ -9,10 +9,12 @@ stages:
     - data/training.csv
 
   train_model:
-    cmd: python -u ml/train.py --data data/training.csv --tune --n-trials 5 --timeout 600 --register --promotion-metric f1_macro --promotion-min-delta 0.01 --no-log-optuna-trials
+    cmd: python -u ml/train.py --data data/training.csv --config configs/model_training_config.json
     deps:
     - data/training.csv
+    - configs/model_training_config.json
     - ml/train.py
+    - ml/tune.py
     outs:
     - ml/artifacts/model.pkl:
         persist: true

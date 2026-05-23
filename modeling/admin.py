@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import AirflowRetrainConfig
+from .models import AirflowRetrainConfig, ModelTrainingConfig
 
 
 @admin.register(AirflowRetrainConfig)
@@ -30,6 +30,45 @@ class AirflowRetrainConfigAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return not AirflowRetrainConfig.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(ModelTrainingConfig)
+class ModelTrainingConfigAdmin(admin.ModelAdmin):
+    list_display = ("n_trials", "timeout", "tune", "register", "promotion_metric", "promotion_min_delta", "updated_at")
+    readonly_fields = ("updated_at",)
+    fieldsets = (
+        (
+            "Training",
+            {
+                "fields": (
+                    "tune",
+                    "enabled_models",
+                    "n_trials",
+                    "timeout",
+                    "log_optuna_trials",
+                )
+            },
+        ),
+        (
+            "Promotion",
+            {
+                "fields": (
+                    "register",
+                    "promotion_metric",
+                    "promotion_min_delta",
+                    "force_promote",
+                )
+            },
+        ),
+        ("Optuna", {"fields": ("optuna", "search_space")}),
+        ("Audit", {"fields": ("updated_at",)}),
+    )
+
+    def has_add_permission(self, request):
+        return not ModelTrainingConfig.objects.exists()
 
     def has_delete_permission(self, request, obj=None):
         return False
