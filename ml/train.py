@@ -1,5 +1,8 @@
 from pathlib import Path
+import logging
 import sys
+import tempfile
+import time
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
@@ -31,6 +34,35 @@ DATA_PATH = ROOT_DIR / "data" / "data.csv"
 MODEL_PATH = ROOT_DIR / "ml" / "artifacts" / "model.pkl"
 TEST_SIZE = 0.2
 RANDOM_STATE = 42
+LOGGER = logging.getLogger("ml.train")
+
+
+def configure_logging():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+        stream=sys.stdout,
+        force=True,
+    )
+
+
+def atomic_joblib_dump(obj, destination):
+    destination = Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            dir=destination.parent,
+            prefix=f".{destination.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as tmp:
+            tmp_path = Path(tmp.name)
+        joblib.dump(obj, tmp_path)
+        tmp_path.replace(destination)
+    finally:
+        if tmp_path and tmp_path.exists():
+            tmp_path.unlink()
 
 
 def make_models():
@@ -91,6 +123,13 @@ def label_acc(y_true, y_pred):
 
 
 def score_model(name, mdl, x_train, x_test, y_train, y_test, tg):
+    started_at = time.monotonic()
+    LOGGER.info(
+        "model_fit_start model=%s train_rows=%s test_rows=%s",
+        name,
+        len(x_train),
+        len(x_test),
+    )
     mdl.fit(x_train, y_train)
     pred = mdl.predict(x_test)
     rep_txt = classification_report(y_test, pred, target_names=tg, zero_division=0)
@@ -105,19 +144,28 @@ def score_model(name, mdl, x_train, x_test, y_train, y_test, tg):
         "hamming_loss": hamming_loss(y_test, pred),
     }
     met = {k: v for k, v in res.items() if k != "model"}
-    print(f"\n{name}")
-    print(pd.Series(met).round(4).to_string())
-    print("\nclassification_report")
-    print(rep_txt)
+    LOGGER.info("model_metrics model=%s metrics=%s", name, pd.Series(met).round(4).to_dict())
+    LOGGER.info("classification_report model=%s\n%s", name, rep_txt)
     for t in tg:
         support = int(y_test[t].sum())
         if support < 10:
-            print(f"{t}: positive support thap ({support}), can doc metric can than")
+            LOGGER.warning(
+                "low_positive_support target=%s support=%s message=read_metric_with_care",
+                t,
+                support,
+            )
+    LOGGER.info("model_fit_done model=%s duration_sec=%.2f", name, time.monotonic() - started_at)
     return res, rep_txt, rep_js
 
 
 def build_tuned_models(x_train, y_train, n_trials, timeout, log_trials=True):
-    print(f"\noptuna_tuning: n_trials={n_trials} timeout={timeout}")
+    started_at = time.monotonic()
+    LOGGER.info(
+        "optuna_tuning_start n_trials=%s timeout=%s log_trials=%s",
+        n_trials,
+        timeout,
+        log_trials,
+    )
     results = tune_all(
         x_train,
         y_train,
@@ -128,12 +176,18 @@ def build_tuned_models(x_train, y_train, n_trials, timeout, log_trials=True):
     models = {}
     tuned_meta = {}
     for name, r in results.items():
-        print(f"  {name}: best_cv_f1_macro={r['best_cv_f1_macro']:.4f} params={r['best_params']}")
+        LOGGER.info(
+            "optuna_tuning_result model=%s best_cv_f1_macro=%.4f params=%s",
+            name,
+            r["best_cv_f1_macro"],
+            r["best_params"],
+        )
         models[name] = r["pipeline"]
         tuned_meta[name] = {
             "best_params": r["best_params"],
             "best_cv_f1_macro": r["best_cv_f1_macro"],
         }
+    LOGGER.info("optuna_tuning_done duration_sec=%.2f", time.monotonic() - started_at)
     return models, tuned_meta
 
 
@@ -173,19 +227,39 @@ def main(
     force_promote=False,
     log_optuna_trials=True,
 ):
+    started_at = time.monotonic()
     data_path = Path(data_path)
+    LOGGER.info(
+        "train_start data=%s tune=%s n_trials=%s timeout=%s register=%s promotion_metric=%s min_delta=%s force_promote=%s",
+        data_path,
+        tune,
+        n_trials,
+        timeout,
+        register,
+        promotion_metric,
+        promotion_min_delta,
+        force_promote,
+    )
+    LOGGER.info("model_output_path=%s", MODEL_PATH)
     df = load_data(data_path)
     raw_n = len(df)
     df = clean_data(df)
-    print(f"rows_raw: {raw_n}")
-    print(f"rows_clean: {len(df)}")
-    print(f"duplicates_dropped: {raw_n - len(df)}")
+    LOGGER.info("rows_raw=%s", raw_n)
+    LOGGER.info("rows_clean=%s", len(df))
+    LOGGER.info("duplicates_dropped=%s", raw_n - len(df))
     x, y, ft, tg, num, cat = split_xy(df)
     x_train, x_test, y_train, y_test = train_test_split(
         x,
         y,
         test_size=TEST_SIZE,
         random_state=RANDOM_STATE,
+    )
+    LOGGER.info(
+        "train_test_split train_rows=%s test_rows=%s features=%s targets=%s",
+        len(x_train),
+        len(x_test),
+        ft,
+        tg,
     )
     base = {
         "targets": tg,
@@ -216,6 +290,7 @@ def main(
     best_metrics = None
     for name, mdl in models_iter.items():
         try:
+            LOGGER.info("mlflow_run_start model=%s", name)
             with start_run(name):
                 res, rep_txt, rep_js = score_model(name, mdl, x_train, x_test, y_train, y_test, tg)
                 met = {k: v for k, v in res.items() if k != "model"}
@@ -229,6 +304,7 @@ def main(
                 log_metrics(met)
                 log_report(rep_txt, rep_js)
                 log_model(mdl)
+            LOGGER.info("mlflow_run_done model=%s", name)
             rows.append(res)
             if res["f1_macro"] > best_f1:
                 best_f1 = res["f1_macro"]
@@ -236,12 +312,12 @@ def main(
                 best_mdl = mdl
                 best_metrics = met
         except Exception as exc:
-            print(f"\n{name} skipped: {exc}")
+            LOGGER.exception("model_skipped model=%s error=%s", name, exc)
     if not rows:
         raise RuntimeError("No model trained successfully")
     cmp = pd.DataFrame(rows).sort_values("f1_macro", ascending=False)
-    print("\nmodel_comparison")
-    print(cmp.round(4).to_string(index=False))
+    LOGGER.info("model_comparison\n%s", cmp.round(4).to_string(index=False))
+    LOGGER.info("best_candidate model=%s f1_macro=%.4f metrics=%s", best_name, best_f1, best_metrics)
     MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
     bundle = {
         "model": best_mdl,
@@ -252,6 +328,10 @@ def main(
         "categorical": cat,
     }
     champion_info = get_champion_metrics() if register else None
+    if champion_info:
+        LOGGER.info("champion_found version=%s metrics=%s", champion_info["version"], champion_info["metrics"])
+    elif register:
+        LOGGER.info("champion_missing")
     promoted, reason = promotion_decision(
         best_metrics,
         champion_info,
@@ -259,8 +339,8 @@ def main(
         promotion_min_delta,
         force=force_promote,
     )
-    print(f"\npromotion_decision: {'promote' if promoted else 'reject'}")
-    print(f"promotion_reason: {reason}")
+    LOGGER.info("promotion_decision=%s", "promote" if promoted else "reject")
+    LOGGER.info("promotion_reason=%s", reason)
 
     if not promoted:
         try:
@@ -269,11 +349,12 @@ def main(
         except Exception as exc:
             promoted = True
             reason = f"candidate promoted because champion artifact could not be restored in this environment: {exc}"
-            print(f"champion_restore_failed: {exc}")
+            LOGGER.warning("champion_restore_failed error=%s", exc)
         else:
             champion_version = champion_info["version"] if champion_info else "unknown"
-            print(f"restored_model: {MODEL_PATH}")
-            print(f"kept_champion_version: {champion_version}")
+            LOGGER.info("restored_model=%s", MODEL_PATH)
+            LOGGER.info("kept_champion_version=%s", champion_version)
+            LOGGER.info("train_done promoted=false duration_sec=%.2f", time.monotonic() - started_at)
             return {
                 "promoted": False,
                 "candidate_model": best_name,
@@ -282,8 +363,8 @@ def main(
                 "reason": reason,
             }
 
-    joblib.dump(bundle, MODEL_PATH)
-    print(f"saved_model: {MODEL_PATH}")
+    atomic_joblib_dump(bundle, MODEL_PATH)
+    LOGGER.info("saved_model=%s bytes=%s", MODEL_PATH, MODEL_PATH.stat().st_size)
 
     if register:
         reg_params = dict(base)
@@ -294,8 +375,9 @@ def main(
             reg_params["best_params"] = tuned_meta[best_name]["best_params"]
             reg_params["best_cv_f1_macro"] = tuned_meta[best_name]["best_cv_f1_macro"]
         info = register_best_model(bundle, best_name, best_metrics, reg_params)
-        print(f"\nregistered_model: {info}")
+        LOGGER.info("registered_model=%s", info)
 
+    LOGGER.info("train_done promoted=true duration_sec=%.2f", time.monotonic() - started_at)
     return {
         "promoted": True,
         "candidate_model": best_name,
@@ -323,6 +405,7 @@ def parse_args():
 
 
 if __name__ == "__main__":
+    configure_logging()
     args = parse_args()
     main(
         data_path=args.data,

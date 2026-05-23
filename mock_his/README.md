@@ -1,52 +1,47 @@
 # Mock HIS
 
-App `mock_his` dùng để giả lập HIS (*Hospital Information System* - hệ thống thông tin bệnh viện).
+App `mock_his` dung de gia lap HIS (*Hospital Information System*).
 
-Đây không phải app nghiệp vụ chính, mà là app demo/test luồng dữ liệu bệnh viện gửi hồ sơ bệnh nhân sang hệ thống dự đoán biến chứng tiểu đường.
+Day khong phai app nghiep vu chinh, ma la app demo/test luong du lieu benh vien gui ho so benh nhan sang he thong du doan bien chung tieu duong.
 
-## Chức năng
+## Chuc nang
 
-- Đọc dữ liệu bệnh nhân mẫu từ `data/data.csv` qua `mock_his/sample_loader.py`.
-- Hiển thị giao diện mô phỏng tại `/mock-his/`.
-- Gửi từng hồ sơ hoặc gửi hàng loạt sang FastAPI endpoint `/api/predict/`.
-- Kiểm tra FastAPI còn sống qua `/api/health/`.
-- Lưu kết quả dự đoán vào database Django:
+- Sinh du lieu benh nhan mock ngau nhien qua `mock_his/sample_loader.py`.
+- Moi record mock co `patient_id`, feature va label rieng de tranh trung voi seed dataset `data/data.csv` khi export ra `data/training.csv`.
+- Hien thi giao dien mo phong tai `/mock-his/`.
+- Gui tung ho so hoac gui hang loat sang FastAPI endpoint `/api/predict/`.
+- Kiem tra FastAPI con song qua `/api/health/`.
+- Luu ket qua du doan vao database Django:
   - `Patient`
   - `ClinicalRecord`
-  - `ClinicalRecordLabel` nếu dữ liệu có nhãn thật
+  - `ClinicalRecordLabel` neu du lieu co nhan that
   - `PredictionResult`
   - `RiskScoreDetail`
 
-## Luồng chính
+## Luong chinh
 
 ```text
-data.csv
-  -> mock_his
+mock_his random records
   -> FastAPI /api/predict/
-  -> kết quả nguy cơ biến chứng
-  -> lưu vào DB Django
-  -> hiển thị ở Patients/Dashboard
+  -> ket qua nguy co bien chung
+  -> luu vao DB Django
+  -> export vao data/training.csv
+  -> dung cho retrain bang DVC/Airflow
 ```
 
-## Auto-feed chạy nền
+## Auto-feed chay nen
 
-Auto-feed không còn chạy bằng `setInterval` trong browser nữa. Khi bấm start hoặc khi trang `/mock-his/` mở lần đầu, UI gọi endpoint điều khiển feed; vòng lặp gửi hồ sơ chạy trong Django process ở `mock_his/feed_runner.py`.
+Auto-feed khong con chay bang `setInterval` trong browser nua. Khi bam start hoac khi trang `/mock-his/` mo lan dau, UI goi endpoint dieu khien feed; vong lap gui ho so chay trong Django process o `mock_his/feed_runner.py`.
 
-Trong môi trường local dev, feed cũng được tự kích hoạt khi chạy Django bằng:
+Trong moi truong local dev, feed cung duoc tu kich hoat khi chay Django bang:
 
 ```powershell
 python manage.py runserver
 ```
 
-Nghĩa là không cần mở trang `/mock-his/` trước. Bạn có thể mở Dashboard/Patients trực tiếp, miễn là Django server và FastAPI server đang chạy.
+Nghia la khong can mo trang `/mock-his/` truoc. Ban co the mo Dashboard/Patients truc tiep, mien la Django server va FastAPI server dang chay.
 
-Vì vậy nếu chuyển sang trang khác, đóng tab Mock HIS, hoặc mở Dashboard/Patients, feed vẫn tiếp tục chạy miễn là:
-
-- Django server vẫn đang chạy.
-- FastAPI server vẫn đang chạy.
-- Django process không bị restart.
-
-Cấu hình trong `settings.py`:
+Cau hinh trong `settings.py`:
 
 ```python
 MOCK_HIS_AUTO_START = True
@@ -55,9 +50,9 @@ MOCK_HIS_AUTO_START_DELAY = 3
 MOCK_HIS_AUTO_START_UNLABELED = False
 ```
 
-Auto-start chỉ chạy với lệnh `runserver`, không chạy trong `test`, `migrate`, `makemigrations` hoặc GitHub Actions.
+Auto-start chi chay voi lenh `runserver`, khong chay trong `test`, `migrate`, `makemigrations` hoac GitHub Actions.
 
-Các endpoint điều khiển:
+Endpoint dieu khien:
 
 ```text
 GET  /mock-his/feed/status/
@@ -68,4 +63,4 @@ POST /mock-his/feed/stop/
 POST /mock-his/feed/reset/
 ```
 
-Lưu ý: runner hiện dùng in-memory thread trong Django process, phù hợp cho local demo/dev. Nếu deploy production nhiều worker/process, cần thay bằng worker thật như Celery/RQ/Huey hoặc Airflow schedule.
+Luu y: runner hien dung in-memory thread trong Django process, phu hop cho local demo/dev. Neu deploy production nhieu worker/process, can thay bang worker that nhu Celery/RQ/Huey hoac Airflow schedule.

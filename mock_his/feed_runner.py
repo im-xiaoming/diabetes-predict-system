@@ -9,6 +9,15 @@ from django.db import close_old_connections
 from .sample_loader import load_record, total_records
 
 
+def saved_mock_record_count():
+    try:
+        from patients.models import ClinicalRecord
+
+        return ClinicalRecord.objects.filter(source="mock_his").count()
+    except Exception:
+        return 0
+
+
 class FeedRunner:
     def __init__(self):
         self._lock = threading.RLock()
@@ -18,14 +27,16 @@ class FeedRunner:
         self._state = self._initial_state()
 
     def _initial_state(self):
+        total = total_records()
+        next_idx = min(saved_mock_record_count(), total)
         return {
             "running": False,
             "paused": False,
             "done": False,
             "mode": "labeled",
             "interval": 5,
-            "next_idx": 0,
-            "total": total_records(),
+            "next_idx": next_idx,
+            "total": total,
             "sent": 0,
             "ok": 0,
             "fail": 0,

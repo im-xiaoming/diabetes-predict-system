@@ -5,7 +5,7 @@ import os
 import pendulum
 
 from airflow import DAG
-from airflow.operators.bash import BashOperator
+from airflow.providers.standard.operators.bash import BashOperator
 
 
 PROJECT_DIR = os.environ.get("DIABETES_PROJECT_DIR", "/opt/diabetes_predict_system")
@@ -13,7 +13,9 @@ LOCAL_TZ = pendulum.timezone("Asia/Ho_Chi_Minh")
 
 DEFAULT_ENV = {
     "PYTHONPATH": PROJECT_DIR,
+    "PYTHONUNBUFFERED": "1",
     "PYTHONIOENCODING": "utf-8",
+    "DVC_NO_ANALYTICS": "1",
     "DJANGO_SETTINGS_MODULE": "diabetes_predict_system.settings",
     "MLFLOW_TRACKING_URI": f"sqlite:///{PROJECT_DIR}/mlflow.db",
     "MLFLOW_ARTIFACT_ROOT": f"file://{PROJECT_DIR}/mlruns",
@@ -34,9 +36,13 @@ with DAG(
     dvc_repro = BashOperator(
         task_id="dvc_repro",
         bash_command=(
-            "set -euo pipefail; "
-            f"cd {PROJECT_DIR}; "
-            "dvc repro"
+            "set -euo pipefail\n"
+            f"cd {PROJECT_DIR}\n"
+            "echo \"[airflow] $(date -Is) dvc_repro_start project_dir=$(pwd)\"\n"
+            "echo \"[airflow] $(date -Is) dvc_status_before\"\n"
+            "dvc status || true\n"
+            "dvc repro\n"
+            "echo \"[airflow] $(date -Is) dvc_repro_done\"\n"
         ),
         env=DEFAULT_ENV,
         append_env=True,
@@ -46,13 +52,15 @@ with DAG(
     dvc_push = BashOperator(
         task_id="dvc_push",
         bash_command=(
-            "set -euo pipefail; "
-            f"cd {PROJECT_DIR}; "
-            "if dvc remote default >/dev/null 2>&1; then "
-            "dvc push; "
-            "else "
-            "echo 'No default DVC remote configured; skipping dvc push.'; "
-            "fi"
+            "set -euo pipefail\n"
+            f"cd {PROJECT_DIR}\n"
+            "echo \"[airflow] $(date -Is) dvc_push_start project_dir=$(pwd)\"\n"
+            "if dvc remote default >/dev/null 2>&1; then\n"
+            "  dvc push\n"
+            "  echo \"[airflow] $(date -Is) dvc_push_done\"\n"
+            "else\n"
+            "  echo \"[airflow] $(date -Is) dvc_push_skipped reason=no_default_remote\"\n"
+            "fi\n"
         ),
         env=DEFAULT_ENV,
         append_env=True,

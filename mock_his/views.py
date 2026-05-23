@@ -196,12 +196,15 @@ def without_truth(rec):
 
 
 def page_context(request, *, unlabeled=False):
-    records = load_records(offset=0, limit=20)
+    feed_state = feed_runner.status()
+    start_offset = int(feed_state.get("next_idx", 0) or 0)
+    records = load_records(offset=start_offset, limit=20)
     if unlabeled:
         records = [without_truth(rec) for rec in records]
     return {
         "records": records,
         "total": total_records(),
+        "start_offset": start_offset,
         "page_title": "Unlabeled HIS Feed" if unlabeled else "Mock HIS Simulation",
         "page_subtitle": (
             "Gửi hồ sơ không nhãn đến FastAPI để model tạo dự đoán và lưu PredictionResult."

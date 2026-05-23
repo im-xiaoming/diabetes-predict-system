@@ -193,6 +193,7 @@
     <script>
         let records = JSON.parse(document.getElementById("mock-records").textContent);
         const totalRecords = Number("{{ total }}");
+        const startOffset = Number("{{ start_offset|default:0 }}");
         const batchSize = 20;
         const recordMap = new Map(records.map((rec) => [rec.idx, rec]));
         const sentSet = new Set();
@@ -224,7 +225,7 @@
         const statFail = document.getElementById("stat-fail");
         let timer = null;
         let busy = false;
-        let nextIdx = 0;
+        let nextIdx = startOffset;
         let running = false;
         let paused = false;
         let stat = { sent: 0, ok: 0, fail: 0 };
@@ -368,7 +369,7 @@
 
         async function sendBulk() {
             records.filter((rec) => rec.ready).forEach((rec) => setStatus(rec.idx, "Dang gui", "bg-[#F59E0B]/10 text-[#D97706]"));
-            const out = await post(bulkUrl, { offset: 0, count: records.length });
+            const out = await post(bulkUrl, { offset: startOffset, count: records.length });
             if (out.body.results) {
                 out.body.results.forEach((row) => {
                     setStatus(row.idx, row.ok ? "Thanh cong" : "That bai", row.ok ? "bg-[#10b981]/10 text-[#059669]" : "bg-error/10 text-error");
