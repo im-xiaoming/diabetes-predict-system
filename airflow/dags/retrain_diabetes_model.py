@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import os
+import json
+import re
 import shlex
+from datetime import timedelta
+from pathlib import Path
 
 import pendulum
 
@@ -10,7 +14,12 @@ from airflow.providers.standard.operators.bash import BashOperator
 
 
 PROJECT_DIR = os.environ.get("DIABETES_PROJECT_DIR", "/opt/diabetes_predict_system")
-RETRAIN_SCHEDULE = os.environ.get("DIABETES_RETRAIN_SCHEDULE", "0 2 * * *")
+RETRAIN_CONFIG_PATH = Path(
+    os.environ.get(
+        "AIRFLOW_RETRAIN_CONFIG_PATH",
+        f"{PROJECT_DIR}/configs/airflow_retrain_config.json",
+    )
+)
 LOCAL_TZ = pendulum.timezone("Asia/Ho_Chi_Minh")
 
 DEFAULT_ENV = {
@@ -19,25 +28,53 @@ DEFAULT_ENV = {
     "PYTHONIOENCODING": "utf-8",
     "DVC_NO_ANALYTICS": "1",
     "DJANGO_SETTINGS_MODULE": "diabetes_predict_system.settings",
-    "MLFLOW_TRACKING_URI": f"sqlite:///{PROJECT_DIR}/mlflow.db",
+    "SQLITE_PATH": f"{PROJECT_DIR}/.runtime/db.sqlite3",
+    "MLFLOW_TRACKING_URI": f"sqlite:///{PROJECT_DIR}/.runtime/mlflow.db",
     "MLFLOW_ARTIFACT_ROOT": f"file://{PROJECT_DIR}/mlruns",
     "MLFLOW_EXPERIMENT_NAME": "diabetes-complication-training-airflow",
 }
-
-
-def env_bool(name, default=False):
-    value = os.environ.get(name)
-    if value is None:
-        return default
-    return value.strip().lower() in {"1", "true", "yes", "y", "on"}
 
 
 def q(value):
     return shlex.quote(str(value))
 
 
-FORCE_RETRAIN = env_bool("DIABETES_RETRAIN_FORCE", False)
-FORCE_ARG = " --force" if FORCE_RETRAIN else ""
+def get_schedule_raw():
+    if RETRAIN_CONFIG_PATH.exists():
+        try:
+            payload = json.loads(RETRAIN_CONFIG_PATH.read_text(encoding="utf-8"))
+            schedule = str(payload.get("schedule", "")).strip()
+            if schedule:
+                return schedule
+        except (OSError, json.JSONDecodeError, TypeError):
+            pass
+    return os.environ.get("DIABETES_RETRAIN_SCHEDULE", "1d")
+
+
+def parse_schedule(value):
+    raw_value = (value or "").strip()
+    lowered = raw_value.lower()
+    if lowered in {"", "none", "manual", "manual_only", "off"}:
+        return None
+
+    match = re.fullmatch(
+        r"(?P<amount>[1-9]\d*)\s*(?P<unit>m|min|mins|minute|minutes|h|hr|hrs|hour|hours|d|day|days)",
+        lowered,
+    )
+    if match:
+        amount = int(match.group("amount"))
+        unit = match.group("unit")
+        if unit.startswith("m"):
+            return timedelta(minutes=amount)
+        if unit.startswith("h"):
+            return timedelta(hours=amount)
+        return timedelta(days=amount)
+
+    return raw_value
+
+
+RETRAIN_SCHEDULE_RAW = get_schedule_raw()
+RETRAIN_SCHEDULE = parse_schedule(RETRAIN_SCHEDULE_RAW)
 
 
 def task_command(name, body):
@@ -61,7 +98,7 @@ with DAG(
 ) as dag:
     check_retrain_policy = BashOperator(
         task_id="check_retrain_policy",
-        bash_command=task_command("retrain_policy_check", f"python -u ml/retrain_policy.py check{FORCE_ARG}"),
+        bash_command=task_command("retrain_policy_check", "python -u ml/retrain_policy.py check"),
         env=DEFAULT_ENV,
         append_env=True,
         retries=0,

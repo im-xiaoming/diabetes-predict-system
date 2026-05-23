@@ -34,17 +34,45 @@ def env_float(name, default):
     return float(os.environ.get(name, default))
 
 
+def config_value(config, key, env_name, default):
+    value = config.get(key)
+    if value is not None:
+        return value
+    return os.environ.get(env_name, default)
+
+
+def load_retrain_config():
+    path = env_path(
+        "AIRFLOW_RETRAIN_CONFIG_PATH",
+        ROOT_DIR / "configs" / "airflow_retrain_config.json",
+    )
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, TypeError):
+        return {}
+
+
+RETRAIN_CONFIG = load_retrain_config()
 STATE_PATH = env_path("DIABETES_RETRAIN_STATE", ROOT_DIR / "ml" / "artifacts" / "retrain_state.json")
 TRAINING_PATH = env_path("DIABETES_RETRAIN_TRAINING_DATA", ROOT_DIR / "data" / "training.csv")
 FALLBACK_PATH = env_path("DIABETES_RETRAIN_FALLBACK_DATA", ROOT_DIR / "data" / "data.csv")
-MIN_NEW_LABELS = env_int("DIABETES_RETRAIN_MIN_NEW_LABELS", 100)
-MIN_NEW_RATIO = env_float("DIABETES_RETRAIN_MIN_NEW_RATIO", 0.10)
-MIN_NEW_POSITIVES = env_int("DIABETES_RETRAIN_MIN_NEW_POSITIVES", 20)
-MIN_POSITIVE_TARGETS = env_int("DIABETES_RETRAIN_MIN_POSITIVE_TARGETS", 2)
-MIN_DAYS = env_int("DIABETES_RETRAIN_MIN_DAYS", 7)
-URGENT_NEW_LABELS = env_int("DIABETES_RETRAIN_URGENT_NEW_LABELS", 500)
-MAX_MISSING_RATE = env_float("DIABETES_RETRAIN_MAX_MISSING_RATE", 0.05)
-MAX_DUPLICATE_RATE = env_float("DIABETES_RETRAIN_MAX_DUPLICATE_RATE", 0.30)
+MIN_NEW_LABELS = int(config_value(RETRAIN_CONFIG, "min_new_labels", "DIABETES_RETRAIN_MIN_NEW_LABELS", 100))
+MIN_NEW_RATIO = float(config_value(RETRAIN_CONFIG, "min_new_ratio", "DIABETES_RETRAIN_MIN_NEW_RATIO", 0.10))
+MIN_NEW_POSITIVES = int(
+    config_value(RETRAIN_CONFIG, "min_new_positives", "DIABETES_RETRAIN_MIN_NEW_POSITIVES", 20)
+)
+MIN_POSITIVE_TARGETS = int(
+    config_value(RETRAIN_CONFIG, "min_positive_targets", "DIABETES_RETRAIN_MIN_POSITIVE_TARGETS", 2)
+)
+MIN_DAYS = int(config_value(RETRAIN_CONFIG, "min_days", "DIABETES_RETRAIN_MIN_DAYS", 7))
+URGENT_NEW_LABELS = int(config_value(RETRAIN_CONFIG, "urgent_new_labels", "DIABETES_RETRAIN_URGENT_NEW_LABELS", 500))
+MAX_MISSING_RATE = float(config_value(RETRAIN_CONFIG, "max_missing_rate", "DIABETES_RETRAIN_MAX_MISSING_RATE", 0.05))
+MAX_DUPLICATE_RATE = float(
+    config_value(RETRAIN_CONFIG, "max_duplicate_rate", "DIABETES_RETRAIN_MAX_DUPLICATE_RATE", 0.30)
+)
+FORCE_RETRAIN = bool(RETRAIN_CONFIG.get("force", False))
 
 
 def configure_logging():
@@ -313,7 +341,7 @@ def parser():
         s.add_argument("--urgent-new-labels", type=int, default=URGENT_NEW_LABELS)
         s.add_argument("--max-missing-rate", type=float, default=MAX_MISSING_RATE)
         s.add_argument("--max-duplicate-rate", type=float, default=MAX_DUPLICATE_RATE)
-        s.add_argument("--force", action="store_true")
+        s.add_argument("--force", action="store_true", default=FORCE_RETRAIN)
     return p
 
 

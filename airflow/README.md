@@ -47,11 +47,13 @@ File DAG:
 airflow/dags/retrain_diabetes_model.py
 ```
 
-Lịch mặc định trong DAG là 02:00 mỗi ngày theo timezone `Asia/Ho_Chi_Minh`:
+Lịch mặc định trong DAG được đọc từ file do Django admin quản lý:
 
-```python
-schedule="0 2 * * *"
+```text
+configs/airflow_retrain_config.json
 ```
+
+Gia tri nay co the la cron (`0 2 * * *`), preset Airflow (`@daily`), `manual`/`none`, hoac interval nhu `15m`, `2h`, `1d`.
 
 Không nên để lịch 1 phút cho pipeline retrain thật. Pipeline retrain có thể mất thời gian và `dvc.yaml` có stage export từ DB, nên nếu một lượt chạy chưa xong thì run mới sẽ bị giữ ở trạng thái `Queued` để chờ run trước chạy xong.
 
@@ -59,8 +61,8 @@ Khi cần demo, dùng nút Trigger trên Airflow UI hoặc tạm thời thêm `-
 
 Khi muốn chỉ chạy thủ công trên UI, đổi lại:
 
-```python
-schedule=None
+```text
+schedule=manual
 ```
 
 Không dùng `pendulum.now()` hoặc giá trị thay đổi theo thời gian cho `start_date`, vì Airflow sẽ xem DAG thay đổi version sau mỗi lần parse.
@@ -76,7 +78,8 @@ Permission denied: '/C:'
 Vì vậy DAG truyền riêng các biến môi trường sau cho task:
 
 ```text
-MLFLOW_TRACKING_URI=sqlite:////opt/diabetes_predict_system/mlflow.db
+SQLITE_PATH=/opt/diabetes_predict_system/.runtime/db.sqlite3
+MLFLOW_TRACKING_URI=sqlite:////opt/diabetes_predict_system/.runtime/mlflow.db
 MLFLOW_ARTIFACT_ROOT=file:///opt/diabetes_predict_system/mlruns
 MLFLOW_EXPERIMENT_NAME=diabetes-complication-training-airflow
 ```
@@ -115,10 +118,9 @@ Từ project root:
 
 ```powershell
 cd airflow
-Copy-Item .env.example .env
-docker compose build
-docker compose up airflow-init
-docker compose up
+docker compose --env-file ../.env build
+docker compose --env-file ../.env up airflow-init
+docker compose --env-file ../.env up
 ```
 
 Nếu Docker báo container name conflict do stack Airflow cũ còn tồn tại, dừng stack cũ trước:
@@ -157,7 +159,6 @@ Các file runtime không commit:
 
 - `airflow/logs/`
 - `airflow/config/airflow.cfg`
-- `airflow/.env`
 
 ## Retrain policy gate
 
@@ -179,29 +180,24 @@ Neu chua du nguong du lieu moi, command exit code `99`; Airflow danh dau task la
 python ml/retrain_policy.py mark-success
 ```
 
-Lich va nguong retrain nam trong `airflow/.env`, khong can sua code DAG:
+Lich retrain doi trong Django admin:
 
 ```text
-DIABETES_RETRAIN_SCHEDULE=0 2 * * *
-DIABETES_RETRAIN_MIN_NEW_LABELS=100
-DIABETES_RETRAIN_MIN_NEW_RATIO=0.10
-DIABETES_RETRAIN_MIN_NEW_POSITIVES=20
-DIABETES_RETRAIN_MIN_POSITIVE_TARGETS=2
-DIABETES_RETRAIN_MIN_DAYS=7
-DIABETES_RETRAIN_URGENT_NEW_LABELS=500
-DIABETES_RETRAIN_MAX_MISSING_RATE=0.05
-DIABETES_RETRAIN_MAX_DUPLICATE_RATE=0.30
-DIABETES_RETRAIN_FORCE=False
+http://127.0.0.1:8000/admin/
+Modeling -> Airflow retrain config
 ```
 
-Khi demo can ep retrain, doi:
+Admin config nay quan ly ca schedule, cac nguong retrain, va co `force` de ep retrain khi demo. Khi bam Save trong admin, Django ghi vao:
 
 ```text
-DIABETES_RETRAIN_FORCE=True
+configs/airflow_retrain_config.json
 ```
 
-Sau khi sua `.env`, restart Airflow scheduler/dag processor de DAG doc lai gia tri moi:
+Schedule co the la cron (`0 2 * * *`), preset Airflow (`@daily`), `manual`/`none`, hoac interval nhu `15m`, `2h`, `1d`. Airflow va `ml/retrain_policy.py` doc file nay nen khong can build lai Docker.
+
+Neu Airflow UI chua cap nhat ngay, restart Airflow scheduler/dag processor de DAG doc lai gia tri moi:
 
 ```powershell
-docker compose -f airflow\docker-compose.yaml restart airflow-scheduler airflow-dag-processor
+cd airflow
+docker compose --env-file ../.env restart airflow-scheduler airflow-dag-processor
 ```

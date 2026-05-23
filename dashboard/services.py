@@ -1,12 +1,9 @@
 from pathlib import Path
 
-import pandas as pd
 import yaml
 from django.conf import settings
 from django.db import connection, transaction
 from tools import AttrDict
-
-from ml.preprocessing import parse_dia_life, rename_cols
 
 
 TARGET = ["CV", "PER VAS", "NEP", "NEU", "RET"]
@@ -19,6 +16,18 @@ LEVEL_MAP = {
 }
 
 SEX_MAP = {0: "female", 1: "male"}
+
+
+def get_pandas():
+    import pandas as pd
+
+    return pd
+
+
+def get_preprocessing_helpers():
+    from ml.preprocessing import parse_dia_life, rename_cols
+
+    return parse_dia_life, rename_cols
 
 
 def calculate_diabetes_risk(row):
@@ -43,24 +52,28 @@ def calculate_diabetes_risk(row):
 
 
 def calculate_diabetes_risks(data):
+    pd = get_pandas()
     results = data[TARGET].apply(calculate_diabetes_risk, axis=1, result_type="expand")
     results.columns = ["LV", "WAR"]
     return pd.concat([data, results], axis=1)
 
 
 def to_float(value):
+    pd = get_pandas()
     if pd.isna(value) or value == "":
         return 0.0
     return float(value)
 
 
 def to_int(value):
+    pd = get_pandas()
     if pd.isna(value) or value == "":
         return 0
     return int(float(value))
 
 
 def sex(value):
+    pd = get_pandas()
     if pd.isna(value):
         return "male"
     normalized = str(value).strip().lower()
@@ -80,6 +93,8 @@ def process_csv_to_database(csv_path):
     from patients.models import ClinicalRecord, ClinicalRecordLabel, Patient
 
     try:
+        pd = get_pandas()
+        parse_dia_life, rename_cols = get_preprocessing_helpers()
         data = rename_cols(pd.read_csv(csv_path))
         required = [
             "SL.NO",
