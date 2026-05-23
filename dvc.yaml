@@ -9,7 +9,7 @@ stages:
     - data/training.csv
 
   train_model:
-    cmd: python -u ml/train.py --data data/training.csv --tune --n-trials 5 --timeout 600 --register --promotion-metric f1_macro --promotion-min-delta 0.01
+    cmd: python -u ml/train.py --data data/training.csv --tune --n-trials 5 --timeout 600 --register --promotion-metric f1_macro --promotion-min-delta 0.01 --no-log-optuna-trials
     deps:
     - data/training.csv
     - ml/train.py

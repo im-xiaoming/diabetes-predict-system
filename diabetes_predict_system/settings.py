@@ -54,20 +54,20 @@ def database_from_url(url):
 
 
 def database_config():
-    database_url = clean_env("DATABASE_URL")
+    database_url = clean_env("DJANGO_DATABASE_URL") or clean_env("DATABASE_URL")
     if database_url:
         return database_from_url(database_url)
 
-    pg_host = clean_env("PGHOST")
+    pg_host = clean_env("DJANGO_PGHOST") or clean_env("PGHOST")
     if pg_host:
-        sslmode = clean_env("PGSSLMODE", "require")
+        sslmode = clean_env("DJANGO_PGSSLMODE") or clean_env("PGSSLMODE", "require")
         config = {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": clean_env("PGDATABASE", "postgres"),
-            "USER": clean_env("PGUSER", "postgres"),
-            "PASSWORD": clean_env("PGPASSWORD", ""),
+            "NAME": clean_env("DJANGO_PGDATABASE") or clean_env("PGDATABASE", "postgres"),
+            "USER": clean_env("DJANGO_PGUSER") or clean_env("PGUSER", "postgres"),
+            "PASSWORD": clean_env("DJANGO_PGPASSWORD") or clean_env("PGPASSWORD", ""),
             "HOST": pg_host,
-            "PORT": clean_env("PGPORT", "5432"),
+            "PORT": clean_env("DJANGO_PGPORT") or clean_env("PGPORT", "5432"),
             "CONN_MAX_AGE": int(clean_env("DB_CONN_MAX_AGE", "60")),
         }
         if sslmode:

@@ -7,8 +7,8 @@ stages:
     deps:
     - path: data/training.csv
       hash: md5
-      md5: fc025a11c302a826612d12e813ce200b
-      size: 106358
+      md5: cced80942117e384cc8c7ddd9572b62c
+      size: 100544
     - path: ml/train.py
       hash: md5
       md5: 0ede2b9996e52e6eb9a9c8ac6972fa84
@@ -17,8 +17,8 @@ stages:
     outs:
     - path: ml/artifacts/model.pkl
       hash: md5
-      md5: 64cb0c6166bf118b5513f4f05322e8ee
-      size: 8799
+      md5: 0e82e77dcb7c66aae06d753de5db4a3b
+      size: 4725321
   export_training_data:
     cmd: python -u ml/export_training_data.py --output data/training.csv 
       --fallback data/data.csv
@@ -36,5 +36,5 @@ stages:
     outs:
     - path: data/training.csv
       hash: md5
-      md5: 4838905b4c8f27cd8a550b758812d758
-      size: 107993
+      md5: 8d04ee1c97e3ac966690a00d2b14bfe0
+      size: 102067

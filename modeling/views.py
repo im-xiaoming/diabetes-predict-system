@@ -18,7 +18,7 @@ from .forms import TrainModelForm
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TRAIN_SCRIPT = BASE_DIR / "ml" / "train.py"
-MLFLOW_UI_URL = os.environ.get("MLFLOW_UI_URL", "http://127.0.0.1:5000")
+MLFLOW_UI_URL = os.environ.get("MLFLOW_UI_URL", "http://127.0.0.1:5001")
 MLFLOW_HEALTH_URL = os.environ.get("MLFLOW_HEALTH_URL", MLFLOW_UI_URL)
 MLFLOW_AUTO_START = os.environ.get("MLFLOW_AUTO_START", "1").strip().lower() in {"1", "true", "yes", "on"}
 REQUIRED_TRAINING_PACKAGES = ("mlflow", "optuna", "pandas", "sklearn", "joblib")
