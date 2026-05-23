@@ -1,11 +1,16 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Count, Max, Min
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 import importlib.util
+import os
 from pathlib import Path
 import subprocess
 import sys
+import time
+from urllib.error import URLError
+from urllib.request import urlopen
 
 from predictions.models import PredictionResult, RequestLog
 from .forms import TrainModelForm
@@ -13,6 +18,9 @@ from .forms import TrainModelForm
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TRAIN_SCRIPT = BASE_DIR / "ml" / "train.py"
+MLFLOW_UI_URL = os.environ.get("MLFLOW_UI_URL", "http://127.0.0.1:5000")
+MLFLOW_HEALTH_URL = os.environ.get("MLFLOW_HEALTH_URL", MLFLOW_UI_URL)
+MLFLOW_AUTO_START = os.environ.get("MLFLOW_AUTO_START", "1").strip().lower() in {"1", "true", "yes", "on"}
 REQUIRED_TRAINING_PACKAGES = ("mlflow", "optuna", "pandas", "sklearn", "joblib")
 TARGET_FIELDS = {
     "NEP": "nep",
@@ -113,6 +121,69 @@ def _missing_training_packages():
         for package in REQUIRED_TRAINING_PACKAGES
         if importlib.util.find_spec(package) is None
     ]
+
+
+def _mlflow_ui_ready(timeout=1):
+    try:
+        with urlopen(MLFLOW_HEALTH_URL, timeout=timeout) as response:
+            return response.status < 500
+    except (OSError, URLError):
+        return False
+
+
+def _start_mlflow_ui():
+    env = os.environ.copy()
+    tracking_uri = os.environ.get("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db")
+    artifact_root = os.environ.get("MLFLOW_ARTIFACT_ROOT", "./mlruns")
+    env["MLFLOW_TRACKING_URI"] = tracking_uri
+    cmd = [
+        sys.executable,
+        "-m",
+        "mlflow",
+        "ui",
+        "--backend-store-uri",
+        tracking_uri,
+        "--default-artifact-root",
+        artifact_root,
+        "--host",
+        os.environ.get("MLFLOW_HOST", "127.0.0.1"),
+        "--port",
+        os.environ.get("MLFLOW_PORT", "5000"),
+    ]
+    kwargs = {
+        "cwd": BASE_DIR,
+        "env": env,
+        "stdout": subprocess.DEVNULL,
+        "stderr": subprocess.DEVNULL,
+        "stdin": subprocess.DEVNULL,
+        "close_fds": os.name != "nt",
+    }
+    if os.name == "nt":
+        kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
+    subprocess.Popen(cmd, **kwargs)
+
+
+@login_required(login_url="login")
+def open_mlflow_ui(request):
+    missing_packages = _missing_training_packages()
+    if "mlflow" in missing_packages:
+        return HttpResponse(
+            "MLflow chua duoc cai trong Python environment dang chay Django. Hay cai bang: pip install -r requirements.txt",
+            status=503,
+        )
+
+    if MLFLOW_AUTO_START and not _mlflow_ui_ready():
+        try:
+            _start_mlflow_ui()
+        except OSError as exc:
+            return HttpResponse(f"Khong the khoi dong MLflow UI: {exc}", status=503)
+
+        for _ in range(20):
+            if _mlflow_ui_ready(timeout=0.5):
+                break
+            time.sleep(0.5)
+
+    return redirect(MLFLOW_UI_URL)
 
 
 @login_required(login_url="login")

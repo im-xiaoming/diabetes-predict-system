@@ -1,6 +1,7 @@
 from pathlib import Path
 import argparse
 import json
+import os
 import sys
 
 import requests
@@ -13,7 +14,7 @@ if str(ROOT_DIR) not in sys.path:
 from mock_his.sample_loader import load_samples
 
 
-URL = "http://127.0.0.1:8001/api/predict/"
+URL = os.environ.get("FASTAPI_PREDICT_URL", "http://127.0.0.1:8001/api/predict/")
 
 
 def send_one(url, data):

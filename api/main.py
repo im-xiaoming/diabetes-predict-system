@@ -1,4 +1,5 @@
 import traceback
+import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -9,7 +10,7 @@ from ml.predictor import predict_one
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-MODEL_PATH = ROOT_DIR / "ml" / "artifacts" / "model.pkl"
+MODEL_PATH = Path(os.environ.get("MODEL_PATH", ROOT_DIR / "ml" / "artifacts" / "model.pkl"))
 
 app = FastAPI(title="Diabetes Complication Prediction API")
 

@@ -1,0 +1,103 @@
+name: diabetes-predict-system
+
+x-app-env: &app-env
+  DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-change-me-for-real-deployments}
+  DJANGO_DEBUG: ${DJANGO_DEBUG:-True}
+  DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0,django}
+  DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-http://localhost:8000,http://127.0.0.1:8000}
+  SQLITE_PATH: /app/runtime/db.sqlite3
+  STATIC_ROOT: /app/staticfiles
+  MODEL_PATH: /app/ml/artifacts/model.pkl
+  MLFLOW_TRACKING_URI: sqlite:////app/runtime/mlflow.db
+  MLFLOW_ARTIFACT_ROOT: /app/mlruns
+  DVC_PULL: ${DVC_PULL:-False}
+  DVC_REMOTE: ${DVC_REMOTE:-origin}
+  DVC_NO_ANALYTICS: ${DVC_NO_ANALYTICS:-True}
+  RUN_MIGRATIONS: ${RUN_MIGRATIONS:-True}
+  RUN_COLLECTSTATIC: ${RUN_COLLECTSTATIC:-False}
+
+services:
+  django:
+    build:
+      context: .
+    image: diabetes-predict-system:latest
+    command: django
+    environment:
+      <<: *app-env
+      FASTAPI_BASE_URL: http://api:8001
+      MLFLOW_UI_URL: http://127.0.0.1:5000
+      MLFLOW_HEALTH_URL: http://mlflow:5000
+      MLFLOW_AUTO_START: ${MLFLOW_AUTO_START:-False}
+      MOCK_HIS_AUTO_START: ${MOCK_HIS_AUTO_START:-False}
+    ports:
+      - "8000:8000"
+    volumes:
+      - app_runtime:/app/runtime
+      - staticfiles:/app/staticfiles
+      - mlruns:/app/mlruns
+      - ./ml/artifacts:/app/ml/artifacts
+    depends_on:
+      - api
+      - mlflow
+
+  api:
+    image: diabetes-predict-system:latest
+    build:
+      context: .
+    command: api
+    environment:
+      <<: *app-env
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./ml/artifacts:/app/ml/artifacts:ro
+
+  mlflow:
+    image: diabetes-predict-system:latest
+    build:
+      context: .
+    command: mlflow
+    environment:
+      <<: *app-env
+    ports:
+      - "5000:5000"
+    volumes:
+      - app_runtime:/app/runtime
+      - mlruns:/app/mlruns
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      - api
+
+  grafana:
+    image: grafana/grafana-oss:11.6.0
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: frser-sqlite-datasource
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - app_runtime:/var/lib/grafana/sqlite:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - django
+
+volumes:
+  app_runtime:
+  staticfiles:
+  mlruns:
+  prometheus_data:
+  grafana_data:

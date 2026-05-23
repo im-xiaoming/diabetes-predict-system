@@ -92,6 +92,18 @@
                 <span class="material-symbols-outlined">smart_toy</span>
                     Model
                 </a>
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all text-on-surface-variant hover:bg-surface-container-highest" href="{% url 'open_mlflow_ui' %}" target="_blank" rel="noopener">
+                    <span class="material-symbols-outlined">experiment</span>
+                    MLflow
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all text-on-surface-variant hover:bg-surface-container-highest" href="http://127.0.0.1:8080" target="_blank" rel="noopener">
+                    <span class="material-symbols-outlined">account_tree</span>
+                    Airflow
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all text-on-surface-variant hover:bg-surface-container-highest" href="http://127.0.0.1:3000" target="_blank" rel="noopener">
+                    <span class="material-symbols-outlined">monitoring</span>
+                    Grafana
+                </a>
                 <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-label-md font-label-md transition-all {% if url_name == 'alerts' %}bg-secondary-container text-on-secondary-container scale-[0.98]{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %}" href="{% url 'alerts' %}">
                     <span class="material-symbols-outlined">warning</span>
                     Alerts

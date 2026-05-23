@@ -1,13 +1,29 @@
-from pathlib import Path
 from importlib.util import find_spec
+import os
+from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-dev-key-diabetes-predict-system"
+def env_bool(name, default=False):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
 
-DEBUG = True
 
-ALLOWED_HOSTS = []
+def env_list(name, default=None):
+    value = os.environ.get(name)
+    if value is None:
+        return default or []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-dev-key-diabetes-predict-system")
+
+DEBUG = env_bool("DJANGO_DEBUG", True)
+
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ["localhost", "127.0.0.1"])
+CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -63,7 +79,7 @@ WSGI_APPLICATION = "diabetes_predict_system.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": os.environ.get("SQLITE_PATH", str(BASE_DIR / "db.sqlite3")),
     }
 }
 
@@ -91,15 +107,16 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.environ.get("STATIC_ROOT", str(BASE_DIR / "staticfiles"))
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-FASTAPI_BASE_URL = "http://127.0.0.1:8001"
+FASTAPI_BASE_URL = os.environ.get("FASTAPI_BASE_URL", "http://127.0.0.1:8001")
 
-MOCK_HIS_AUTO_START = True
-MOCK_HIS_AUTO_START_INTERVAL = 5
-MOCK_HIS_AUTO_START_DELAY = 3
-MOCK_HIS_AUTO_START_UNLABELED = False
+MOCK_HIS_AUTO_START = env_bool("MOCK_HIS_AUTO_START", True)
+MOCK_HIS_AUTO_START_INTERVAL = int(os.environ.get("MOCK_HIS_AUTO_START_INTERVAL", "5"))
+MOCK_HIS_AUTO_START_DELAY = int(os.environ.get("MOCK_HIS_AUTO_START_DELAY", "3"))
+MOCK_HIS_AUTO_START_UNLABELED = env_bool("MOCK_HIS_AUTO_START_UNLABELED", False)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
