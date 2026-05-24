@@ -24,40 +24,40 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter" data-anim="stagger">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)]" data-anim-item>
                 <div class="flex justify-between items-start mb-stack-sm">
                     <span class="text-label-md font-label-md text-secondary uppercase tracking-wider">Tổng bệnh nhân</span>
                     <span class="material-symbols-outlined text-primary">group</span>
                 </div>
-                <div class="text-display-lg font-display-lg text-on-surface">{{ result.total_patient }}</div>
+                <div class="text-display-lg font-display-lg text-on-surface" data-anim="count" data-to="{{ result.total_patient|default:0 }}">0</div>
                 <div class="mt-2 text-label-sm font-label-sm text-secondary flex items-center gap-1">
                     {% if result.patient_growth is not None %}{{ result.patient_growth|floatformat:1 }}% trong 30 ngày{% else %}Chưa có dữ liệu kỳ trước{% endif %}
                 </div>
             </div>
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)]" data-anim-item>
                 <div class="flex justify-between items-start mb-stack-sm">
                     <span class="text-label-md font-label-md text-secondary uppercase tracking-wider">Hồ sơ xử lý</span>
                     <span class="material-symbols-outlined text-primary">description</span>
                 </div>
-                <div class="text-display-lg font-display-lg text-on-surface">{{ result.processed_profile }}</div>
+                <div class="text-display-lg font-display-lg text-on-surface" data-anim="count" data-to="{{ result.processed_profile|default:0 }}">0</div>
                 <div class="mt-2 text-label-sm font-label-sm text-secondary flex items-center gap-1">Hôm nay: {{ result.today_profile }} hồ sơ</div>
             </div>
-            <div class="bg-surface-container-lowest border border-error rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] relative overflow-hidden">
+            <div class="bg-surface-container-lowest border border-error rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)] relative overflow-hidden" data-anim-item>
                 <div class="absolute top-0 left-0 w-1 h-full bg-error"></div>
                 <div class="flex justify-between items-start mb-stack-sm">
                     <span class="text-label-md font-label-md text-on-error-container font-semibold uppercase tracking-wider">Cảnh báo rủi ro cao</span>
-                    <span class="material-symbols-outlined text-error fill">warning</span>
+                    <span class="material-symbols-outlined text-error fill" data-anim="pulse">warning</span>
                 </div>
-                <div class="text-display-lg font-display-lg text-error">{{ result.total_war }}</div>
+                <div class="text-display-lg font-display-lg text-error" data-anim="count" data-to="{{ result.total_war|default:0 }}">0</div>
                 <div class="mt-2 text-label-sm font-label-sm text-error flex items-center gap-1">Lấy từ PredictionResult</div>
             </div>
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)]" data-anim-item>
                 <div class="flex justify-between items-start mb-stack-sm">
                     <span class="text-label-md font-label-md text-secondary uppercase tracking-wider">Dự đoán đã tạo</span>
                     <span class="material-symbols-outlined text-primary">psychology</span>
                 </div>
-                <div class="text-display-lg font-display-lg text-on-surface">{{ result.total_prediction }}</div>
+                <div class="text-display-lg font-display-lg text-on-surface" data-anim="count" data-to="{{ result.total_prediction|default:0 }}">0</div>
                 <div class="mt-2 text-label-sm font-label-sm text-secondary flex items-center gap-1">
                     F1 DB: {% if result.model_accuracy is not None %}{{ result.model_accuracy|floatformat:3 }}{% else %}chưa có label{% endif %}
                 </div>
@@ -66,16 +66,16 @@
 
         <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
             <h3 class="text-title-lg font-title-lg text-on-surface mb-stack-md">Phân bố rủi ro theo biến chứng</h3>
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-stack-sm">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-stack-sm" data-anim="stagger">
                 {% for item in complication_stats %}
-                    <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 {% if item.color == 'error' %}border-error{% elif item.color == 'warning' %}border-[#F59E0B]{% else %}border-[#10B981]{% endif %} flex flex-col justify-between">
+                    <div class="bg-surface-container-low rounded-lg p-stack-sm border-t-4 {% if item.color == 'error' %}border-error{% elif item.color == 'warning' %}border-[#F59E0B]{% else %}border-[#10B981]{% endif %} flex flex-col justify-between" data-anim-item>
                         <div>
                             <div class="text-label-sm font-label-sm text-secondary uppercase mb-1">{{ item.name }}</div>
-                            <div class="text-headline-sm font-headline-sm text-on-surface">{{ item.count }} <span class="text-label-sm text-secondary font-normal">ca</span></div>
+                            <div class="text-headline-sm font-headline-sm text-on-surface"><span data-anim="count" data-to="{{ item.count|default:0 }}">0</span> <span class="text-label-sm text-secondary font-normal">ca</span></div>
                         </div>
                         <div class="mt-3 space-y-1">
                             <div class="w-full bg-surface-variant rounded-full h-1.5">
-                                <div class="{% if item.color == 'error' %}bg-error{% elif item.color == 'warning' %}bg-[#F59E0B]{% else %}bg-[#10B981]{% endif %} h-1.5 rounded-full" style="width: {{ item.width }}%"></div>
+                                <div class="{% if item.color == 'error' %}bg-error{% elif item.color == 'warning' %}bg-[#F59E0B]{% else %}bg-[#10B981]{% endif %} h-1.5 rounded-full" data-anim="bar" data-to="{{ item.width|default:0 }}" style="width: {{ item.width }}%"></div>
                             </div>
                             <div class="flex justify-between text-[10px] text-secondary">
                                 <span>{{ item.label }}: {{ item.percent|floatformat:1 }}%</span>
@@ -105,9 +105,9 @@
                             <th class="py-3 px-4 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-right">Hành động</th>
                         </tr>
                     </thead>
-                    <tbody class="text-body-sm font-body-sm">
+                    <tbody class="text-body-sm font-body-sm" data-anim="stagger">
                         {% for row in alert_patients %}
-                            <tr class="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors relative">
+                            <tr class="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors relative" data-anim-item>
                                 <td class="py-3 px-4 font-mono text-secondary relative">
                                     <div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
                                     {{ row.patient.id }}

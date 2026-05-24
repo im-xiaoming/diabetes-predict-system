@@ -27,35 +27,35 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-stack-lg">
-            <div class="bg-surface-container-lowest border border-error-container rounded-xl p-stack-md flex flex-col relative overflow-hidden shadow-sm">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-stack-lg" data-anim="stagger">
+            <div class="bg-surface-container-lowest border border-error-container rounded-xl p-stack-md flex flex-col relative overflow-hidden shadow-sm" data-anim-item>
                 <div class="absolute top-0 right-0 w-24 h-24 bg-error opacity-5 rounded-bl-full"></div>
                 <div class="flex items-center gap-2 text-error mb-2">
-                    <span class="material-symbols-outlined fill">error</span>
+                    <span class="material-symbols-outlined fill" data-anim="pulse">error</span>
                     <span class="text-label-md font-label-md">Cần xử lý gấp</span>
                 </div>
                 <div class="flex items-end gap-3 mt-auto">
-                    <span class="text-display-lg font-display-lg text-on-surface">{{ high_count }}</span>
+                    <span class="text-display-lg font-display-lg text-on-surface" data-anim="count" data-to="{{ high_count|default:0 }}">0</span>
                     <span class="text-body-sm font-body-sm text-secondary mb-1">cảnh báo high</span>
                 </div>
             </div>
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex flex-col relative overflow-hidden shadow-sm">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex flex-col relative overflow-hidden shadow-sm" data-anim-item>
                 <div class="flex items-center gap-2 text-tertiary-container mb-2">
                     <span class="material-symbols-outlined">pending_actions</span>
                     <span class="text-label-md font-label-md">Tổng cảnh báo</span>
                 </div>
                 <div class="flex items-end gap-3 mt-auto">
-                    <span class="text-display-lg font-display-lg text-on-surface">{{ pending_count }}</span>
+                    <span class="text-display-lg font-display-lg text-on-surface" data-anim="count" data-to="{{ pending_count|default:0 }}">0</span>
                     <span class="text-body-sm font-body-sm text-secondary mb-1">kết quả dương tính</span>
                 </div>
             </div>
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex flex-col relative overflow-hidden shadow-sm">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex flex-col relative overflow-hidden shadow-sm" data-anim-item>
                 <div class="flex items-center gap-2 text-primary-container mb-2">
                     <span class="material-symbols-outlined">visibility</span>
                     <span class="text-label-md font-label-md">Đang theo dõi</span>
                 </div>
                 <div class="flex items-end gap-3 mt-auto">
-                    <span class="text-display-lg font-display-lg text-on-surface">{{ monitoring_count }}</span>
+                    <span class="text-display-lg font-display-lg text-on-surface" data-anim="count" data-to="{{ monitoring_count|default:0 }}">0</span>
                     <span class="text-body-sm font-body-sm text-secondary mb-1">medium/low</span>
                 </div>
             </div>
@@ -76,9 +76,9 @@
                             <th class="py-3 px-4 font-semibold text-right">Hành động</th>
                         </tr>
                     </thead>
-                    <tbody class="text-body-sm font-body-sm">
+                    <tbody class="text-body-sm font-body-sm" data-anim="stagger">
                         {% for alert in alerts %}
-                            <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors relative">
+                            <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors relative" data-anim-item>
                                 <td class="py-3 px-4">
                                     {% if alert.risk_level == 'high' %}<div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>{% endif %}
                                     <span class="font-medium">{{ alert.id }}</span>

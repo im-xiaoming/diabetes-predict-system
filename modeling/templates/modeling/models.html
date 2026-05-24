@@ -58,11 +58,11 @@
                   </div>
                   <div>
                     <p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Độ trễ TB</p>
-                    <p class="text-body-md font-body-md text-on-surface font-medium">{{ production_model.avg_latency|floatformat:0 }}ms</p>
+                    <p class="text-body-md font-body-md text-on-surface font-medium"><span data-anim="count" data-to="{{ production_model.avg_latency|default:0|floatformat:0 }}">0</span>ms</p>
                   </div>
                   <div>
                     <p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Số dự đoán</p>
-                    <p class="text-body-md font-body-md text-on-surface font-medium">{{ production_model.prediction_count }}</p>
+                    <p class="text-body-md font-body-md text-on-surface font-medium" data-anim="count" data-to="{{ production_model.prediction_count|default:0 }}">0</p>
                   </div>
                   <div>
                     <p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Stage</p>
@@ -118,9 +118,9 @@
                 <th class="py-3 px-4 text-label-sm font-label-sm text-on-surface-variant uppercase font-semibold">Predictions</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-outline-variant">
+            <tbody class="divide-y divide-outline-variant" data-anim="stagger">
               {% for row in model_rows %}
-                <tr class="hover:bg-surface-container-lowest transition-colors group">
+                <tr class="hover:bg-surface-container-lowest transition-colors group" data-anim-item>
                   <td class="py-3 px-4">
                     <span class="text-body-sm font-body-sm font-medium text-on-surface">{{ row.model_version }}</span>
                     <p class="text-label-sm font-label-sm text-on-surface-variant mt-0.5">{{ row.last_seen|date:"d/m/Y H:i" }}</p>

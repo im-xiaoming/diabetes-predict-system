@@ -60,28 +60,28 @@
                             Hồ sơ Lâm sàng mới nhất
                         </h3>
                         {% if record %}
-                            <div class="grid grid-cols-2 gap-x-gutter gap-y-stack-md">
-                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant">
+                            <div class="grid grid-cols-2 gap-x-gutter gap-y-stack-md" data-anim="stagger">
+                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant" data-anim-item>
                                     <span class="text-label-sm font-label-sm text-secondary block mb-1">AGE</span>
                                     <span class="text-title-lg font-title-lg text-on-surface">{{ record.age }}</span>
                                 </div>
-                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant">
+                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant" data-anim-item>
                                     <span class="text-label-sm font-label-sm text-secondary block mb-1">BMI</span>
                                     <span class="text-title-lg font-title-lg text-on-surface">{{ record.bmi }}</span>
                                 </div>
-                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant">
+                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant" data-anim-item>
                                     <span class="text-label-sm font-label-sm text-secondary block mb-1">HbA1c</span>
                                     <span class="text-title-lg font-title-lg text-error">{{ record.hba1c }}</span>
                                 </div>
-                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant">
+                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant" data-anim-item>
                                     <span class="text-label-sm font-label-sm text-secondary block mb-1">FPS</span>
                                     <span class="text-title-lg font-title-lg text-error">{{ record.fps }}</span>
                                 </div>
-                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant">
+                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant" data-anim-item>
                                     <span class="text-label-sm font-label-sm text-secondary block mb-1">SP/BP</span>
                                     <span class="text-title-lg font-title-lg text-on-surface">{{ record.sp }}/{{ record.bp }}</span>
                                 </div>
-                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant">
+                                <div class="bg-surface-container-low p-stack-sm rounded-lg border border-outline-variant" data-anim-item>
                                     <span class="text-label-sm font-label-sm text-secondary block mb-1">DIA LIFE</span>
                                     <span class="text-title-lg font-title-lg text-on-surface">{{ record.dia_life }}</span>
                                 </div>
@@ -103,13 +103,13 @@
                             {% endif %}
                         </div>
                         {% if prediction %}
-                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-stack-sm">
+                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-stack-sm" data-anim="stagger">
                                 {% for item in prediction.scores.all %}
-                                    <div class="border border-outline-variant bg-surface-container-low rounded-lg p-stack-sm">
+                                    <div class="border border-outline-variant bg-surface-container-low rounded-lg p-stack-sm" data-anim-item>
                                         <span class="text-label-sm font-label-sm text-secondary block">{{ item.target }}</span>
                                         <div class="flex items-end gap-2 mt-1">
                                             <span class="text-headline-sm font-headline-sm text-on-surface">{{ item.risk_score|floatformat:2 }}</span>
-                                            <span class="px-2 py-0.5 rounded text-label-sm font-label-sm {% if item.risk_level == 'high' %}bg-error/10 text-error{% elif item.risk_level == 'medium' %}bg-[#F59E0B]/10 text-[#D97706]{% else %}bg-[#10B981]/10 text-[#059669]{% endif %}">
+                                            <span class="px-2 py-0.5 rounded text-label-sm font-label-sm {% if item.risk_level == 'high' %}bg-error/10 text-error{% elif item.risk_level == 'medium' %}bg-[#F59E0B]/10 text-[#D97706]{% else %}bg-[#10B981]/10 text-[#059669]{% endif %}" {% if item.risk_level == 'high' %}data-anim="pulse"{% endif %}>
                                                 {{ item.risk_level }}
                                             </span>
                                         </div>
@@ -140,9 +140,9 @@
                                         <th class="py-2 px-3 font-medium">Cảnh báo</th>
                                     </tr>
                                 </thead>
-                                <tbody class="text-body-sm font-body-sm">
+                                <tbody class="text-body-sm font-body-sm" data-anim="stagger">
                                     {% for row in history %}
-                                        <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+                                        <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors" data-anim-item>
                                             <td class="py-3 px-3 text-on-surface">{{ row.created_at|date:"H:i d/m/Y" }}</td>
                                             <td class="py-3 px-3 text-secondary">{{ row.model_name }} {{ row.model_version }}</td>
                                             <td class="py-3 px-3 text-on-surface">{{ row.risk_level }}</td>
