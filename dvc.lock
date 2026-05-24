@@ -11,8 +11,8 @@ stages:
       isexec: true
     - path: data/training.csv
       hash: md5
-      md5: 6fd03da2ae8ccc4fc2c6deb1fedbd9cc
-      size: 113546
+      md5: db882c1a129fca292a815ebb59cdf001
+      size: 149673
     - path: ml/train.py
       hash: md5
       md5: 17ac176d699cc34debaeec8326651104
@@ -26,8 +26,8 @@ stages:
     outs:
     - path: ml/artifacts/model.pkl
       hash: md5
-      md5: 02d44b66331a08fb57627dee88b57a25
-      size: 16607161
+      md5: 2d507dfc4a44cc9562404b8422447779
+      size: 5966281
   export_training_data:
     cmd: python -u ml/export_training_data.py --output data/training.csv 
       --fallback data/data.csv
@@ -45,5 +45,5 @@ stages:
     outs:
     - path: data/training.csv
       hash: md5
-      md5: ee3cc8fa4972b3696f2b1ed881e4e881
-      size: 115077
+      md5: db882c1a129fca292a815ebb59cdf001
+      size: 149673

@@ -81,6 +81,29 @@ class FeedRunner:
             self._thread.start()
             return self.status()
 
+    def apply_config(self, *, auto_start, interval, delay, unlabeled):
+        """Apply admin-updated config to the runtime feed without losing progress.
+
+        - auto_start False: stop the feed if running and cancel any pending auto-start.
+        - auto_start True and feed already running: update interval/mode in place.
+        - auto_start True and feed idle/done: schedule a fresh auto-start with the new params.
+        """
+        interval = max(1, int(interval))
+        with self._lock:
+            alive = bool(self._thread and self._thread.is_alive())
+            if not auto_start:
+                self._stop_event.set()
+                self._state["running"] = False
+                self._state["paused"] = False
+                self._state["message"] = "Feed stopped by admin config"
+                return self.status()
+            if alive:
+                self._state["interval"] = interval
+                self._state["mode"] = "unlabeled" if unlabeled else "labeled"
+                self._state["message"] = "Feed config updated"
+                return self.status()
+        return self.auto_start(interval=interval, delay=delay, unlabeled=unlabeled)
+
     def auto_start(self, *, interval=5, delay=3, unlabeled=False):
         def delayed_start():
             time.sleep(max(0, int(delay)))
@@ -201,4 +224,7 @@ class FeedRunner:
             time.sleep(interval)
 
 
-feed_runner = FeedRunner()
+labeled_runner = FeedRunner()
+unlabeled_runner = FeedRunner()
+# Backwards-compat alias for views/UI that control the labeled feed.
+feed_runner = labeled_runner

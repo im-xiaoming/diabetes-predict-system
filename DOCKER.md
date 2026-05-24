@@ -1,6 +1,6 @@
 # Docker
 
-## Chay app chinh
+## Chạy app chính
 
 ```bash
 cd C:\diabetes\diabetes_predict_system
@@ -21,7 +21,7 @@ Grafana login local:
 admin / admin
 ```
 
-## Lenh quan ly
+## Lệnh quản lý
 
 ```bash
 docker compose ps
@@ -30,7 +30,7 @@ docker compose logs -f api
 docker compose down
 ```
 
-Docker Compose tu doc file `.env` trong thu muc project. Neu muon container tu pull artifact DVC khi start, sua:
+Docker Compose tự đọc file `.env` trong thư mục project. Nếu muốn container tự pull artifact DVC khi start, sửa:
 
 ```text
 DVC_PULL=True
@@ -39,9 +39,9 @@ AWS_ACCESS_KEY_ID=<dagshub-access-key>
 AWS_SECRET_ACCESS_KEY=<dagshub-secret-key>
 ```
 
-Remote DVC `origin` dang tro toi DagsHub trong `.dvc/config`. Khong dua `.dvc/config.local` vao Docker image; file do chi nen nam tren may local. Container se lay credential tu `.env` qua bien moi truong `AWS_ACCESS_KEY_ID` va `AWS_SECRET_ACCESS_KEY`.
+Remote DVC `origin` đang trỏ tới DagsHub trong `.dvc/config`. Không đưa `.dvc/config.local` vào Docker image; file đó chỉ nên nằm trên máy local. Container sẽ lấy credential từ `.env` qua biến môi trường `AWS_ACCESS_KEY_ID` và `AWS_SECRET_ACCESS_KEY`.
 
-Database Django doc tu `.env`. Neu co `DATABASE_URL` thi uu tien bien do; neu khong, Django dung bo bien PostgreSQL:
+Database Django đọc từ `.env`. Nếu có `DATABASE_URL` thì ưu tiên biến đó; nếu không, Django dùng bộ biến PostgreSQL:
 
 ```text
 PGHOST=<postgres-host>
@@ -52,9 +52,9 @@ PGPORT=5432
 PGSSLMODE=require
 ```
 
-Neu cac bien PostgreSQL de trong, app fallback ve SQLite tai `SQLITE_PATH`.
+Nếu các biến PostgreSQL để trống, app fallback về SQLite tại `SQLITE_PATH`.
 
-Neu muon MLflow log len DagsHub thay vi SQLite local, sua them:
+Nếu muốn MLflow log lên DagsHub thay vì SQLite local, sửa thêm:
 
 ```text
 MLFLOW_TRACKING_URI=https://dagshub.com/<username>/<repo>.mlflow
@@ -62,9 +62,9 @@ MLFLOW_TRACKING_USERNAME=<dagshub-username>
 MLFLOW_TRACKING_PASSWORD=<dagshub-token>
 ```
 
-Neu giu mac dinh `sqlite:////app/runtime/mlflow.db`, MLflow se chay local trong thu muc `.runtime/` cua project.
+Nếu giữ mặc định `sqlite:////app/runtime/mlflow.db`, MLflow sẽ chạy local trong thư mục `.runtime/` của project.
 
-Mac dinh `.env` hien bat:
+Mặc định `.env` hiện bật:
 
 ```text
 RESET_DATABASE_ON_START=False
@@ -73,11 +73,11 @@ DJANGO_SUPERUSER_USERNAME=admin
 DJANGO_SUPERUSER_PASSWORD=1
 ```
 
-Voi DB cloud/PostgreSQL, `RESET_DATABASE_ON_START` nen de `False`; entrypoint cung se bo qua reset khi phat hien `DATABASE_URL` hoac `PGHOST`. Khi start container, Django van migrate va tao/cap nhat tai khoan admin.
+Với DB cloud/PostgreSQL, `RESET_DATABASE_ON_START` nên để `False`; entrypoint cũng sẽ bỏ qua reset khi phát hiện `DATABASE_URL` hoặc `PGHOST`. Khi start container, Django vẫn migrate và tạo/cập nhật tài khoản admin.
 
 ## Airflow
 
-Airflow dang co compose rieng trong thu muc `airflow/`, vi stack nay lon va dung image rieng. Airflow khong dung `airflow/.env` rieng nua; no doc cau hinh tu `.env` o thu muc root.
+Airflow đang có compose riêng trong thư mục `airflow/`, vì stack này lớn và dùng image riêng. Airflow không dùng `airflow/.env` riêng nữa; nó đọc cấu hình từ `.env` ở thư mục root.
 
 ```bash
 cd airflow
@@ -87,7 +87,7 @@ docker compose --env-file ../.env up --build
 
 Airflow UI: http://127.0.0.1:8080
 
-MLflow UI cho cac run do Airflow retrain tao: http://127.0.0.1:5001
+MLflow UI cho các run do Airflow retrain tạo: http://127.0.0.1:5001
 
 Airflow login local:
 
@@ -95,23 +95,23 @@ Airflow login local:
 admin / 1
 ```
 
-Schedule va cac nguong retrain duoc doi trong Django admin:
+Schedule và các ngưỡng retrain được đổi trong Django admin:
 
 ```text
 http://127.0.0.1:8000/admin/
 Modeling -> Airflow retrain config
 ```
 
-Gia tri schedule co the la cron (`0 2 * * *`), preset Airflow (`@daily`), `manual`/`none`, hoac interval nhu `15m`, `2h`, `1d`. Cac nguong policy va `force` cung nam o form nay. Khi bam Save trong admin, Django ghi vao `configs/airflow_retrain_config.json`; Airflow va `ml/retrain_policy.py` doc file nay nen khong can build lai Docker. Neu Airflow UI chua cap nhat ngay, restart scheduler va dag processor:
+Giá trị schedule có thể là cron (`0 2 * * *`), preset Airflow (`@daily`), `manual`/`none`, hoặc interval như `15m`, `2h`, `1d`. Các ngưỡng policy và `force` cũng nằm ở form này. Khi bấm Save trong admin, Django ghi vào `configs/airflow_retrain_config.json`; Airflow và `ml/retrain_policy.py` đọc file này nên không cần build lại Docker. Nếu Airflow UI chưa cập nhật ngay, restart scheduler và dag processor:
 
-Sieu tham so model va cau hinh Optuna cung doi trong Django admin:
+Siêu tham số model và cấu hình Optuna cũng đổi trong Django admin:
 
 ```text
 http://127.0.0.1:8000/admin/
 Modeling -> Model training config
 ```
 
-Form nay quan ly `n_trials`, `timeout`, model duoc train, promotion metric, co log Optuna trial hay khong, va JSON search space cho tung model. Khi bam Save, Django ghi vao `configs/model_training_config.json`; `dvc repro`/`ml/train.py` doc file nay nen khong can sua `dvc.yaml`.
+Form này quản lý `n_trials`, `timeout`, model được train, promotion metric, có log Optuna trial hay không, và JSON search space cho từng model. Khi bấm Save, Django ghi vào `configs/model_training_config.json`; `dvc repro`/`ml/train.py` đọc file này nên không cần sửa `dvc.yaml`.
 
 ```bash
 cd airflow

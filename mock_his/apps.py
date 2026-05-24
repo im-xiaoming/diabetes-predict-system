@@ -2,7 +2,6 @@ import os
 import sys
 
 from django.apps import AppConfig
-from django.conf import settings
 
 
 class MockHisConfig(AppConfig):
@@ -10,17 +9,27 @@ class MockHisConfig(AppConfig):
     name = "mock_his"
 
     def ready(self):
-        if not getattr(settings, "MOCK_HIS_AUTO_START", False):
-            return
         if "runserver" not in sys.argv:
             return
+        from django.conf import settings
         if settings.DEBUG and os.environ.get("RUN_MAIN") != "true":
             return
 
-        from .feed_runner import feed_runner
+        from .models import load_labeled_config, load_unlabeled_config
+        from .feed_runner import labeled_runner, unlabeled_runner
 
-        feed_runner.auto_start(
-            interval=getattr(settings, "MOCK_HIS_AUTO_START_INTERVAL", 5),
-            delay=getattr(settings, "MOCK_HIS_AUTO_START_DELAY", 3),
-            unlabeled=getattr(settings, "MOCK_HIS_AUTO_START_UNLABELED", False),
-        )
+        labeled = load_labeled_config()
+        if labeled.get("auto_start"):
+            labeled_runner.auto_start(
+                interval=labeled.get("interval", 5),
+                delay=labeled.get("delay", 3),
+                unlabeled=False,
+            )
+
+        unlabeled = load_unlabeled_config()
+        if unlabeled.get("auto_start"):
+            unlabeled_runner.auto_start(
+                interval=unlabeled.get("interval", 5),
+                delay=unlabeled.get("delay", 3),
+                unlabeled=True,
+            )

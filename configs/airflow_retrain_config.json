@@ -1,5 +1,5 @@
 {
-  "schedule": "1m",
+  "schedule": "15m",
   "min_new_labels": 100,
   "min_new_ratio": 0.1,
   "min_new_positives": 20,

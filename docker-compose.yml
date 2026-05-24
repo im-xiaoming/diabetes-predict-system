@@ -42,10 +42,9 @@ services:
     environment:
       <<: *app-env
       FASTAPI_BASE_URL: http://api:8001
-      MLFLOW_UI_URL: http://127.0.0.1:5000
+      MLFLOW_UI_URL: http://127.0.0.1:5001
       MLFLOW_HEALTH_URL: http://mlflow:5000
       MLFLOW_AUTO_START: ${MLFLOW_AUTO_START:-False}
-      MOCK_HIS_AUTO_START: ${MOCK_HIS_AUTO_START:-False}
     ports:
       - "8000:8000"
     volumes:
