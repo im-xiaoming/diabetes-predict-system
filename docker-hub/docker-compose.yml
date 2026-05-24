@@ -1,0 +1,116 @@
+name: diabetes-predict-system-hub
+
+x-app-env: &app-env
+  DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-change-me-for-real-deployments}
+  DJANGO_DEBUG: ${DJANGO_DEBUG:-True}
+  DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0,django}
+  DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-http://localhost:8000,http://127.0.0.1:8000}
+  DATABASE_URL: ${DATABASE_URL:-}
+  PGHOST: ${PGHOST:-}
+  PGDATABASE: ${PGDATABASE:-}
+  PGUSER: ${PGUSER:-}
+  PGPASSWORD: ${PGPASSWORD:-}
+  PGPORT: ${PGPORT:-5432}
+  PGSSLMODE: ${PGSSLMODE:-require}
+  DB_CONN_MAX_AGE: ${DB_CONN_MAX_AGE:-60}
+  SQLITE_PATH: ${SQLITE_PATH:-/app/runtime/db.sqlite3}
+  STATIC_ROOT: /app/staticfiles
+  MODEL_PATH: /app/ml/artifacts/model.pkl
+  MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI:-sqlite:////app/runtime/mlflow.db}
+  MLFLOW_ARTIFACT_ROOT: ${MLFLOW_ARTIFACT_ROOT:-/app/mlruns}
+  MLFLOW_TRACKING_USERNAME: ${MLFLOW_TRACKING_USERNAME:-}
+  MLFLOW_TRACKING_PASSWORD: ${MLFLOW_TRACKING_PASSWORD:-}
+  DVC_PULL: ${DVC_PULL:-False}
+  DVC_REMOTE: ${DVC_REMOTE:-origin}
+  DVC_NO_ANALYTICS: ${DVC_NO_ANALYTICS:-True}
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+  RESET_DATABASE_ON_START: ${RESET_DATABASE_ON_START:-False}
+  RUN_MIGRATIONS: ${RUN_MIGRATIONS:-True}
+  RUN_COLLECTSTATIC: ${RUN_COLLECTSTATIC:-False}
+  DJANGO_CREATE_SUPERUSER: ${DJANGO_CREATE_SUPERUSER:-True}
+  DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-admin}
+  DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-1}
+  DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-admin@example.com}
+
+services:
+  django:
+    image: ${APP_IMAGE:-nguyenminh079/diabetes-predict-system:latest}
+    command: django
+    environment:
+      <<: *app-env
+      FASTAPI_BASE_URL: http://api:8001
+      MLFLOW_UI_URL: http://127.0.0.1:5000
+      MLFLOW_HEALTH_URL: http://mlflow:5000
+      MLFLOW_AUTO_START: ${MLFLOW_AUTO_START:-False}
+    ports:
+      - "8000:8000"
+    volumes:
+      - runtime:/app/runtime
+      - staticfiles:/app/staticfiles
+      - mlruns:/app/mlruns
+      - model_artifacts:/app/ml/artifacts
+      - configs:/app/configs
+    depends_on:
+      - api
+      - mlflow
+    restart: unless-stopped
+
+  api:
+    image: ${APP_IMAGE:-nguyenminh079/diabetes-predict-system:latest}
+    command: api
+    environment:
+      <<: *app-env
+    ports:
+      - "8001:8001"
+    volumes:
+      - model_artifacts:/app/ml/artifacts
+    restart: unless-stopped
+
+  mlflow:
+    image: ${APP_IMAGE:-nguyenminh079/diabetes-predict-system:latest}
+    command: mlflow
+    environment:
+      <<: *app-env
+    ports:
+      - "5000:5000"
+    volumes:
+      - runtime:/app/runtime
+      - mlruns:/app/mlruns
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana-oss:11.6.0
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  runtime:
+  staticfiles:
+  mlruns:
+  model_artifacts:
+  configs:
+  prometheus_data:
+  grafana_data:
