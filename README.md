@@ -2,7 +2,9 @@
 
 # Đan Đường Dự Tri Huyết Đường
 
-Đây là pháp trận dự đoán nguy cơ biến chứng tiểu đường, lấy Django làm chính điện, FastAPI làm truyền lệnh sứ, MLflow ghi công pháp tu luyện, DVC giữ linh thạch dữ liệu, Mock HIS mô phỏng y viện, Airflow điều khiển lịch tái luyện, Prometheus và Grafana quan sát khí mạch hệ thống.
+Đây là Đan Đường dự tri biến chứng tiêu khát, lập Django làm chủ điện cai quản bệnh án, sai FastAPI làm truyền phù sứ tiếp nhận vấn chẩn, dùng scikit-learn làm đan lô luyện thuật dự đoán, mượn Optuna làm tầm đạo bàn để dò ra tham số thượng phẩm, dẫn PySpark khai thông dữ mạch trước khi nhập lô, lấy MLflow chép lại đạo ngân mỗi lần luyện đan, còn DVC trấn giữ linh thạch dữ liệu cùng model artifact.
+
+Mock HIS hóa thành y viện huyễn cảnh, HIS Inference tiếp nhận bệnh án vô nhãn, SQLite hoặc PostgreSQL làm tàng kinh các lần luận đoán, Airflow giữ thiên lịch tái luyện, Prometheus tuần sát khí tức vận hành, Grafana dựng quan tinh đài soi biến động, Docker phong ấn toàn bộ pháp khí vào một bảo hạp, Docker Hub mở truyền tống trận để đạo hữu phương xa kéo image về khai đàn, Anime.js khởi vũ cho giao diện, Three.js dựng pháp cảnh ba chiều, tất cả quy về một đạo: trợ y giả sớm nhận ra hung triệu, ưu tiên hồ sơ nguy cấp, nhưng không tiếm quyền chẩn quyết của thầy thuốc.
 
 ## Khai Môn Tại Bản Địa
 
