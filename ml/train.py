@@ -25,7 +25,7 @@ except ImportError:
 
 import argparse
 
-from ml.preprocessing import build_preprocessor, clean_data, load_data, split_xy
+from ml.preprocessing import build_preprocessor, load_clean_data, split_xy
 from ml.tracking import log_metrics, log_model, log_params, log_report, start_run
 from ml.tune import tune_all
 from ml.registry import get_champion_metrics, register_best_model, restore_champion_model
@@ -252,12 +252,14 @@ def main(
     force_promote=False,
     log_optuna_trials=True,
     training_config=None,
+    preprocessing_backend="pandas",
 ):
     started_at = time.monotonic()
     data_path = Path(data_path)
     LOGGER.info(
-        "train_start data=%s tune=%s n_trials=%s timeout=%s register=%s promotion_metric=%s min_delta=%s force_promote=%s",
+        "train_start data=%s preprocessing_backend=%s tune=%s n_trials=%s timeout=%s register=%s promotion_metric=%s min_delta=%s force_promote=%s",
         data_path,
+        preprocessing_backend,
         tune,
         n_trials,
         timeout,
@@ -269,9 +271,7 @@ def main(
     LOGGER.info("model_output_path=%s", MODEL_PATH)
     if training_config:
         LOGGER.info("training_config=%s", training_config)
-    df = load_data(data_path)
-    raw_n = len(df)
-    df = clean_data(df)
+    df, raw_n = load_clean_data(data_path, preprocessing_backend)
     LOGGER.info("rows_raw=%s", raw_n)
     LOGGER.info("rows_clean=%s", len(df))
     LOGGER.info("duplicates_dropped=%s", raw_n - len(df))
@@ -298,6 +298,7 @@ def main(
         "test_size": TEST_SIZE,
         "random_state": RANDOM_STATE,
         "data_path": str(data_path),
+        "preprocessing_backend": preprocessing_backend,
         "promotion_metric": promotion_metric,
         "promotion_min_delta": promotion_min_delta,
     }
@@ -419,6 +420,12 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--data", default=str(DATA_PATH), help="CSV training data path")
     p.add_argument("--config", default=str(TRAINING_CONFIG_PATH), help="JSON training config path")
+    p.add_argument(
+        "--preprocessing-backend",
+        choices=["pandas", "pyspark", "spark"],
+        default="pandas",
+        help="Backend used to read and clean the training CSV",
+    )
     p.add_argument("--tune", action="store_true", help="Use Optuna for hyperparameter tuning")
     p.add_argument("--n-trials", type=int, default=30, help="Number of trials per model")
     p.add_argument("--timeout", type=int, default=None, help="Timeout in seconds per model")
@@ -452,4 +459,5 @@ if __name__ == "__main__":
         force_promote=bool(config_value(training_config, "force_promote", args.force_promote)),
         log_optuna_trials=bool(config_value(training_config, "log_optuna_trials", not args.no_log_optuna_trials)),
         training_config=training_config,
+        preprocessing_backend=str(config_value(training_config, "preprocessing_backend", args.preprocessing_backend)),
     )

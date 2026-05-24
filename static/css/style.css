@@ -43,3 +43,33 @@ body {
     font-family: monospace;
     font-size: 12px;
 }
+
+.has-three-scene {
+    position: relative;
+    isolation: isolate;
+}
+
+.clinical-three-scene {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.clinical-three-scene canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+[data-three-scene] {
+    position: relative;
+    z-index: 1;
+}
+
+@media (max-width: 767px) {
+    .clinical-three-scene {
+        opacity: 0.45;
+    }
+}

@@ -52,9 +52,9 @@
                                         <th class="p-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider border-b border-outline-variant text-right">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody id="records-body">
+                                <tbody id="records-body" data-anim="stagger">
                                     {% for rec in records %}
-                                        <tr id="row-{{ rec.idx }}" class="hover:bg-surface-container-low transition-colors group {% if not rec.ready %}border-l-4 border-error{% endif %}">
+                                        <tr id="row-{{ rec.idx }}" class="hover:bg-surface-container-low transition-colors group {% if not rec.ready %}border-l-4 border-error{% endif %}" data-anim-item>
                                             <td class="p-3 border-b border-outline-variant text-body-sm font-body-sm text-on-surface">{{ rec.pid }}</td>
                                             <td class="p-3 border-b border-outline-variant text-body-sm font-body-sm text-on-surface font-medium">{{ rec.name }}</td>
                                             <td class="p-3 border-b border-outline-variant">
@@ -260,6 +260,18 @@
             if (!el) return;
             el.textContent = text;
             el.className = `inline-flex px-2 py-1 rounded text-label-sm font-label-sm ${cls}`;
+            if (typeof anime === "function" && (text === "Thanh cong" || text === "That bai")) {
+                const row = document.getElementById(`row-${idx}`);
+                if (row) {
+                    anime.remove(row);
+                    anime({
+                        targets: row,
+                        scale: [1, 1.015, 1],
+                        duration: 360,
+                        easing: "easeOutQuad",
+                    });
+                }
+            }
         }
 
         function rowHtml(rec) {
@@ -348,6 +360,10 @@
                 updateStats();
             }
             show(out.body, out.ok);
+            if (window.showToast) window.showToast(
+                out.ok ? `Đã gửi record #${idx}` : `Gửi record #${idx} thất bại`,
+                out.ok ? "success" : "error"
+            );
             return out;
         }
 
@@ -376,6 +392,14 @@
                 });
             }
             show(out.body, out.ok);
+            if (window.showToast) {
+                const okCount = out.body.success ?? 0;
+                const failCount = out.body.failed ?? 0;
+                window.showToast(
+                    `Bulk: ${okCount} OK, ${failCount} fail`,
+                    failCount === 0 ? "success" : "error"
+                );
+            }
         }
 
         document.getElementById("bulk-btn").addEventListener("click", sendBulk);

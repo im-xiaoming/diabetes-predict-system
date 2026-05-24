@@ -1,5 +1,6 @@
 {
   "tune": true,
+  "preprocessing_backend": "pyspark",
   "n_trials": 5,
   "timeout": 600,
   "register": true,

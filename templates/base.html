@@ -13,7 +13,11 @@
     <!-- Tailwind CSS with custom configuration -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script src="{% static 'js/tailwind-config.js' %}"></script>
-    <link href="{% static 'css/style.css' %}" rel="stylesheet"/>
+    <link href="{% static 'css/style.css' %}?v=20260524-3d-fix" rel="stylesheet"/>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
+    <script defer src="{% static 'js/animations.js' %}?v=20260524-fast-nav"></script>
+    <script type="module" src="{% static 'js/three-scene.js' %}?v=20260524-3d-fix"></script>
 
     {% block css %}{% endblock %}
 </head>

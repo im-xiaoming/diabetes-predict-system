@@ -13,6 +13,7 @@ stages:
     deps:
     - data/training.csv
     - configs/model_training_config.json
+    - ml/preprocessing.py
     - ml/train.py
     - ml/tune.py
     outs:

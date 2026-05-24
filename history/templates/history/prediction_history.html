@@ -69,9 +69,9 @@
                   <th class="px-4 py-3 text-label-sm font-label-sm text-on-surface-variant border-b border-outline-variant uppercase whitespace-nowrap text-center">Tác vụ</th>
                 </tr>
               </thead>
-              <tbody class="text-body-sm font-body-sm text-on-surface divide-y divide-outline-variant/50">
+              <tbody class="text-body-sm font-body-sm text-on-surface divide-y divide-outline-variant/50" data-anim="stagger">
                 {% for row in rows %}
-                  <tr class="hover:bg-surface-container-low transition-colors group relative">
+                  <tr class="hover:bg-surface-container-low transition-colors group relative" data-anim-item>
                     <td class="px-4 py-3 whitespace-nowrap font-mono text-xs text-on-surface-variant relative">
                       {% if row.prediction.risk_level == 'high' %}
                         <div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>

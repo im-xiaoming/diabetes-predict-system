@@ -11,7 +11,12 @@ RUN apt-get update \
         build-essential \
         curl \
         git \
+        openjdk-21-jre-headless \
     && rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 \
+    PYSPARK_PYTHON=python \
+    PYSPARK_DRIVER_PYTHON=python
 
 COPY requirements.txt .
 RUN sed '/^pywin32==/d' requirements.txt > /tmp/requirements-docker.txt \
