@@ -69,7 +69,7 @@ nguyenminh079/diabetes-predict-system:latest
 
 - Django: http://127.0.0.1:8000
 - FastAPI docs: http://127.0.0.1:8001/docs
-- MLflow: http://127.0.0.1:5000
+- MLflow: http://127.0.0.1:5001
 - Prometheus: http://127.0.0.1:9090
 - Grafana: http://127.0.0.1:3000
 
