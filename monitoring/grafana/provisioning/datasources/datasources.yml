@@ -9,9 +9,17 @@ datasources:
     isDefault: true
     editable: true
 
-  - name: Diabetes SQLite
-    uid: diabetes_sqlite
-    type: frser-sqlite-datasource
+  - name: Diabetes PostgreSQL
+    uid: diabetes_postgres
+    type: postgres
+    access: proxy
     editable: true
     jsonData:
-      path: /var/lib/grafana/sqlite/db.sqlite3
+      database: ${PGDATABASE}
+      sslmode: ${PGSSLMODE}
+      postgresVersion: 1500
+      timescaledb: false
+    secureJsonData:
+      password: ${PGPASSWORD}
+    user: ${PGUSER}
+    url: ${PGHOST}:${PGPORT}

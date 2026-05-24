@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "FastAPI operations from Prometheus plus prediction data from the Django SQLite database.",
+  "description": "FastAPI operations from Prometheus plus prediction data from the Django PostgreSQL database.",
   "editable": true,
   "graphTooltip": 0,
   "id": null,
@@ -310,8 +310,8 @@
     },
     {
       "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "diabetes_sqlite"
+        "type": "postgres",
+        "uid": "diabetes_postgres"
       },
       "fieldConfig": {
         "defaults": {
@@ -340,14 +340,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "diabetes_sqlite"
+            "type": "postgres",
+            "uid": "diabetes_postgres"
           },
-          "queryType": "table",
-          "rawQueryText": "SELECT COUNT(*) AS value FROM predictions_predictionresult",
-          "queryText": "SELECT COUNT(*) AS value FROM predictions_predictionresult",
-          "timeColumns": [],
-          "refId": "A"
+          "refId": "A",
+          "rawSql": "SELECT COUNT(*) AS value FROM predictions_predictionresult",
+          "format": "table"
         }
       ],
       "title": "Prediction Results",
@@ -355,8 +353,8 @@
     },
     {
       "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "diabetes_sqlite"
+        "type": "postgres",
+        "uid": "diabetes_postgres"
       },
       "fieldConfig": {
         "defaults": {
@@ -386,14 +384,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "diabetes_sqlite"
+            "type": "postgres",
+            "uid": "diabetes_postgres"
           },
-          "queryType": "table",
-          "rawQueryText": "SELECT ROUND(COALESCE(AVG(latency_ms), 0), 2) AS value FROM predictions_requestlog",
-          "queryText": "SELECT ROUND(COALESCE(AVG(latency_ms), 0), 2) AS value FROM predictions_requestlog",
-          "timeColumns": [],
-          "refId": "A"
+          "refId": "A",
+          "rawSql": "SELECT ROUND(COALESCE(AVG(latency_ms), 0)::numeric, 2) AS value FROM predictions_requestlog",
+          "format": "table"
         }
       ],
       "title": "DB Avg Latency",
@@ -401,8 +397,8 @@
     },
     {
       "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "diabetes_sqlite"
+        "type": "postgres",
+        "uid": "diabetes_postgres"
       },
       "gridPos": {
         "h": 7,
@@ -434,14 +430,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "diabetes_sqlite"
+            "type": "postgres",
+            "uid": "diabetes_postgres"
           },
-          "queryType": "table",
-          "rawQueryText": "SELECT risk_level AS metric, COUNT(*) AS value FROM predictions_predictionresult GROUP BY risk_level ORDER BY value DESC",
-          "queryText": "SELECT risk_level AS metric, COUNT(*) AS value FROM predictions_predictionresult GROUP BY risk_level ORDER BY value DESC",
-          "timeColumns": [],
-          "refId": "A"
+          "refId": "A",
+          "rawSql": "SELECT risk_level AS metric, COUNT(*) AS value FROM predictions_predictionresult GROUP BY risk_level ORDER BY value DESC",
+          "format": "table"
         }
       ],
       "title": "Overall Risk Distribution",
@@ -449,8 +443,8 @@
     },
     {
       "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "diabetes_sqlite"
+        "type": "postgres",
+        "uid": "diabetes_postgres"
       },
       "gridPos": {
         "h": 7,
@@ -462,14 +456,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "diabetes_sqlite"
+            "type": "postgres",
+            "uid": "diabetes_postgres"
           },
-          "queryType": "table",
-          "rawQueryText": "SELECT COALESCE(NULLIF(model_name, ''), 'Unknown') AS model_name, COALESCE(NULLIF(model_version, ''), 'Unknown') AS model_version, COUNT(*) AS predictions, MAX(created_at) AS last_prediction FROM predictions_predictionresult GROUP BY model_name, model_version ORDER BY predictions DESC",
-          "queryText": "SELECT COALESCE(NULLIF(model_name, ''), 'Unknown') AS model_name, COALESCE(NULLIF(model_version, ''), 'Unknown') AS model_version, COUNT(*) AS predictions, MAX(created_at) AS last_prediction FROM predictions_predictionresult GROUP BY model_name, model_version ORDER BY predictions DESC",
-          "timeColumns": [],
-          "refId": "A"
+          "refId": "A",
+          "rawSql": "SELECT COALESCE(NULLIF(model_name, ''), 'Unknown') AS model_name, COALESCE(NULLIF(model_version, ''), 'Unknown') AS model_version, COUNT(*) AS predictions, MAX(created_at) AS last_prediction FROM predictions_predictionresult GROUP BY model_name, model_version ORDER BY predictions DESC",
+          "format": "table"
         }
       ],
       "title": "Model Usage",
@@ -477,8 +469,8 @@
     },
     {
       "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "diabetes_sqlite"
+        "type": "postgres",
+        "uid": "diabetes_postgres"
       },
       "fieldConfig": {
         "defaults": {
@@ -496,16 +488,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "diabetes_sqlite"
+            "type": "postgres",
+            "uid": "diabetes_postgres"
           },
-          "queryType": "time series",
-          "rawQueryText": "SELECT CAST(strftime('%s', created_at) AS INTEGER) AS time, COUNT(*) AS predictions FROM predictions_predictionresult GROUP BY strftime('%Y-%m-%d %H:%M', created_at) ORDER BY time",
-          "queryText": "SELECT CAST(strftime('%s', created_at) AS INTEGER) AS time, COUNT(*) AS predictions FROM predictions_predictionresult GROUP BY strftime('%Y-%m-%d %H:%M', created_at) ORDER BY time",
-          "timeColumns": [
-            "time"
-          ],
-          "refId": "A"
+          "refId": "A",
+          "rawSql": "SELECT date_trunc('minute', created_at) AS time, COUNT(*) AS predictions FROM predictions_predictionresult GROUP BY 1 ORDER BY 1",
+          "format": "time_series"
         }
       ],
       "title": "Prediction Activity",
@@ -513,8 +501,8 @@
     },
     {
       "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "diabetes_sqlite"
+        "type": "postgres",
+        "uid": "diabetes_postgres"
       },
       "gridPos": {
         "h": 8,
@@ -526,14 +514,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "diabetes_sqlite"
+            "type": "postgres",
+            "uid": "diabetes_postgres"
           },
-          "queryType": "table",
-          "rawQueryText": "SELECT target AS metric, COUNT(*) AS value FROM predictions_riskscoredetail WHERE risk_label = 1 GROUP BY target ORDER BY value DESC",
-          "queryText": "SELECT target AS metric, COUNT(*) AS value FROM predictions_riskscoredetail WHERE risk_label = 1 GROUP BY target ORDER BY value DESC",
-          "timeColumns": [],
-          "refId": "A"
+          "refId": "A",
+          "rawSql": "SELECT target AS metric, COUNT(*) AS value FROM predictions_riskscoredetail WHERE risk_label = 1 GROUP BY target ORDER BY value DESC",
+          "format": "table"
         }
       ],
       "title": "Positive Targets",
@@ -541,8 +527,8 @@
     },
     {
       "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "diabetes_sqlite"
+        "type": "postgres",
+        "uid": "diabetes_postgres"
       },
       "gridPos": {
         "h": 8,
@@ -554,14 +540,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "diabetes_sqlite"
+            "type": "postgres",
+            "uid": "diabetes_postgres"
           },
-          "queryType": "table",
-          "rawQueryText": "SELECT target AS metric, ROUND(AVG(risk_score), 4) AS value FROM predictions_riskscoredetail GROUP BY target ORDER BY value DESC",
-          "queryText": "SELECT target AS metric, ROUND(AVG(risk_score), 4) AS value FROM predictions_riskscoredetail GROUP BY target ORDER BY value DESC",
-          "timeColumns": [],
-          "refId": "A"
+          "refId": "A",
+          "rawSql": "SELECT target AS metric, ROUND(AVG(risk_score)::numeric, 4) AS value FROM predictions_riskscoredetail GROUP BY target ORDER BY value DESC",
+          "format": "table"
         }
       ],
       "title": "Average Risk Score by Target",
@@ -569,8 +553,8 @@
     },
     {
       "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "diabetes_sqlite"
+        "type": "postgres",
+        "uid": "diabetes_postgres"
       },
       "gridPos": {
         "h": 8,
@@ -582,14 +566,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "diabetes_sqlite"
+            "type": "postgres",
+            "uid": "diabetes_postgres"
           },
-          "queryType": "table",
-          "rawQueryText": "SELECT log.id AS request_id, log.endpoint, log.status_code, ROUND(log.latency_ms, 2) AS latency_ms, log.created_at, result.id AS prediction_id, result.model_version FROM predictions_requestlog log JOIN predictions_predictionresult result ON result.id = log.prediction_id ORDER BY log.created_at DESC LIMIT 20",
-          "queryText": "SELECT log.id AS request_id, log.endpoint, log.status_code, ROUND(log.latency_ms, 2) AS latency_ms, log.created_at, result.id AS prediction_id, result.model_version FROM predictions_requestlog log JOIN predictions_predictionresult result ON result.id = log.prediction_id ORDER BY log.created_at DESC LIMIT 20",
-          "timeColumns": [],
-          "refId": "A"
+          "refId": "A",
+          "rawSql": "SELECT log.id AS request_id, log.endpoint, log.status_code, ROUND(log.latency_ms::numeric, 2) AS latency_ms, log.created_at, result.id AS prediction_id, result.model_version FROM predictions_requestlog log JOIN predictions_predictionresult result ON result.id = log.prediction_id ORDER BY log.created_at DESC LIMIT 20",
+          "format": "table"
         }
       ],
       "title": "Latest Request Logs",
