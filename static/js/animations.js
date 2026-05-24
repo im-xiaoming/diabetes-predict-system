@@ -48,6 +48,22 @@
       return window.anime(Object.assign({ targets }, options));
     };
 
+    const hasPlayedPageIntro = () => {
+      try {
+        return window.sessionStorage.getItem('clinicalMotionIntroPlayed') === 'true';
+      } catch (error) {
+        return false;
+      }
+    };
+
+    const markPageIntroPlayed = () => {
+      try {
+        window.sessionStorage.setItem('clinicalMotionIntroPlayed', 'true');
+      } catch (error) {
+        // Storage can be blocked in private contexts; animation still works.
+      }
+    };
+
     const makeObserver = (onEnter, options) => {
       if (!('IntersectionObserver' in window)) {
         return {
@@ -68,10 +84,11 @@
     };
 
     const animateLayout = (onComplete) => {
+      const useFullIntro = !hasPlayedPageIntro();
       const sidebar = document.querySelector('nav.docked');
       const topbar = document.querySelector('header.sticky');
       const main = document.querySelector('main');
-      const pageRoot = main && main.firstElementChild;
+      const pageRoot = main && Array.from(main.children).find((child) => !child.classList.contains('clinical-three-scene'));
       const navLinks = sidebar
         ? $('.flex-1 > a, .mt-auto > a, form button, .px-3.pt-3', sidebar).filter(isRenderable)
         : [];
@@ -90,11 +107,12 @@
           restoreLayout();
           restoreNav();
           restorePills();
+          markPageIntroPlayed();
           if (typeof onComplete === 'function') onComplete();
         },
       });
 
-      if (sidebar && isRenderable(sidebar)) {
+      if (useFullIntro && sidebar && isRenderable(sidebar)) {
         timeline.add({
           targets: sidebar,
           translateX: [-18, 0],
@@ -103,7 +121,7 @@
         }, 0);
       }
 
-      if (topbar && isRenderable(topbar)) {
+      if (useFullIntro && topbar && isRenderable(topbar)) {
         timeline.add({
           targets: topbar,
           translateY: [-12, 0],
@@ -112,7 +130,7 @@
         }, 60);
       }
 
-      if (navLinks.length) {
+      if (useFullIntro && navLinks.length) {
         timeline.add({
           targets: navLinks,
           translateX: [-8, 0],
@@ -125,13 +143,13 @@
       if (pageRoot && isRenderable(pageRoot)) {
         timeline.add({
           targets: pageRoot,
-          translateY: [16, 0],
-          opacity: [0, 1],
-          duration: 460,
-        }, 110);
+          translateY: useFullIntro ? [16, 0] : [4, 0],
+          opacity: useFullIntro ? [0, 1] : [0.96, 1],
+          duration: useFullIntro ? 460 : 160,
+        }, useFullIntro ? 110 : 0);
       }
 
-      if (statusPills.length) {
+      if (useFullIntro && statusPills.length) {
         timeline.add({
           targets: statusPills,
           translateY: [8, 0],
