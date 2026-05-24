@@ -6,28 +6,29 @@ stages:
     deps:
     - path: configs/model_training_config.json
       hash: md5
-      md5: 816237bd02a8f21809d6c8e06e7b8a37
-      size: 1902
-      isexec: true
+      md5: 63337f3176dc7e24f0f99968d3a981c0
+      size: 1938
     - path: data/training.csv
       hash: md5
-      md5: 9fd6fa8ba79667c9046ad24224b7b0aa
-      size: 165091
+      md5: fcee5d40e4f4f3bcbb79ba5b50cae0ad
+      size: 172236
+    - path: ml/preprocessing.py
+      hash: md5
+      md5: 4eebe8af4a1693a437608eeb8b8f68b2
+      size: 5041
     - path: ml/train.py
       hash: md5
-      md5: 17ac176d699cc34debaeec8326651104
-      size: 16788
-      isexec: true
+      md5: b12bb48a9d7b8a782006301683b38b6d
+      size: 17239
     - path: ml/tune.py
       hash: md5
       md5: 030873094e16a47386d977ee4db920c6
       size: 10561
-      isexec: true
     outs:
     - path: ml/artifacts/model.pkl
       hash: md5
-      md5: 19d3539c5b6daaca04a4351e96cecdd9
-      size: 40707481
+      md5: 49dade5d9440856a7dd4b0b1164d3a51
+      size: 5980849
   export_training_data:
     cmd: python -u ml/export_training_data.py --output data/training.csv 
       --fallback data/data.csv
@@ -45,5 +46,5 @@ stages:
     outs:
     - path: data/training.csv
       hash: md5
-      md5: 9fd6fa8ba79667c9046ad24224b7b0aa
-      size: 165091
+      md5: 5ebda1913aa6b74665630bd559eb7ba9
+      size: 170213

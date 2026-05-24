@@ -21,7 +21,7 @@ TRAIN_SCRIPT = BASE_DIR / "ml" / "train.py"
 MLFLOW_UI_URL = os.environ.get("MLFLOW_UI_URL", "http://127.0.0.1:5001")
 MLFLOW_HEALTH_URL = os.environ.get("MLFLOW_HEALTH_URL", MLFLOW_UI_URL)
 MLFLOW_AUTO_START = os.environ.get("MLFLOW_AUTO_START", "1").strip().lower() in {"1", "true", "yes", "on"}
-REQUIRED_TRAINING_PACKAGES = ("mlflow", "optuna", "pandas", "sklearn", "joblib")
+REQUIRED_TRAINING_PACKAGES = ("mlflow", "optuna", "pandas", "pyspark", "sklearn", "joblib")
 TARGET_FIELDS = {
     "NEP": "nep",
     "NEU": "neu",

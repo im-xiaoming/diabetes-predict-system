@@ -79,6 +79,54 @@ def load_data(path):
     return rename_cols(df)
 
 
+def load_data_spark(path):
+    try:
+        from pyspark.sql import SparkSession
+        from pyspark.sql import functions as F
+    except ImportError as exc:
+        raise RuntimeError(
+            "PySpark backend requested but pyspark is not installed. "
+            "Install it with: python -m pip install pyspark"
+        ) from exc
+
+    spark = (
+        SparkSession.builder.appName("diabetes-preprocessing")
+        .config("spark.sql.execution.arrow.pyspark.enabled", "true")
+        .getOrCreate()
+    )
+    try:
+        sdf = spark.read.option("header", True).option("inferSchema", False).csv(str(path))
+        for col_name in sdf.columns:
+            stripped = col_name.strip()
+            if stripped != col_name:
+                sdf = sdf.withColumnRenamed(col_name, stripped)
+
+        for old, new in COLS.items():
+            if old in sdf.columns and old != new:
+                sdf = sdf.withColumnRenamed(old, new)
+
+        raw_n = sdf.count()
+
+        dia_life_str = F.lower(F.trim(F.col("DIA LIFE").cast("string")))
+        dia_life_num = F.regexp_extract(dia_life_str, r"-?\d+(\.\d+)?", 0).cast("double")
+        sdf = sdf.withColumn(
+            "DIA LIFE",
+            F.when(dia_life_str.contains("month"), dia_life_num / F.lit(12.0)).otherwise(dia_life_num),
+        )
+
+        for col_name in NUM:
+            sdf = sdf.withColumn(col_name, F.col(col_name).cast("double"))
+        for col_name in CAT:
+            sdf = sdf.withColumn(col_name, F.trim(F.col(col_name).cast("string")))
+        for col_name in TG:
+            sdf = sdf.withColumn(col_name, F.col(col_name).cast("int"))
+
+        sdf = sdf.dropna(subset=TG).dropDuplicates(FT + TG)
+        return sdf.select(*(FT + TG)).toPandas().reset_index(drop=True), raw_n
+    finally:
+        spark.stop()
+
+
 def clean_data(df):
     df = rename_cols(df)
     df = df.copy()
@@ -93,6 +141,17 @@ def clean_data(df):
     df[TG] = df[TG].astype(int)
     df = df.drop_duplicates(subset=FT + TG).reset_index(drop=True)
     return df
+
+
+def load_clean_data(path, backend="pandas"):
+    backend = (backend or "pandas").strip().lower()
+    if backend == "pandas":
+        df = load_data(path)
+        raw_n = len(df)
+        return clean_data(df), raw_n
+    if backend in {"spark", "pyspark"}:
+        return load_data_spark(path)
+    raise ValueError(f"Unsupported preprocessing backend: {backend}")
 
 
 def split_xy(df):
