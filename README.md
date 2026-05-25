@@ -1,5 +1,3 @@
-![Demo](images/image.png)
-
 # Đan Đường Dự Tri Huyết Đường
 
 Đây là Đan Đường dự tri biến chứng tiêu khát, lập Django làm chủ điện cai quản bệnh án, sai FastAPI làm truyền phù sứ tiếp nhận vấn chẩn, dùng scikit-learn làm đan lô luyện thuật dự đoán, mượn Optuna làm tầm đạo bàn để dò ra tham số thượng phẩm, dẫn PySpark khai thông dữ mạch trước khi nhập lô, lấy MLflow chép lại đạo ngân mỗi lần luyện đan, còn DVC trấn giữ linh thạch dữ liệu cùng model artifact.
