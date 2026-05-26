@@ -344,6 +344,23 @@ services:
         echo
         chown -v -R "$${AIRFLOW_UID}:0" /opt/airflow/{logs,dags,plugins,config}
         echo
+        echo "Prepare project write permissions for DVC retraining artifacts"
+        echo
+        mkdir -v -p "$${DIABETES_PROJECT_DIR}/ml/artifacts" "$${DIABETES_PROJECT_DIR}/mlruns" "$${DIABETES_PROJECT_DIR}/.dvc/tmp" "$${DIABETES_PROJECT_DIR}/data"
+        touch "$${DIABETES_PROJECT_DIR}/dvc.lock" || true
+        chown -v -R "$${AIRFLOW_UID}:0" \
+          "$${DIABETES_PROJECT_DIR}/ml/artifacts" \
+          "$${DIABETES_PROJECT_DIR}/mlruns" \
+          "$${DIABETES_PROJECT_DIR}/.dvc/tmp" \
+          "$${DIABETES_PROJECT_DIR}/data" \
+          "$${DIABETES_PROJECT_DIR}/dvc.lock" || true
+        chmod -v -R ug+rwX \
+          "$${DIABETES_PROJECT_DIR}/ml/artifacts" \
+          "$${DIABETES_PROJECT_DIR}/mlruns" \
+          "$${DIABETES_PROJECT_DIR}/.dvc/tmp" \
+          "$${DIABETES_PROJECT_DIR}/data" || true
+        chmod -v ug+rw "$${DIABETES_PROJECT_DIR}/dvc.lock" || true
+        echo
         echo "Files in shared volumes:"
         echo
         ls -la /opt/airflow/{logs,dags,plugins,config}

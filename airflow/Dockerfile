@@ -3,11 +3,11 @@ FROM apache/airflow:3.2.1-python3.11
 USER root
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git openjdk-21-jre-headless \
+    && apt-get install -y --no-install-recommends git openjdk-17-jre-headless \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 \
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
     PYSPARK_PYTHON=python \
     PYSPARK_DRIVER_PYTHON=python
 
