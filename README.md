@@ -1,12 +1,14 @@
-![Demo](images/image.png)
+# Diabetes Predict System
 
-# Đan Đường Dự Tri Huyết Đường
+Diabetes Predict System là hệ thống hỗ trợ dự đoán nguy cơ biến chứng tiểu đường, kết hợp ứng dụng quản lý bệnh án, dịch vụ suy luận mô hình và quy trình MLOps để theo dõi, huấn luyện lại và triển khai mô hình.
 
-Đây là Đan Đường dự tri biến chứng tiêu khát, lập Django làm chủ điện cai quản bệnh án, sai FastAPI làm truyền phù sứ tiếp nhận vấn chẩn, dùng scikit-learn làm đan lô luyện thuật dự đoán, mượn Optuna làm tầm đạo bàn để dò ra tham số thượng phẩm, dẫn PySpark khai thông dữ mạch trước khi nhập lô, lấy MLflow chép lại đạo ngân mỗi lần luyện đan, còn DVC trấn giữ linh thạch dữ liệu cùng model artifact.
+Dự án sử dụng Django cho giao diện và quản lý dữ liệu bệnh án, FastAPI cho API suy luận, scikit-learn cho mô hình dự đoán, Optuna để tối ưu tham số, PySpark hoặc pandas cho tiền xử lý dữ liệu, MLflow để ghi nhận thí nghiệm, DVC để quản lý dữ liệu và model artifact.
 
-Mock HIS hóa thành y viện huyễn cảnh, HIS Inference tiếp nhận bệnh án vô nhãn, SQLite hoặc PostgreSQL làm tàng kinh các lần luận đoán, Airflow giữ thiên lịch tái luyện, Prometheus tuần sát khí tức vận hành, Grafana dựng quan tinh đài soi biến động, Docker phong ấn toàn bộ pháp khí vào một bảo hạp, Docker Hub mở truyền tống trận để đạo hữu phương xa kéo image về khai đàn, Anime.js khởi vũ cho giao diện, Three.js dựng pháp cảnh ba chiều, tất cả quy về một đạo: trợ y giả sớm nhận ra hung triệu, ưu tiên hồ sơ nguy cấp, nhưng không tiếm quyền chẩn quyết của thầy thuốc.
+Bên cạnh đó, hệ thống có Mock HIS để mô phỏng luồng dữ liệu bệnh viện, HIS Inference để tiếp nhận hồ sơ cần dự đoán, SQLite hoặc PostgreSQL để lưu lịch sử suy luận, Airflow để tự động hóa quy trình tái huấn luyện, Prometheus và Grafana để giám sát vận hành. Docker và Docker Hub được dùng để đóng gói, phân phối và khởi chạy các dịch vụ một cách nhất quán.
 
-## Khai Môn Tại Bản Địa
+Mục tiêu của hệ thống là hỗ trợ nhân viên y tế nhận diện sớm hồ sơ có nguy cơ cao, ưu tiên theo dõi các trường hợp cần chú ý và cung cấp thêm dữ liệu tham khảo cho quá trình ra quyết định. Kết quả dự đoán chỉ mang tính hỗ trợ, không thay thế chẩn đoán chuyên môn của bác sĩ.
+
+## Chạy Trên Máy Cục Bộ
 
 ```powershell
 cd C:\diabetes\diabetes_predict_system
@@ -14,16 +16,16 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-Chính điện: http://127.0.0.1:8000
+Ứng dụng Django: http://127.0.0.1:8000
 
-## Khởi Động Docker Pháp Trận
+## Chạy Bằng Docker Compose
 
 ```powershell
 cd C:\diabetes\diabetes_predict_system
 docker compose up --build
 ```
 
-Các linh đài:
+Các dịch vụ sau khi khởi động:
 
 - Django: http://127.0.0.1:8000
 - FastAPI: http://127.0.0.1:8001/docs
@@ -31,28 +33,28 @@ Các linh đài:
 - Prometheus: http://127.0.0.1:9090
 - Grafana: http://127.0.0.1:3000
 
-## Thiên Cơ Airflow
+## Khởi Động Airflow
 
 ```powershell
 cd C:\diabetes\diabetes_predict_system\airflow
 docker compose --env-file ../.env up --build
 ```
 
-Airflow đạo trường: http://127.0.0.1:8080
+Airflow: http://127.0.0.1:8080
 
-## Luyện Đan Mô Hình
+## Huấn Luyện Mô Hình
 
-Đan phương nằm tại `configs/model_training_config.json`. Công đoạn tiền xử lý có thể vận hành bằng pandas hoặc PySpark qua pháp ấn `preprocessing_backend`.
+Cấu hình huấn luyện nằm tại `configs/model_training_config.json`. Bước tiền xử lý có thể chạy bằng pandas hoặc PySpark thông qua tùy chọn `preprocessing_backend`.
 
-## Bí Tịch Phụ Lục
+## Tài Liệu Liên Quan
 
-- Docker pháp quyết: `DOCKER.md`
-- DVC linh phổ: `DVC.md`
-- ML công pháp: `ml/README.md`
+- Docker: `DOCKER.md`
+- DVC: `DVC.md`
+- Machine Learning: `ml/README.md`
 
-## Hạ Sơn Bằng Docker Hub
+## Chạy Bằng Image Từ Docker Hub
 
-Nếu không muốn build lại từ source, hãy dùng bộ file đã chuẩn bị trong thư mục `docker-hub/`. Bộ này kéo image đã push lên Docker Hub và khởi động các dịch vụ chính bằng Docker Compose.
+Nếu không muốn build lại từ source, có thể dùng bộ file đã chuẩn bị trong thư mục `docker-hub/`. Bộ cấu hình này kéo image đã được push lên Docker Hub và khởi động các dịch vụ chính bằng Docker Compose.
 
 ```powershell
 cd C:\diabetes\diabetes_predict_system\docker-hub
